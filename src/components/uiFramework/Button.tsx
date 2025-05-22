@@ -42,11 +42,11 @@ const Button = ({
   };
 
   const variantClasses: Record<string, string> = {
-    'btn-light': 'bg-white border border-gray-200 hover:primary',
+    'btn-light': 'bg-white/10 backdrop-blur-lg border border-gray-200 hover:primary',
     'btn-secondary': 'border border-gray-200 hover:bg-gray-200',
     'btn-Border': 'border border-gray-200 hover:bg-gray-200',
     'btn-dark':
-      'bg-gray-900 border border-gray-900 text-white hover:bg-primary hover:border-primary',
+      'bg-gray-900 border border-gray-900 text-white',
     'btn-primary':
       'bg-primary border border-primary text-white hover:bg-blue-800 hover:border-blue-800',
   };
