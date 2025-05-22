@@ -145,7 +145,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-white">
+      <body className="">
         {/* <Header /> */}
         <Navbar />
         {/* <ScrollProvider>{children}</ScrollProvider> */}

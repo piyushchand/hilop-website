@@ -1,6 +1,14 @@
-import { CardBody, CardContainer, CardItem } from "@/components/animationComponents/3DCard";
+import {
+  CardBody,
+  CardContainer,
+  CardItem,
+} from "@/components/animationComponents/3DCard";
+import LongerWithBetter from "@/components/longerWithBetter";
+import LoseWeight from "@/components/loseWeight";
+import { Testimonials } from "@/components/testimonials";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
 import Button from "@/components/uiFramework/Button";
+import { VelocityScroll } from "@/components/velocityScroll";
 import Image from "next/image";
 
 const features = [
@@ -50,23 +58,23 @@ const productCard = [
 export default function Home() {
   return (
     <>
-      <div className="container ">
-        <div className="grid grid-cols-[auto_316px] items-center mt-14 mb-9">
+      <section className="container overflow-hidden mb-20 lg:mb-32">
+        <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
-            <h1 className="text-2xl xl:text-7xl mb-6 font-medium">
+            <h1 className="text-4xl lg:text-6xl xl:text-7xl mb-6 font-medium">
               100% Natural <br />
               <span className="text-primary">personalized to you</span>
             </h1>
-            <h2 className="text-xl text-gray-700">
+            <h2 className="text-lg md:text-xl text-gray-700">
               Customized care starts here
             </h2>
           </div>
-          <div>
+          <div className="grid md:grid-cols-1 sm:grid-cols-2 grid-cols-1">
             {features.map((item, index) => (
               <div
                 key={index}
-                className={`p-4 flex items-center gap-4 ${
+                className={`p-4 flex  items-center gap-4 ${
                   index !== features.length - 1
                     ? "border-b border-gray-200"
                     : ""
@@ -88,58 +96,74 @@ export default function Home() {
             ))}
           </div>
         </div>
-       
-        <div className="grid grid-cols-3 gap-6">
-      {productCard.map(({ id, imageSrc, tag, title, viewWorkLink, takeTestHref }) => (
-         <CardContainer
-         key={id}
-         containerClassName="h-full"
-         className="btn-arrow-animation h-full rounded-3xl bg-white p-6"
-       >
-         <CardBody>
-           {/* Image layer with highest translateZ for pop-out effect */}
-           <CardItem translateZ={50} className="relative mb-5 rounded-3xl overflow-hidden">
-             <Image
-               src={imageSrc}
-               width={443}
-               height={332}
-               className="rounded-3xl"
-               alt={title}
-             />
-             <p className="bg-white text-green-800 text-base font-medium px-4 py-1.5 rounded-full block w-fit absolute top-3 left-3">
-               {tag}
-             </p>
-           </CardItem>
-     
-           {/* Title layer */}
-           <CardItem translateZ={20} className="mb-4">
-             <h4 className="text-2xl font-medium">{title}</h4>
-           </CardItem>
-     
-           {/* Buttons layer */}
-           <CardItem translateZ={10} className=" w-full">
-            <div className="grid grid-cols-2 gap-4">
-           <Button
-                 label="View Our Work"
-                 variant="btn-light"
-                 size="xl"
-                 className="w-full"
-                 link={viewWorkLink}
-               />
-               <ArrowButton
-                 label="Take the test"
-                 theme="primary"
-                  className="w-full"
-                 size="lg"
-                 href={takeTestHref}
-               />
-               </div>
-           </CardItem>
-         </CardBody>
-       </CardContainer>
-      ))}
-    </div>
-      </div>
+
+        <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
+          {productCard.map(
+            (
+              { id, imageSrc, tag, title, viewWorkLink, takeTestHref },
+              index
+            ) => (
+              <CardContainer
+                key={id}
+                containerClassName={`h-full col-span-4 sm:col-span-2 md:col-span-1  ${
+                  index === productCard.length - 1
+                    ? "sm:col-start-2 md:col-start-auto"
+                    : ""
+                }`}
+                className="btn-arrow-animation h-full rounded-3xl bg-white p-3 lg:p-4 xl:p-6"
+              >
+                <CardBody>
+                  {/* Image layer with highest translateZ for pop-out effect */}
+                  <CardItem
+                    translateZ={50}
+                    className="relative mb-5 rounded-3xl overflow-hidden w-full"
+                  >
+                    <Image
+                      src={imageSrc}
+                      width={443}
+                      height={332}
+                      className="rounded-3xl w-full"
+                      alt={title}
+                    />
+                    <p className="bg-white text-green-800 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
+                      {tag}
+                    </p>
+                  </CardItem>
+
+                  {/* Title layer */}
+                  <CardItem translateZ={20} className="mb-4">
+                    <h4 className="text-xl lg:text-2xl font-medium">{title}</h4>
+                  </CardItem>
+
+                  {/* Buttons layer */}
+                  <CardItem translateZ={10} className=" w-full">
+                    <div className="grid xl:grid-cols-2 gap-2 lg:gap-4">
+                      <Button
+                        label="View Our Work"
+                        variant="btn-light"
+                        size="xl"
+                        className="w-full"
+                        link={viewWorkLink}
+                      />
+                      <ArrowButton
+                        label="Take the test"
+                        theme="primary"
+                        className="w-full"
+                        size="lg"
+                        href={takeTestHref}
+                      />
+                    </div>
+                  </CardItem>
+                </CardBody>
+              </CardContainer>
+            )
+          )}
+        </div>
+      </section>
+      <LoseWeight />
+      <VelocityScroll>100% Natural Product</VelocityScroll>
+      <LongerWithBetter />
+      <Testimonials/>
     </>
   );
 }
