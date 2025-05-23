@@ -61,7 +61,7 @@ export function OurProcess() {
            </div>
             <div>
               <p className="mb-6">
-              We've made it simple to find the right product for your needs through our personalized consultation process.
+              We ve made it simple to find the right product for your needs through our personalized consultation process.
               </p>
               <Button label="About us" variant="btn-dark" size="xl" />
             </div>
