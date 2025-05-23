@@ -3,12 +3,15 @@ import {
   CardContainer,
   CardItem,
 } from "@/components/animationComponents/3DCard";
+import { Blogs } from "@/components/blogs";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
+import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
 import Button from "@/components/uiFramework/Button";
 import { VelocityScroll } from "@/components/velocityScroll";
+import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 
 const features = [
@@ -164,6 +167,9 @@ export default function Home() {
       <VelocityScroll>100% Natural Product</VelocityScroll>
       <LongerWithBetter />
       <Testimonials/>
+      <WhyChoose />
+      <OurProcess />
+      <Blogs />
     </>
   );
 }
