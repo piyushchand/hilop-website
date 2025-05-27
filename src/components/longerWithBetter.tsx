@@ -55,14 +55,16 @@ const LongerWithBetter = () => {
     <>
       <section className=" bg-rackley md:py-20 py-12 rounded-4xl mb-20 lg:mb-32">
         <div className="container">
-          <Paragraph
+         <div className="max-w-lg mx-auto">
+         <Paragraph
             align="center"
             paragraph="Give your best performance in the bedroom"
             textColor="text-white"
+            textSize="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold"
             className="mb-6 md:mb-10 max-w-5xl"
-            // highlightedWord="Naturally"
           />
-          <div className="max-w-fit mx-auto -mt-20 relative mb-16">
+         </div>
+          <div className="max-w-fit mx-auto sm:-mt-20 -mt-13 relative mb-16">
             <Image
               src="/images/improving-sexual/commponant-model.png"
               width={408}
@@ -96,10 +98,10 @@ const LongerWithBetter = () => {
                 alt="weightloss product"
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
-              <h3 className="md:text-3xl text-2xl mb-6 text-white font-semibold">
+              <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Have Longer, Better Sex with Rx + Climax Control
               </h3>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex gap-4">
                 <Button
                   label="Get Started"
                   variant="btn-dark"
@@ -122,10 +124,10 @@ const LongerWithBetter = () => {
                 alt="weightloss product"
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
-              <h3 className="md:text-3xl text-2xl mb-6 text-white font-semibold">
+              <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Have Longer, Better Sex with Rx + Climax Control
               </h3>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex gap-4">
                 <Button
                   label="Get Started"
                   variant="btn-dark"
@@ -164,7 +166,7 @@ const LongerWithBetter = () => {
                 transition={{ duration: 0.5 }}
               />
               <div className="relative h-full flex-col flex z-20">
-                <h3 className="text-2xl font-semibold mb-2 text-white">
+                <h3 className="text-2xl font-medium mb-2 text-white">
                   Personalized Solution
                 </h3>
                 <p className="text-gray-200">
@@ -213,7 +215,7 @@ const LongerWithBetter = () => {
                         className="rotate-[20deg]"
                       />
                       <div>
-                        <h3 className="text-white font-semibold text-xl mb-2">
+                        <h3 className="text-white font-medium text-xl mb-2">
                           {testimonial.name}
                         </h3>
                         <p className="text-white mb-6 lg:mb-10">

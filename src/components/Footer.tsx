@@ -1,262 +1,153 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import Accordion from './uiFramework/Accordion';
-import { Facebook, Github, Instagram, LinkIcon, Mail, MailCheck, Phone, Twitter } from 'lucide-react';
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+} from "lucide-react";
 
 const Footer = () => {
-  const [currentYear, setCurrentYear] = useState(
-    new Date().getFullYear().toString()
-  );
+  const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear().toString());
-  }, []);
+  
+  const hilopLinks = [
+    { href: "/", label: "Home" },
+    { href: "/about-us", label: "About Us" },
+    { href: "/contact", label: "Contact Us" },
+    { href: "/blogs", label: "Blogs" },
+  ];
 
-  const accordionItems = [
-    {
-      title: 'Digital transform',
-      links: [
-        { link: '/', linkText: 'MVP Development' },
-        { link: '/', linkText: 'UI / UX Design' },
-        { link: '/', linkText: 'Web Application' },
-        { link: '/', linkText: 'SAAS Development' },
-        { link: '/', linkText: 'Mobile App Development' },
-      ],
-    },
-    {
-      title: 'Cloud and DevOps engineering',
-      links: [
-        { link: '/', linkText: 'aws' },
-        { link: '/', linkText: 'Azure' },
-        { link: '/', linkText: 'Google Cloud Platform' },
-      ],
-    },
+  const learnLinks = [
+    { href: "/learn/sexual-health", label: "Sexual Health" },
+    { href: "/learn/longer-sex", label: "Have Longer Sex" },
+    { href: "/learn/better-sex", label: "Have Better Sex" },
+  ];
+
+  const productLinks = [
+    { href: "/product/fat-loss", label: "Herbal Fat Loss Formula" },
+    { href: "/product/enhancer", label: "Sexual Enhancer" },
+    { href: "/product/wellness", label: "Sexual Wellness Formula" },
   ];
   return (
-    <footer className="px-4 pb-4">
-      <div className="overflow-hidden rounded-2xl bg-black pt-[100px]">
-        <div className="container">
-          <div className="grid gap-x-4 gap-y-8 border-b border-gray-700 pb-10 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-12">
-            <div className="sm:col-span-2 md:col-span-3 lg:col-span-4">
-              <Link
-                href="/"
-                className="mb-5"
-              >
-                <Image
-                  src="/image/logotnwhite.svg"
-                  alt="thinknovus logo"
-                  width={236}
-                  height={40}
-                />
-              </Link>
-              <div>
-                <label
-                  htmlFor="price"
-                  className="mt-5 inline-block text-xl text-white"
+    <footer className="pb-4 pt-20 bg-white relative">
+       <Image
+                src="/images/footer/leaf-1.png"
+                width={167}
+                height={211}
+                alt="mobile app mockup"
+                className="absolute bottom-9 left-0 max-w-[167px] w-1/6"
+              />
+               <Image
+                src="/images/footer/leaf-2.png"
+                width={126}
+                height={148}
+                alt="mobile app mockup"
+                className="absolute top-1 end-0 max-w-[126px] w-1/6"
+              />
+      <div className="container relative">
+        <div className="grid md:grid-cols-[362px_auto] md:gap-10 gap-6 mb-4">
+          <div className="px-4 pt-4 border border-gray-200 rounded-lg order-2 md:order-1 bg-white">
+            <div className="p-4 bg-gray-100 rounded-lg flex items-center gap-4 mb-4 justify-between">
+              <h2 className="text-lg md:text-xl">
+                <span className="text-primary">Total care.</span>
+                <br />
+                Totally different.
+              </h2>
+              <Image
+                src="/images/footer/qrcode.svg"
+                width={120}
+                height={120}
+                alt="App QR code"
+                className="rounded-lg border border-gray-200"
+              />
+            </div>
+            <div className="flex items-center gap-4 justify-between">
+              <p className="text-gray-800">Download the
+              Application</p>
+            <Image
+                src="/images/footer/footer-mobile.png"
+                width={164}
+                height={191}
+                alt="mobile app mockup"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 md:gap-x-6 gap-x-4 gap-y-6 order-1 md:order-2">
+            <div>
+              <p className="mb-4 text-base uppercase text-dark font-medium">Hilop</p>
+              {hilopLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== hilopLinks.length - 1 ? "mb-4" : ""}`}
                 >
-                  Subscribe our newsletters
-                </label>
-                <div className="mt-5">
-                  <div className="hover:ring-primary-800 flex items-center rounded-md bg-gray-800 transition-all duration-300 hover:ring-2">
-                    <input
-                      id="price"
-                      name="price"
-                      type="text"
-                      placeholder="Email *"
-                      className="min-w-0 grow border-none bg-transparent px-5 py-3 text-base text-gray-400 placeholder:text-gray-600 focus:outline-none"
-                    />
-                    <Link
-                      href="/"
-                      className="px-3 py-3 text-gray-400 hover:text-primary"
-                      aria-label="Subscribe to newsletter"
-                    >
-                      <MailCheck className="" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="mb-5 mt-5 text-base text-white">Social</p>
-                <div className="flex flex-wrap gap-2 sm:gap-2">
-                  <Link
-                    href="https://www.instagram.com/think.novus/"
-                    className="social-icon"
-                    aria-label="Instagram"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Instagram />
-                  </Link>
-                  <Link
-                    href="https://www.linkedin.com/company/think-novus/"
-                    className="social-icon"
-                    aria-label="Linkedin"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <LinkIcon />
-                  </Link>
-                  <Link
-                    href="https://www.facebook.com/thinknovus.official/"
-                    className="social-icon"
-                    aria-label="Facebook"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Facebook />
-                  </Link>
-                  <Link
-                    href="https://x.com/thinknovus"
-                    className="social-icon"
-                    aria-label="Twitter"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Twitter />
-                  </Link>
-                  <Link
-                    href="https://github.com/mitulkanani"
-                    className="social-icon"
-                    aria-label="Github"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github />
-                  </Link>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
-                
-                </div>
-              </div>
+            <div>
+              <p className="mb-4 text-base uppercase text-dark font-medium">Learn</p>
+              {learnLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== learnLinks.length - 1 ? "mb-4" : ""}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
-            <div className="sm:col-span-1 md:col-span-3 lg:col-span-3">
-              <p className="mb-6 text-base uppercase text-white">Services</p>
-              <Link
-                href="/"
-                className="custome-text-hover mb-4 block text-white"
-              >
-                AI and Data Consulting
-              </Link>
-              <Accordion items={accordionItems} />
-            </div>
-            <div className="sm:col-span-1 md:col-span-3 lg:col-span-2">
-              <p className="mb-6 text-base uppercase text-white">Industry</p>
-              <Link
-                href="/"
-                className="custome-text-hover mb-4 block text-white"
-              >
-                Healthcare
-              </Link>
-              <Link
-                href="/"
-                className="custome-text-hover mb-4 block text-white"
-              >
-                Logistics
-              </Link>
-              <Link
-                href="/"
-                className="custome-text-hover block text-white"
-              >
-                E-Commerce
-              </Link>
-            </div>
-            <div className="sm:col-span-2 md:col-span-3 lg:col-span-3">
-              <p className="mb-6 text-base uppercase text-white">
-                business inquiries
-              </p>
-              <Link
-                href="mailto:hello@thinknovus.com"
-                className="mb-4 flex items-center gap-2"
-              >
-                <Mail className="text-white opacity-60" />
-                <span className="custome-text-hover text-white">
-                  {' '}
-                  hello@thinknovus.com
-                </span>
-              </Link>
-              <Link
-                href="tel:+919033680165"
-                className="mb-4 flex items-center gap-2"
-              >
-                <Phone className="text-white opacity-60" />
-                <span className="custome-text-hover text-white">
-                  {' '}
-                  (+91) 9033680165
-                </span>
-              </Link>
-              <p className="mb-2 text-xl text-gray-200">Book a Call</p>
-              <p className="mb-4 text-gray-400">
-                A 30-min Discovery call to see how we can help
-              </p>
 
-              <div>
-                <figure className="flex items-center rounded-full border border-gray-800 bg-gray-800 p-3 duration-300 hover:bg-gray-900 hover:transition-all">
-                  <video
-                    className="h-11 w-11 rounded-full"
-                    preload="auto"
-                    autoPlay
-                    playsInline
-                    loop
-                    muted
-                    width="44"
-                  >
-                    <source
-                      src="/videos/memojicall.mp4"
-                      type="video/mp4"
-                    />
-                  </video>
-                  <div className="ml-3">
-                    <p className="text-white">Mitul kanani</p>
-                    <p className="text-gray-400">
-                      Co-Founder & Creative Director
-                    </p>
-                  </div>
-                </figure>
+            <div>
+              <p className="mb-4 text-base uppercase text-dark font-medium">Our Products</p>
+              {productLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== productLinks.length - 1 ? "mb-4" : ""}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div>
+              <p className="mb-4 text-base uppercase text-dark font-medium">Contact Us</p>
+              <p className="mb-4 text-gray-600">123 Herbal Lane, Nature City, Earth</p>
+              <a href="tel:+12345678900" className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300">
+                +1 (234) 567-8900
+              </a>
+              <a href="mailto:info@hilop.com" className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300">
+                info@hilop.com
+              </a>
+
+              <div className="flex gap-3 mt-2">
+                <Link className="social-icon" href="https://www.instagram.com/think.novus/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <Instagram />
+                </Link>
+                <Link className="social-icon" href="https://www.facebook.com/thinknovus.official/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <Facebook />
+                </Link>
+                <Link className="social-icon" href="https://x.com/thinknovus" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                  <Twitter />
+                </Link>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 items-center gap-y-2 py-4 md:grid-cols-2">
-            <div className="basis-auto text-center md:basis-1/4 md:text-left">
-              <p className="text-gray-400">
-                &copy; {currentYear} Thinknovus. All rights reserved.
-              </p>
-            </div>
-            <div className="text-end">
-              <div className="items-center justify-center sm:flex md:justify-end">
-                <div className="flex items-center justify-center">
-                  <Link
-                    href="/"
-                    className="custome-text-hover text-nowrap px-3 text-white"
-                  >
-                    About Us
-                  </Link>
-                  <div className="h-4 w-[1] border border-gray-700"></div>
-                  <Link
-                    href="/"
-                    className="custome-text-hover text-nowrap px-3 text-white"
-                  >
-                    Career
-                  </Link>
-                </div>
-                <div className="hidden h-4 w-[1] border border-gray-700 sm:block"></div>
-                <div className="flex items-center justify-center">
-                  <Link
-                    href="/"
-                    className="custome-text-hover col-start-auto col-end-auto text-nowrap px-3 text-white"
-                  >
-                    Privacy Policy
-                  </Link>
-                  <div className="h-4 w-[1] border border-gray-700"></div>
-                  <Link
-                    href="/"
-                    className="custome-text-hover col-start-auto col-end-auto text-nowrap px-3 text-white"
-                  >
-                    Site Map
-                  </Link>
-                </div>
-              </div>
-            </div>
+        </div>
+
+        <div className="grid md:grid-cols-[298px_auto] items-center pt-4 border-t border-gray-200 gap-3">
+          <p className="text-center md:text-left text-gray-600 text-sm">
+            &copy; {currentYear} Hilop Health, Inc. All rights reserved.
+          </p>
+          <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-white">
+            <Link href="/terms" className="text-gray-600 hover:underline">Terms & Conditions</Link>
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+            <Link href="/privacy" className="text-gray-600 hover:underline">Privacy Policy</Link>
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+            <Link href="/sitemap" className="text-gray-600 hover:underline">Sitemap</Link>
           </div>
         </div>
       </div>

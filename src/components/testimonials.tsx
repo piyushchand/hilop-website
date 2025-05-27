@@ -68,11 +68,11 @@ const ReviewCard = ({
   return (
     <div
       className={cn(
-        'relative !flex w-[490px] flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center'
+        'relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center'
       )}
     >
       <span className=" inline-block mb-10">{UserName}</span>
-      <p className="mb-10 text-gray-700 text-2xl">{content}</p>
+      <p className="mb-10 sm:text-2xl">{content}</p>
       <div className='flex items-center gap-2 text-green-800 justify-center'> <BadgeCheck className='text-green-800' /> <p>Real Hilop Customers</p></div>
     </div>
   );

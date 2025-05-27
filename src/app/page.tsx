@@ -4,6 +4,7 @@ import {
   CardItem,
 } from "@/components/animationComponents/3DCard";
 import { Blogs } from "@/components/blogs";
+import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
 import { OurProcess } from "@/components/ourProcess";
@@ -32,6 +33,7 @@ const features = [
   },
 ];
 
+
 const productCard = [
   {
     id: 1,
@@ -58,6 +60,39 @@ const productCard = [
     takeTestHref: "/herbatrim-test",
   },
 ];
+const homepagefaqdata = [
+  {
+    id: 'faq1',
+    question: 'How do i order from your company?',
+    answer:
+      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+  },
+  {
+    id: 'faq2',
+    question: 'How do i order from your company?',
+    answer:
+      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+  },
+  {
+    id: 'faq3',
+    question: 'How do i order from your company?',
+    answer:
+      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+  },
+  {
+    id: 'faq4',
+    question: 'How do i order from your company?',
+    answer:
+      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+  },
+  {
+    id: 'faq5',
+    question: 'How do i order from your company?',
+    answer:
+      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+  },
+  
+];
 export default function Home() {
   return (
     <>
@@ -65,7 +100,7 @@ export default function Home() {
         <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
-            <h1 className="text-4xl lg:text-6xl xl:text-7xl mb-6 font-medium">
+            <h1 className="text-5xl lg:text-7xl xl:text-8xl mb-6 font-medium">
               100% Natural <br />
               <span className="text-primary">personalized to you</span>
             </h1>
@@ -93,7 +128,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-1">{item.title}</h3>
-                  <p className="text-base text-gray-700">{item.description}</p>
+                  <p className="text-base">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -128,7 +163,7 @@ export default function Home() {
                       className="rounded-3xl w-full"
                       alt={title}
                     />
-                    <p className="bg-white text-green-800 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
+                    <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
                       {tag}
                     </p>
                   </CardItem>
@@ -170,6 +205,10 @@ export default function Home() {
       <WhyChoose />
       <OurProcess />
       <Blogs />
+      <FaqAccordion
+              items={homepagefaqdata}
+              className="mx-auto"
+            />
     </>
   );
 }

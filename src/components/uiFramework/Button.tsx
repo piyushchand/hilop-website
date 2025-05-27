@@ -46,7 +46,7 @@ const Button = ({
     'btn-secondary': 'border border-gray-200 hover:bg-gray-200',
     'btn-Border': 'border border-gray-200 hover:bg-gray-200',
     'btn-dark':
-      'bg-gray-900 border border-gray-900 text-white',
+      'bg-dark border border-gray-900 !text-white',
     'btn-primary':
       'bg-primary border border-primary text-white hover:bg-blue-800 hover:border-blue-800',
   };

@@ -1,82 +1,97 @@
-import React from 'react';
-import Link from 'next/link';
-import { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
-interface AccordionLink {
-  link: string;
-  linkText: string;
-}
-
-interface AccordionItem {
-  title: string;
-  links: AccordionLink[];
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 interface AccordionProps {
-  items: AccordionItem[];
+  items: FaqItem[];
+  className?: string;
+  onItemClick?: (item: FaqItem) => void;
+  defaultActiveId?: string;
 }
+const Accordion: React.FC<AccordionProps> = ({
+  items,
+  className = "",
+  onItemClick,
+  defaultActiveId,
+}) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-const Accordion = ({ items }: AccordionProps) => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  useEffect(() => {
+    if (defaultActiveId) {
+      setActiveId(defaultActiveId);
+    } else if (items.length > 0) {
+      setActiveId(items[0].id);
+    }
+  }, [defaultActiveId, items]);
 
-  const toggleAccordion = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
+  const toggleAccordion = (id: string, item: FaqItem) => {
+    setActiveId((prevId) => (prevId === id ? null : id));
+    onItemClick?.(item);
   };
 
-  return (
-    <div className="space-y-4">
-      {items.map((item, index) => (
-        <div
-          key={index}
-          className="overflow-hidden rounded-lg border border-gray-800 shadow-sm"
-        >
-          {/* Accordion Header */}
-          <button
-            className="flex w-full items-center justify-between bg-gray-800 p-3 text-left hover:bg-gray-900 hover:transition-all"
-            onClick={() => toggleAccordion(index)}
-          >
-            <span className="font-medium text-gray-500">{item.title}</span>
-            <svg
-              className={`h-5 w-5 transform text-gray-600 transition-transform ${
-                activeIndex === index ? 'rotate-180' : 'rotate-0'
-              }`}
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
 
-          {/* Accordion Body */}
-          <div
-            className={`overflow-hidden transition-[max-height] duration-500 ease-in-out ${
-              activeIndex === index ? 'max-h-96' : 'max-h-0'
-            }`}
-          >
-            <div className="grid gap-4 p-4 text-gray-700">
-              {item.links.map((link, linkIndex) => (
-                <div key={linkIndex}>
-                  <Link
-                    href={link.link}
-                    rel="noopener noreferrer"
-                    className="custome-text-hover text-white"
+  return (
+   <>
+    <div className={`space-y-4 w-full ${className}`}>
+            {items.map((item) => {
+              const isOpen = activeId === item.id;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`overflow-hidden rounded-xl transition-colors duration-200 w-full ${
+                    isOpen ? "bg-gray-200" : "bg-white"
+                  }`}
+                >
+                  <button
+                    onClick={() => toggleAccordion(item.id, item)}
+                    className="flex w-full items-center justify-between p-3 sm:p-6 text-left"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-content-${item.id}`}
+                    id={`faq-header-${item.id}`}
                   >
-                    {link.linkText}
-                  </Link>
+                    <h3 className="text-h3 font-medium">{item.question}</h3>
+                    <div  className={`ml-4 flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full transition-transform duration-300 ${
+    isOpen ? "bg-black" : "bg-primary"
+  }`}>
+                      <ChevronDown
+                        className={`text-white transition-transform duration-300 ${
+                          isOpen ? "-rotate-180" : "rotate-0"
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={`faq-content-${item.id}`}
+                        role="region"
+                        aria-labelledby={`faq-header-${item.id}`}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-3 sm:px-6 pb-3 sm:pb-6 pt-0">
+                          <p className="text-gray-600">{item.answer}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </div>
-      ))}
-    </div>
+   </>
   );
 };
 
