@@ -46,7 +46,7 @@ export default function AboutUsContent() {
         </div>
       </section>
       <WhyChoose />
-      <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
+      <section className="container mb-16 lg:mb-40">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
           <Image
             src="/images/about-us/our-mission.jpg"
@@ -73,7 +73,7 @@ export default function AboutUsContent() {
           </div>
         </div>
       </section>
-      <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
+      <section className="container mb-16 lg:mb-40">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
           <div className="order-2 lg:order-1">
             <Paragraph

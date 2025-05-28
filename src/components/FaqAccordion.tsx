@@ -42,7 +42,7 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
   return (
     <section className="mb-16 lg:mb-40">
       <div className="container">
-        <div className="grid gap-6 items-start justify-between lg:grid-cols-[auto_569px] xl:grid-cols-[auto_680px] 2xl:grid-cols-[auto_745px]">
+        <div className="grid w-full gap-6 items-start justify-between lg:grid-cols-[auto_569px] xl:grid-cols-[auto_680px] 2xl:grid-cols-[auto_745px]">
           <Paragraph
             align="start"
             paragraph="Frequently Asked Questions"
@@ -63,13 +63,13 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
                 >
                   <button
                     onClick={() => toggleAccordion(item.id, item)}
-                    className="flex w-full items-center justify-between p-3 sm:p-6 text-left"
+                    className="flex items-center justify-between  text-left gap-4 w-full p-3 sm:p-6 "
                     aria-expanded={isOpen}
                     aria-controls={`faq-content-${item.id}`}
                     id={`faq-header-${item.id}`}
                   >
-                    <h3 className="text-h3 font-medium">{item.question}</h3>
-                    <div className="ml-4 flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-full bg-primary transition-transform duration-300">
+                    <h3 className="text-h3 font-medium w-full">{item.question}</h3>
+                    <div className="flex min-h-8 min-w-8 md:min-h-12 md:min-w-12 items-center justify-center rounded-full bg-primary transition-transform duration-300">
                       <ChevronDown
                         className={`text-white transition-transform duration-300 ${
                           isOpen ? "-rotate-180" : "rotate-0"
@@ -90,9 +90,7 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="overflow-hidden"
                       >
-                        <div className="px-3 sm:px-6 pb-3 sm:pb-6 pt-0">
-                          <p className="text-gray-600">{item.answer}</p>
-                        </div>
+                        <p className="text-gray-600 px-3 sm:px-6 pb-3 sm:pb-6 pt-0">{item.answer}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>

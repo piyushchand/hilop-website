@@ -87,7 +87,7 @@ export function Testimonials() {
           <Paragraph
             paragraph="Real People, Real Results"
             textColor="text-dark"
-            className="mb-10"
+            className="lg:mb-10 mb-6"
             highlightedWord="Results"
           />
         </div>

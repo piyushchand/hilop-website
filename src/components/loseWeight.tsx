@@ -7,7 +7,7 @@ import Button from "./uiFramework/Button";
 const LoseWeight = () => {
   return (
     <>
-      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-20 lg:mb-32">
+      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
         <div className="container">
           <div className="max-w-lg mx-auto">
           <Paragraph
