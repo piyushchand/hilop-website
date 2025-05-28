@@ -233,3 +233,6 @@ font-size: 40px;
   @apply w-12 h-12 rounded-full flex items-center justify-center bg-green-100 text-green-800;
 }
 
+.bg-greenleaf{
+  background-image: url('/images/banner.jpg');
+}

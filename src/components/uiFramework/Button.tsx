@@ -43,12 +43,12 @@ const Button = ({
 
   const variantClasses: Record<string, string> = {
     'btn-light': 'bg-white/10 backdrop-blur-lg border border-gray-200 hover:primary',
-    'btn-secondary': 'border border-gray-200 hover:bg-gray-200',
+    'btn-secondary': 'border bg-white border-gray-200 hover:bg-gray-200',
     'btn-Border': 'border border-gray-200 hover:bg-gray-200',
     'btn-dark':
       'bg-dark border border-gray-900 !text-white',
     'btn-primary':
-      'bg-primary border border-primary text-white hover:bg-blue-800 hover:border-blue-800',
+      'bg-primary border border-primary text-white hover:bg-green-800 hover:border-green-800',
   };
 
   const commonClasses = `btn-tn relative flex w-fit justify-center items-center overflow-hidden rounded-full transition-colors duration-500 ease-in-out ${variantClasses[variant] || ''} ${getSizeClasses()} ${className}`;

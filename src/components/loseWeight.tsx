@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import Paragraph from "./animationComponents/TextVisble";
 import Button from "./uiFramework/Button";
 
@@ -20,12 +21,17 @@ const LoseWeight = () => {
           />
           </div>
           <div className="max-w-fit mx-auto sm:-mt-20 -mt-12 relative mb-6">
-            <Image
-              src="/images/weight-loss/commponant-model.png"
-              width={408}
-              height={493}
-              alt="weightloss model"
-            />
+          <motion.img
+      src="/images/weight-loss/commponant-model.png"
+      width={408}
+      height={493}
+      alt="weightloss model"
+      initial={{ y: 100, opacity: 0 }}   // Start 100px below and invisible
+      whileInView={{ y: 0, opacity: 1 }} // Animate to original position and visible
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true, amount: 0.5 }} // Animate once when 50% visible
+      style={{ display: "block" }}
+    />
             <div className="absolute bg-gradient-to-b from-transparent to-light-vanilla h-28 w-full bottom-0"></div>
             <div className="grid sm:grid-cols-2 gap-4 -mt-[52px]">
               <Button

@@ -42,7 +42,7 @@ export function Blogs() {
               />
             </div>
             <div>
-              <Button label="View All Blogs" variant="btn-dark" size="xl" />
+              <Button label="View All Blogs" variant="btn-dark" size="xl" link="/blog" />
             </div>
           </div>
         </div>
