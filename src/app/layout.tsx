@@ -3,13 +3,11 @@ import { Poppins } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// import { ScrollProvider } from './components/ScrollProvider';
-// import Footer from './components/Footer';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // Use whatever weights you need
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });

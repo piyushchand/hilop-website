@@ -63,7 +63,7 @@ export function WhyChoose() {
                 Our commitment to quality, personalization, and effectiveness
                 sets us apart. Discover the HerbaFit difference.
               </p>
-              <Button label="About us" variant="btn-dark" size="xl" />
+              <Button label="About us" variant="btn-dark" size="xl" link='/about-us' />
             </div>
           </div>
           <div className="grid lg:grid-cols-3 sm:grid-cols-2 gap-6">

@@ -4,9 +4,11 @@ import Link from "next/link";
 import ArrowButton from "./uiFramework/ArrowButton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import AuthModal from "@/app/auth/AuthLayout";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   
 
@@ -45,8 +47,9 @@ const Navbar = () => {
             </span>
           </button>
          </div>
-          <ArrowButton label="Login" theme="light" size="lg" />
+          <ArrowButton label="Login" theme="light" size="lg"  onClick={() => setOpen(true)} />
         {/* Mobile Hamburger */}
+        <AuthModal isOpen={open} onClose={() => setOpen(false)} />
         <button
           className="md:hidden flex items-center"
           onClick={() => setMobileMenuOpen(true)}

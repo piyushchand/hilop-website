@@ -65,7 +65,7 @@ export function OurProcess() {
               <p className="mb-6">
               We ve made it simple to find the right product for your needs through our personalized consultation process.
               </p>
-              <Button label="About us" variant="btn-dark" size="xl" />
+              <Button label="Learn more" variant="btn-dark" size="xl" link="/how-it-works"  />
             </div>
           </div>
           <Swiper
