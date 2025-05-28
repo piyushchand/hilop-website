@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Paragraph from "./animationComponents/TextVisble";
 import Button from "./uiFramework/Button";
+import {
+  CardBody,
+  CardContainer,
+  CardItem,
+} from "./animationComponents/3DCard";
 
 const whyChoosecontent = [
   {
@@ -43,7 +48,7 @@ const whyChoosecontent = [
 export function WhyChoose() {
   return (
     <>
-      <section className="mb-16 lg:mb-40 bg-green-100 lg:py-20">
+      <section className="mb-16 lg:mb-40 bg-green-100 lg:py-20 py-10">
         <div className="container">
           <div className="grid lg:grid-cols-[auto_560px] items-center bg-white p-6 lg:p-10 rounded-2xl mb-6">
             {" "}
@@ -63,17 +68,30 @@ export function WhyChoose() {
           </div>
           <div className="grid lg:grid-cols-3 sm:grid-cols-2 gap-6">
             {whyChoosecontent.map((whyChoosecontent, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl">
-                <Image
-                  src={whyChoosecontent.icon}
-                  width={80}
-                  height={80}
-                  alt={whyChoosecontent.title}
-                  className="mb-8"
-                />
-                <h3 className="mb-4 text-2xl font-medium">{whyChoosecontent.title}</h3>
-                <p>{whyChoosecontent.description}</p>
-              </div>
+              <CardContainer
+                key={index}
+                containerClassName="h-full"
+                className="h-full bg-white p-6 rounded-2xl"
+              >
+                <CardBody>
+                  <CardItem translateZ={50} className="mb-8">
+                  <Image
+                        src={whyChoosecontent.icon}
+                        width={80}
+                        height={80}
+                        alt={whyChoosecontent.title}
+                      />
+                  </CardItem>
+                  <CardItem translateZ={20} className="mb-4">
+                    <h3 className="mb-4 text-2xl font-medium">
+                      {whyChoosecontent.title}
+                    </h3>
+                  </CardItem>
+                  <CardItem translateZ={10}>
+                    <p>{whyChoosecontent.description}</p>
+                  </CardItem>
+                </CardBody>
+              </CardContainer>
             ))}
           </div>
         </div>

@@ -51,7 +51,7 @@ const Navbar = () => {
           className="md:hidden flex items-center"
           onClick={() => setMobileMenuOpen(true)}
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-6 h-6 text-green-800" />
         </button>
         </div>
       </div>
@@ -82,7 +82,7 @@ const Navbar = () => {
           </button>
           </div>
           <button onClick={() => setMobileMenuOpen(false)}>
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-green-800" />
           </button>
         </div>
 

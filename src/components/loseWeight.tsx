@@ -7,16 +7,19 @@ import Button from "./uiFramework/Button";
 const LoseWeight = () => {
   return (
     <>
-      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-20 lg:mb-32">
+      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
         <div className="container">
+          <div className="max-w-lg mx-auto">
           <Paragraph
             align="center"
             paragraph="Lose Weight Naturally With a Custom Plan Designed for You"
             textColor="text-white"
+            textSize="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold"
             className="mb-6 md:mb-10 max-w-5xl"
             highlightedWord="Naturally"
           />
-          <div className="max-w-fit mx-auto -mt-20 relative mb-6">
+          </div>
+          <div className="max-w-fit mx-auto sm:-mt-20 -mt-12 relative mb-6">
             <Image
               src="/images/weight-loss/commponant-model.png"
               width={408}
@@ -50,10 +53,10 @@ const LoseWeight = () => {
                 alt="weightloss product"
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
-              <h3 className="text-3xl mb-2 text-white font-semibold">
+              <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
                 Moving in the Right Direction
               </h3>
-              <h4 className="text-2xl mb-6 text-white">
+              <h4 className="md:text-2xl text-lg mb-6 text-white">
                 Personalized Natural Weight Loss Plan
               </h4>
               <p className="text-gray-200">
@@ -69,10 +72,10 @@ const LoseWeight = () => {
                 alt="weightloss product"
                 className="mb-6 rounded-3xl md:h-[336px] h-56 w-full object-cover"
               />
-              <h3 className="text-3xl mb-2 text-white font-semibold">
+              <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
               Eat Healthy, Get Strong
               </h3>
-              <h4 className="text-2xl mb-6 text-white">
+              <h4 className="md:text-2xl text-lg mb-6 text-white">
               Nourish Your Body the Right Way
               </h4>
               <p className="text-gray-200">
@@ -81,10 +84,10 @@ const LoseWeight = () => {
             </div>
             <div className="bg-vanilla p-6 lg:p-10 rounded-3xl md:col-span-2 flex flex-col gap-6 sm:flex-row justify-between items-center">
                 <div className="sm:order-1 order-2">
-                <h3 className="text-3xl mb-2 text-white font-semibold">
+                <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
                 Know Your Starting Point
               </h3>
-              <h4 className="text-2xl mb-6 text-white">
+              <h4 className="md:text-2xl text-lg mb-6 text-white">
               Check Your BMI to Begin
               </h4>
               <Button

@@ -6,6 +6,7 @@ body {
   background: var(--color-gray-100);
   font-family: var(--font-poppins);
 }
+
 @theme {
   --font-sans: var(--font-poppins);
   --font-serif: var(--font-poppins);
@@ -42,11 +43,11 @@ body {
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1520px;
 
-  --container-sm: 384px;
-  --container-md: 448px;
-  --container-lg: 512px;
-  --container-xl: 576px;
-  --container-2xl: 672px ;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1520px;
 
   --radius-xs: 2px;
   --radius-sm: 4px;
@@ -75,26 +76,29 @@ body {
   --text-2xl: 24px;
   --text-2xl--line-height: 32px;
 
-  --text-3xl: 40px;
-  --text-3xl--line-height: 48px;
+  --text-3xl: 32px;
+  --text-3xl--line-height: 40px;
 
-  --text-4xl: 48px;
-  --text-4xl--line-height: 56px;
+  --text-4xl: 40px;
+  --text-4xl--line-height: 48px;
 
-  --text-5xl: 56px;
-  --text-5xl--line-height: 64px;
+  --text-5xl: 48px;
+  --text-5xl--line-height: 56px;
 
-  --text-6xl: 64px;
-  --text-6xl--line-height: 82px;
+  --text-6xl: 56px;
+  --text-6xl--line-height: 64px;
 
-  --text-7xl: 76px;
-  --text-7xl--line-height: 84px;
+  --text-7xl: 64px;
+  --text-7xl--line-height: 82px;
 
-  --text-8xl: 96px;
-  --text-8xl--line-height: 104px;
+  --text-8xl: 76px;
+  --text-8xl--line-height: 84px;
 
-  --text-9xl: 128px;
-  --text-9xl--line-height: 136px;
+  --text-9xl: 96px;
+  --text-9xl--line-height: 104px;
+
+  --text-10xl: 128px;
+  --text-10xl--line-height: 136px;
 
 }
 .container {
@@ -181,3 +185,51 @@ font-size: 40px;
     animation: marquee-vertical var(--duration, 40s) linear infinite;
   }
 }
+
+.swiper-custome-button{
+  &.swiper-button-disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+}
+
+.roundbutton-hilop {
+  .roundbutton-arrow-1 {
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  .roundbutton-arrow-2 {
+    transform: translate(-180%, 0%);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.1, 1);
+  }
+  &:hover {
+    .roundbutton-arrow-1 {
+      transform: translate(180%, 0%);
+    }
+    .roundbutton-arrow-2 {
+      transform: translate(0, 0);
+    }
+  }
+  &.swiper-button-disabled{
+    &:hover {
+      .roundbutton-arrow-1 {
+        transform: none !important;
+        transition: none !important;
+      }
+      .roundbutton-arrow-2 {
+        transform: translate(-180%, 0%);
+      }
+    }
+    .roundbutton-arrow-1 {
+      transform: none !important;
+      transition: none !important;
+    }
+    .roundbutton-arrow-2 {
+      transform: translate(-180%, 0%);
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.1, 1);
+    }
+  }
+}
+
+.social-icon{
+  @apply w-12 h-12 rounded-full flex items-center justify-center bg-green-100 text-green-800;
+}
+
