@@ -11,7 +11,7 @@ import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
 import Button from "@/components/uiFramework/Button";
-import { VelocityScroll } from "@/components/velocityScroll";
+import ParallaxText from "@/components/velocityScroll";
 import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 
@@ -32,7 +32,6 @@ const features = [
     description: "Feel the difference",
   },
 ];
-
 
 const productCard = [
   {
@@ -62,36 +61,35 @@ const productCard = [
 ];
 const homepagefaqdata = [
   {
-    id: 'faq1',
-    question: 'How do i order from your company?',
+    id: "faq1",
+    question: "How do i order from your company?",
     answer:
-      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
   {
-    id: 'faq2',
-    question: 'How do i order from your company?',
+    id: "faq2",
+    question: "How do i order from your company?",
     answer:
-      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
   {
-    id: 'faq3',
-    question: 'How do i order from your company?',
+    id: "faq3",
+    question: "How do i order from your company?",
     answer:
-      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
   {
-    id: 'faq4',
-    question: 'How do i order from your company?',
+    id: "faq4",
+    question: "How do i order from your company?",
     answer:
-      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
   {
-    id: 'faq5',
-    question: 'How do i order from your company?',
+    id: "faq5",
+    question: "How do i order from your company?",
     answer:
-      'We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications',
+      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
-  
 ];
 export default function Home() {
   return (
@@ -199,16 +197,16 @@ export default function Home() {
         </div>
       </section>
       <LoseWeight />
-      <VelocityScroll>100% Natural Product</VelocityScroll>
+      {/* <VelocityScroll>100% Natural Product</VelocityScroll> */}
+      <ParallaxText baseVelocity={80}>
+        ✅ 100% money back guarantee
+      </ParallaxText>
       <LongerWithBetter />
-      <Testimonials/>
+      <Testimonials />
       <WhyChoose />
       <OurProcess />
       <Blogs />
-      <FaqAccordion
-              items={homepagefaqdata}
-              className="mx-auto"
-            />
+      <FaqAccordion items={homepagefaqdata} className="mx-auto" />
     </>
   );
 }
