@@ -87,7 +87,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           >
             <X size={32} />
           </motion.button>
-          <div className="bg-green-100 h-full w-full sm:p-12 p-6 flex flex-col justify-between">
+          <div className="bg-white h-full w-full sm:p-12 p-6 flex flex-col justify-between">
             {/* Close button */}
 
             {/* Auth views */}
@@ -95,7 +95,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {view === "signup" && <SignupForm setView={setView} />}
             {view === "otp" && <OtpForm setView={setView} />}
           </div>
-          <div className="relative hidden h-full w-full items-center justify-center lg:flex">
+          <div className="relative bg-green-100 hidden h-full w-full items-center justify-center lg:flex">
             <motion.div
               key={isOpen ? "open" : "closed"}
               className="grid grid-cols-12 gap-4 w-full overflow-hidden h-screen p-4"

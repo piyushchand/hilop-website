@@ -89,7 +89,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
         htmlFor={name}
         className={`
           absolute left-3 top-1/2 -translate-y-1/2 
-          bg-green-100 px-1 transition-all duration-200 pointer-events-none
+          bg-white px-1 transition-all duration-200 pointer-events-none
           ${showFloatingLabel ? 'top-1 text-xs' : 'text-base'}
           ${isFocused ? 'text-green-800' : 'text-gray-600/80'}
         `}
@@ -104,8 +104,8 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
       </motion.label>
 
       <div
-        className="flex items-center bg-green-100 rounded-lg border-2 overflow-hidden 
-          transition-all duration-200 focus-within:border-green-600 border-green-300 pr-3"
+        className="flex items-center bg-white rounded-lg border-2 overflow-hidden 
+          transition-all duration-200 focus-within:border-green-600 border-gray-200 pr-3"
       >
         <input
           id={name}
@@ -121,7 +121,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           required={required}
           placeholder={label}
           className={`
-            w-full px-3 py-4 bg-green-100 outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
+            w-full px-3 py-4 bg-none outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
             text-gray-900 placeholder-transparent leading-[24px] appearance-none
           `}
         />
@@ -129,7 +129,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           <button
             type="button"
             onClick={handleIconClick}
-            className="text-green-700 hover:text-green-900"
+            className="text-gray-700 hover:text-green-900"
           >
             <CalendarRange size={20} />
           </button>

@@ -1,138 +1,163 @@
 "use client";
-import { useState } from "react";
-import Paragraph from "@/components/animationComponents/TextVisble";
-import ArrowButton from "@/components/uiFramework/ArrowButton";
-import Button from "@/components/uiFramework/Button";
-import { WhyChoose } from "@/components/whyChoose";
-import Image from "next/image";
-import React from "react";
-import Modal from "@/components/model/logout";
 
-const stats = [
-  { text: "No synthetic chemicals or harmful additives" },
-  { text: "Doctor-recommended, pharmacy-grade treatments" },
-  { text: "Full transparency in ingredients & processes" },
-  { text: "Proven results or your money back!" },
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+
+import ArrowButton from "@/components/uiFramework/ArrowButton";
+import LogoutModal from "@/components/model/logout";
+import MobileApproch from "@/components/Mobileapproch";
+import AccountDetailsModal from "@/components/model/AccoutDetails";
+import MyPlansModal from "@/components/model/MyPlans";
+
+const cardData = [
+  {
+    id: 1,
+    title: "Account Details",
+    subtitle: "Edit Now",
+    action: "modal",
+    modalType: "accountDetails",
+  },
+  {
+    id: 2,
+    title: "My Plans",
+    subtitle: "View Your Plans",
+    action: "modal",
+    modalType: "myPlans",
+  },
+  {
+    id: 3,
+    title: "Orders",
+    subtitle: "View History",
+    action: "redirect",
+    link: "/cart",
+  },
+  {
+    id: 4,
+    title: "Buy Again",
+    subtitle: "Stay Consistent",
+    action: "redirect",
+    link: "/myplans",
+  },
+  {
+    id: 5,
+    title: "Address",
+    subtitle: "View saved",
+    action: "redirect",
+    link: "/myplans",
+  },
+  {
+    id: 6,
+    title: "Book a Call",
+    subtitle: "Book a Call",
+    action: "redirect",
+    link: "/myplans",
+  },
+  {
+    id: 7,
+    title: "My Prescription",
+    subtitle: "Check Your Prescribed Plan",
+    action: "redirect",
+    link: "/myplans",
+  },
+  {
+    id: 8,
+    title: "Hilop Coins",
+    subtitle: "View Balance",
+    action: "redirect",
+    link: "/myplans",
+  },
 ];
 export default function ProfileContent() {
-  const { openModal } = useModal();
+  const router = useRouter();
+
+  // State for controlling modal visibility
+  const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isAccountDetailsModalOpen, setAccountDetailsModalOpen] = useState(false);
+  const [isMyPlansModalOpen, setMyPlansModalOpen] = useState(false); // State for MyPlansModal
+
+  // Function to handle card clicks (redirects or opens modals)
+  const handleClick = (card: typeof cardData[number]) => {
+    if (card.action === "redirect" && card.link) {
+      router.push(card.link);
+    } else if (card.action === "modal") {
+      switch (card.modalType) {
+        case "accountDetails":
+          setAccountDetailsModalOpen(true);
+          break;
+        case "myPlans": // <--- ADDED THIS CASE
+          setMyPlansModalOpen(true);
+          break;
+        default:
+          // Handle any other modal types or do nothing
+          console.warn(`Unhandled modal type: ${card.modalType}`);
+          break;
+      }
+    }
+  };
+
   return (
     <>
       <section className="w-full py-10 bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
-        <div className="container h-full flex items-center justify-between">
+        <div className="container h-full flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
             <h1 className="top-content-badge">Profile Page</h1>
-            <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">
-              John doe
-            </h2>
-            <p className="mb-3 text-gray-600">+91 5837284928</p>
+            <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">John Doe</h2>
+            <p className="mb-3 text-gray-600">
+              +91 5837284928 <span className="px-2">|</span> Test@hilop.com
+            </p>
           </div>
-          <ArrowButton onClick={openModal} label="Logout" theme="light" size="lg" />
-         
+          <ArrowButton
+            onClick={() => setLogoutModalOpen(true)}
+            label="Logout"
+            theme="light"
+            size="lg"
+          />
         </div>
       </section>
       <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-          <div className="order-2 lg:order-1">
-            <span className="top-content-badge">About Hilop</span>
-            <h1 className="text-5xl 2xl:text-6xl mb-6 font-semibold">
-              Welcome to Hilop –{" "}
-              <span className="text-primary">Your Wellness</span>, Your Way
-            </h1>
-            <p className="mb-3">
-              At Hilop, we believe that wellness should be simple, effective,
-              and completely natural. Our mission is to provide science-backed
-              natural health solutions that help you look, feel, and perform at
-              your best—without the risks of harmful chemicals or unnecessary
-              medications.
-            </p>
-            <p>
-              With over 2 million satisfied customers, we’re setting a new
-              standard in personalized wellness, discreet care, and guaranteed
-              results.
-            </p>
-          </div>
-          <Image
-            src="/images/about-us/about-main.jpg"
-            alt="About hero image"
-            width={620}
-            height={632}
-            className="rounded-2xl lg:ms-auto order-1 lg:order-2"
-            priority
-          />
+        <div className="grid xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 sm:gap-6 gap-[1px] items-center">
+          {cardData.map((card) => (
+            <motion.div
+              key={card.id}
+              whileHover="hovered"
+              initial="rest"
+              animate="rest"
+              variants={{
+                rest: {},
+                hovered: {},
+              }}
+              onClick={() => handleClick(card)}
+              className="bg-white p-6 sm:rounded-3xl flex items-center justify-between sm:border sm:border-white border-b-gray-200 duration-600 transition-all hover:border-green-400 group cursor-pointer"
+            >
+              <div>
+                <h3 className="text-lg font-medium mb-2">{card.title}</h3>
+                <p className="text-gray-600 text-sm">{card.subtitle}</p>
+              </div>
+
+              <motion.div
+                variants={{
+                  rest: { x: 0 },
+                  hovered: { x: 8 },
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="transition-colors duration-200 text-gray-400 group-hover:text-green-600"
+              >
+                <ChevronRight />
+              </motion.div>
+            </motion.div>
+          ))}
         </div>
       </section>
-      <WhyChoose />
-      <section className="container mb-16 lg:mb-40">
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
-          <Image
-            src="/images/about-us/our-mission.jpg"
-            alt="About hero image"
-            width={740}
-            height={740}
-            className="rounded-2xl"
-          />
-          <div>
-            <Paragraph
-              paragraph="Our Mission: Science + Nature for Real Wellness"
-              textColor="text-dark"
-              textSize="md:text-3xl lg:text-5xl text-2xl font-semibold"
-              className="mb-8"
-              highlightedWord="Science + Nature"
-            />
-            <p>
-              At Hilop, we don’t believe in quick fixes or gimmicks—we believe
-              in science-backed, natural solutions that are designed to help you
-              achieve long-term results. Whether you’re looking to enhance
-              performance, improve skin, or manage weight, we’ve got a solution
-              that works naturally and effectively.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="container mb-16 lg:mb-40">
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
-          <div className="order-2 lg:order-1">
-            <Paragraph
-              paragraph="Our Commitment to You"
-              textColor="text-dark"
-              textSize="md:text-3xl lg:text-5xl text-2xl font-semibold"
-              className="mb-8"
-              highlightedWord="Commitment"
-            />
-            <h3 className=" text-xl md:text-2xl text-gray-800 font-medium mb-6">
-              Join Hilop today and start your journey to natural
-              wellness—risk-free!
-            </h3>
-            <div className="flex-col flex gap-5 p-5 rounded-2xl bg-gray-200">
-              {stats.map((item, index) => (
-                <div key={index} className="flex items-start ">
-                  <Image
-                    src="/images/icon/list.svg"
-                    alt="About hero image"
-                    width={24}
-                    height={24}
-                  />
-                  <p className="text-black">{item.text}</p>
-                </div>
-              ))}
-              <Button
-                label="Get Started Now"
-                variant="btn-dark"
-                size="xl"
-                link="/"
-              />
-            </div>
-          </div>
-          <Image
-            src="/images/about-us/our-commitment.jpg"
-            alt="About hero image"
-            width={740}
-            height={742}
-            className="rounded-2xl order-1 lg:order-2"
-          />
-        </div>
-      </section>
+      <MobileApproch />
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={() => setLogoutModalOpen(false)} />
+      <AccountDetailsModal
+        isOpen={isAccountDetailsModalOpen}
+        onClose={() => setAccountDetailsModalOpen(false)}
+      />
+      <MyPlansModal isOpen={isMyPlansModalOpen} onClose={() => setMyPlansModalOpen(false)} />
+   
     </>
   );
 }

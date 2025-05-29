@@ -3,70 +3,65 @@ import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import Link from "next/link";
 
-
 interface Props {
-    setView: (view: 'login' | 'signup' | 'otp') => void;
-  }
-  export default function SignupForm({ setView }: Props) {
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      // Handle form submission logic here
-      console.log("Form submitted!");
-      // You'd typically access form values from state here
-    };
+  setView: (view: "login" | "signup" | "otp") => void;
+}
+export default function SignupForm({ setView }: Props) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Handle form submission logic here
+    console.log("Form submitted!");
+    // You'd typically access form values from state here
+  };
   return (
-   <>
-       <Link href="/">
+    <>
+      <Link href="/">
         <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} />
       </Link>
       <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
         <h2 className="text-3xl font-semibold mb-2">Register</h2>
-        <p className="font-medium mb-6 text-gray-600">
-        Create your account
-        </p>
+        <p className="font-medium mb-6 text-gray-600">Create your account</p>
         {/* Input + T&C */}
         <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-5 mb-6">
-        <AnimatedInput
-            label="Full Name"
-            name="fullName"
-            type="text"
-            // value="Rogie"
-            required
-          />
+          <div className="flex flex-col gap-5 mb-6">
+            <AnimatedInput
+              label="Full Name"
+              name="fullName"
+              type="text"
+              // value="Rogie"
+              required
+            />
 
-          <AnimatedInput
-            label="Email"
-            name="email"
-            type="email"
-            required
-          />
-          <AnimatedInput
-            label="Mobile number"
-            name="Mobile number"
-            type="tel"
-            required
-          />
-          <AnimatedInput
-            label="Date of Birth"
-            name="Date of Birth"
-            type="date"
-            required
-          />
-        </div>
-        <label className="mb-4 flex cursor-pointer items-start">
-  <input type="checkbox" className="mr-2 accent-primary size-5 mt-0.5" />
-  <span className="text-sm text-gray-600 font-medium">
-    By registering, you agree to our
-    <span className="underline mx-1 text-dark hover:underline">
-      Terms & Conditions
-    </span>
-    &
-    <span className="underline mx-1 text-dark hover:underline">
-      Privacy Policy.
-    </span>
-  </span>
-</label>
+            <AnimatedInput label="Email" name="email" type="email" required />
+            <AnimatedInput
+              label="Mobile number"
+              name="Mobile number"
+              type="tel"
+              required
+            />
+            <AnimatedInput
+              label="Date of Birth"
+              name="Date of Birth"
+              type="date"
+              required
+            />
+          </div>
+          <label className="mb-4 flex cursor-pointer items-start">
+            <input
+              type="checkbox"
+              className="mr-2 accent-primary size-5 mt-0.5"
+            />
+            <span className="text-sm text-gray-600 font-medium">
+              By registering, you agree to our
+              <span className="underline mx-1 text-dark hover:underline">
+                Terms & Conditions
+              </span>
+              &
+              <span className="underline mx-1 text-dark hover:underline">
+                Privacy Policy.
+              </span>
+            </span>
+          </label>
           <Button
             label="Register"
             variant="btn-dark"
@@ -99,9 +94,13 @@ interface Props {
       </div>
       <p className="text-sm mt-4 text-center">
         Don’t have an account yet?{" "}
-        <button className="text-green-700 font-semibold underline" onClick={() => setView('login')}>
+        <button
+          className="text-green-700 font-semibold underline"
+          onClick={() => setView("login")}
+        >
           Log in
         </button>
-      </p></>
+      </p>
+    </>
   );
 }
