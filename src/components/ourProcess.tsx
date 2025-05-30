@@ -62,7 +62,7 @@ export function OurProcess() {
             />
            </div>
             <div>
-              <p className="mb-6">
+              <p className="mb-6 text-gray-700">
               We ve made it simple to find the right product for your needs through our personalized consultation process.
               </p>
               <Button label="Learn more" variant="btn-dark" size="xl" link="/how-it-works"  />
@@ -112,7 +112,7 @@ export function OurProcess() {
                        <h3 className="font-medium text-xl mb-4">
                           {ourProcesscontent.title}
                         </h3>
-                        <p>
+                        <p className="text-gray-600">
                           {ourProcesscontent.description}
                         </p>
                        </div>

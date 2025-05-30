@@ -24,6 +24,16 @@ export default function Modal({ isOpen, onClose, children, className = "" }: Mod
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
+    if (isOpen) {
+      document.body.style.overflow = "hidden"; // Disable scrolling
+      document.addEventListener("keydown", handleEsc);
+    }
+  
+    return () => {
+      document.body.style.overflow = ""; // Re-enable scrolling
+      document.removeEventListener("keydown", handleEsc);
+    };
+    
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);

@@ -25,15 +25,18 @@ body {
   --color-gray-900: #2E2E2E;
   --color-green-100: #E6F5D0;
   --color-green-200: #D2EBAD;
---color-green-300: #B7DB7D;
---color-green-400: #9ECA53;
---color-green-500: #88BA36;
+  --color-green-300: #B7DB7D;
+  --color-green-400: #9ECA53;
+  --color-green-500: #88BA36;
   --color-green-600: var(--color-primary);
   --color-green-700: #6EA523;
   --color-green-800: #5D8A1E;
   --color-green-900: #446514;
 
-  --color-black: var(--color-gray-900);
+  --color-red-200: #FF6F61;
+  --color-red-900: #D32F2F;
+
+  --color-black: var(--color-dark);
   --color-white: #FFFFFFFF;
 
   --color-light-vanilla: #D2C49F;

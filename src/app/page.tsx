@@ -3,6 +3,7 @@ import {
   CardContainer,
   CardItem,
 } from "@/components/animationComponents/3DCard";
+import { MorphingText } from "@/components/animationComponents/MorphingText";
 import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
@@ -91,6 +92,11 @@ const homepagefaqdata = [
       "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
 ];
+const texts = [
+  "Better Sex",
+  "Weight Loss",
+  "Instant Sex",
+];
 export default function Home() {
   return (
     <>
@@ -98,8 +104,8 @@ export default function Home() {
         <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
-            <h1 className="text-5xl lg:text-7xl xl:text-8xl mb-6 font-medium">
-              100% Natural <br />
+            <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl mb-6 font-medium">
+            <MorphingText texts={texts} /> <br />
               <span className="text-primary">personalized to you</span>
             </h1>
             <h2 className="text-lg md:text-xl text-gray-700">
@@ -125,8 +131,8 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-1">{item.title}</h3>
-                  <p className="text-base">{item.description}</p>
+                  <h3 className="text-lg md:text-xl font-semibold mb-1">{item.title}</h3>
+                  <p className="text-gray-600">{item.description}</p>
                 </div>
               </div>
             ))}

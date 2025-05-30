@@ -52,7 +52,7 @@ export default function HowItWorkContent() {
             100% Natural, Simple & {''}
               <span className="text-primary">Risk-Free</span>
             </h1>
-            <p className="mb-3 text-gray-600">
+            <p className="text-gray-600">
             At Hilop, we make personalized wellness easy. Our 100% natural treatments are designed to fit seamlessly into your life, with expert-backed guidance and a risk-free experience.
             </p>
       </div>

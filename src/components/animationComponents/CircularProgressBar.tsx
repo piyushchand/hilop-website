@@ -83,7 +83,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           }}
         />
       </svg>
-      <div className="absolute text-lg font-bold text-gray-800">
+      <div className="absolute text-sm font-medium text-gray-600">
         {Math.round(animatedPercentage)}%
       </div>
     </div>
