@@ -22,14 +22,14 @@ export default function AboutUsContent() {
               Welcome to Hilop –{" "}
               <span className="text-primary">Your Wellness</span>, Your Way
             </h1>
-            <p className="mb-3">
+            <p className="mb-3 text-gray-600">
               At Hilop, we believe that wellness should be simple, effective,
               and completely natural. Our mission is to provide science-backed
               natural health solutions that help you look, feel, and perform at
               your best—without the risks of harmful chemicals or unnecessary
               medications.
             </p>
-            <p>
+            <p className="text-gray-600">
               With over 2 million satisfied customers, we’re setting a new
               standard in personalized wellness, discreet care, and guaranteed
               results.
@@ -63,7 +63,7 @@ export default function AboutUsContent() {
               className="mb-8"
               highlightedWord="Science + Nature"
             />
-            <p>
+            <p className="text-gray-600"> 
               At Hilop, we don’t believe in quick fixes or gimmicks—we believe
               in science-backed, natural solutions that are designed to help you
               achieve long-term results. Whether you’re looking to enhance
@@ -91,7 +91,7 @@ export default function AboutUsContent() {
                 {stats.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-start "
+                    className="flex items-start gap-2"
                   >
                     <Image
                       src="/images/icon/list.svg"
@@ -99,7 +99,7 @@ export default function AboutUsContent() {
                       width={24}
                       height={24}
                     />
-                    <p className="text-black">{item.text}</p>
+                    <p className="text-gray-800">{item.text}</p>
                   </div>
                 ))}
                  <Button

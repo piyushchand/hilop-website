@@ -131,7 +131,7 @@ export default function BlogContent() {
           <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">
             Your Guide to <span className="text-primary">Natural Wellness</span>
           </h2>
-          <p className="mb-3 text-gray-600">
+          <p className="text-gray-600">
             Stay informed with expert insights, wellness tips, and myth-busting
             facts about{" "}
             <span className="font-medium text-dark">

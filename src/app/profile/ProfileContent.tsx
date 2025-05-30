@@ -10,6 +10,7 @@ import LogoutModal from "@/components/model/logout";
 import MobileApproch from "@/components/Mobileapproch";
 import AccountDetailsModal from "@/components/model/AccoutDetails";
 import MyPlansModal from "@/components/model/MyPlans";
+import AddresssModal from "@/components/model/Address";
 
 const cardData = [
   {
@@ -44,8 +45,8 @@ const cardData = [
     id: 5,
     title: "Address",
     subtitle: "View saved",
-    action: "redirect",
-    link: "/myplans",
+    action: "modal",
+    modalType: "Address",
   },
   {
     id: 6,
@@ -76,6 +77,7 @@ export default function ProfileContent() {
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isAccountDetailsModalOpen, setAccountDetailsModalOpen] = useState(false);
   const [isMyPlansModalOpen, setMyPlansModalOpen] = useState(false); // State for MyPlansModal
+  const [isAddresssModalOpen, setAddresssModalOpen] = useState(false); // State for MyPlansModal
 
   // Function to handle card clicks (redirects or opens modals)
   const handleClick = (card: typeof cardData[number]) => {
@@ -88,6 +90,9 @@ export default function ProfileContent() {
           break;
         case "myPlans": // <--- ADDED THIS CASE
           setMyPlansModalOpen(true);
+          break;
+          case "Address": // <--- ADDED THIS CASE
+          setAddresssModalOpen(true);
           break;
         default:
           // Handle any other modal types or do nothing
@@ -104,7 +109,7 @@ export default function ProfileContent() {
           <div>
             <h1 className="top-content-badge">Profile Page</h1>
             <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">John Doe</h2>
-            <p className="mb-3 text-gray-600">
+            <p className="text-gray-600">
               +91 5837284928 <span className="px-2">|</span> Test@hilop.com
             </p>
           </div>
@@ -157,6 +162,7 @@ export default function ProfileContent() {
         onClose={() => setAccountDetailsModalOpen(false)}
       />
       <MyPlansModal isOpen={isMyPlansModalOpen} onClose={() => setMyPlansModalOpen(false)} />
+      <AddresssModal isOpen={isAddresssModalOpen} onClose={() => setAddresssModalOpen(false)} />
    
     </>
   );

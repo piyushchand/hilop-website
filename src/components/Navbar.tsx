@@ -4,6 +4,7 @@ import Link from "next/link";
 import ArrowButton from "./uiFramework/ArrowButton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AuthModal from "@/app/auth/AuthLayout";
 
 const Navbar = () => {
@@ -17,7 +18,11 @@ const Navbar = () => {
     document.body.classList.toggle("overflow-hidden", mobileMenuOpen);
     return () => document.body.classList.remove("overflow-hidden");
   }, [mobileMenuOpen]);
+  const [language, setLanguage] = useState<"en" | "hi">("en");
 
+  const toggleLanguage = () => {
+    setLanguage((prev) => (prev === "en" ? "hi" : "en"));
+  };
   return (
     <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
       <div className="container py-3 flex items-center justify-between">
@@ -36,10 +41,28 @@ const Navbar = () => {
         {/* Right Side Desktop */}
         <div className="flex gap-4">
          <div className="hidden md:flex gap-4 relative">
-         <button className="relative gap-2 h-[52px] flex justify-center items-center">
-            <Globe className="w-5 h-5 text-dark" />
-            <span>English</span>
-          </button>
+         <button
+      onClick={toggleLanguage}
+      className="relative gap-2 h-[52px] flex justify-center items-center overflow-hidden hover:opacity-60"
+    >
+      <Globe className="w-5 h-5 text-dark" />
+      
+      {/* Animated language label */}
+      <div className="relative w-[60px] h-[24px]">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={language}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 top-0 w-full text-center"
+          >
+            {language === "en" ? "English" : "हिंदी"}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+    </button>
           <button className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center">
             <ShoppingCart className="w-5 h-5 text-dark" />
             <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">

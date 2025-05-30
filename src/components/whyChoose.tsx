@@ -59,7 +59,7 @@ export function WhyChoose() {
               highlightedWord="Hilop"
             />
             <div>
-              <p className="mb-6">
+              <p className="mb-6 text-gray-700">
                 Our commitment to quality, personalization, and effectiveness
                 sets us apart. Discover the HerbaFit difference.
               </p>
@@ -88,7 +88,7 @@ export function WhyChoose() {
                     </h3>
                   </CardItem>
                   <CardItem translateZ={10}>
-                    <p>{whyChoosecontent.description}</p>
+                    <p className="text-gray-600">{whyChoosecontent.description}</p>
                   </CardItem>
                 </CardBody>
               </CardContainer>
