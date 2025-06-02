@@ -65,9 +65,9 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   const [viewMode, setViewMode] = useState<"list" | "addForm" | "editForm">(
     "list"
   );
-  const [formData, setFormData] = useState<Omit<Address, "id"> & { id?: string }>(
-    initialAddressFormState
-  );
+  const [formData, setFormData] = useState<
+    Omit<Address, "id"> & { id?: string }
+  >(initialAddressFormState);
 
   // Reset form and view when modal is closed or properly re-opened
   useEffect(() => {
@@ -90,7 +90,8 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   };
 
   const handleEditClick = (address: Address) => {
-    setFormData({ // Populate form with existing address data
+    setFormData({
+      // Populate form with existing address data
       id: address.id,
       name: address.name,
       addressLine: address.addressLine,
@@ -103,8 +104,16 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   const handleSaveAddress = () => {
     const { name, addressLine, phone, city, landmark } = formData;
-    if (!name.trim() || !addressLine.trim() || !phone.trim() || !city?.trim() || !landmark?.trim()) {
-      alert("Please fill in all required fields: Name, Address Line, Phone, City, and Landmark.");
+    if (
+      !name.trim() ||
+      !addressLine.trim() ||
+      !phone.trim() ||
+      !city?.trim() ||
+      !landmark?.trim()
+    ) {
+      alert(
+        "Please fill in all required fields: Name, Address Line, Phone, City, and Landmark."
+      );
       return;
     }
 
@@ -112,7 +121,9 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       // Update existing address
       setAddresses((prevAddresses) =>
         prevAddresses.map((addr) =>
-          addr.id === formData.id ? { ...addr, ...formData, id: formData.id as string } : addr
+          addr.id === formData.id
+            ? { ...addr, ...formData, id: formData.id as string }
+            : addr
         )
       );
       alert(`Address for ${formData.name} updated.`);
@@ -146,7 +157,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       );
       alert("Address removed.");
       // If the deleted address was being edited, go back to list
-      if (viewMode === 'editForm' && formData.id === addressId) {
+      if (viewMode === "editForm" && formData.id === addressId) {
         handleCancel();
       }
     }
@@ -167,27 +178,30 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   return (
     <Modal
-      className="max-w-[930px] grid grid-cols-12 rounded-lg overflow-hidden shadow-lg"
+      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-12"
       isOpen={isOpen}
       onClose={() => {
-        handleCancel(); // Reset view state and form data
-        onClose();      // Original onClose
+        handleCancel();
+        onClose();
       }}
     >
-      <Image
-        src="/images/modal-3.jpg"
-        width={428}
-        height={682}
-        alt="modal image"
-        className="col-span-5 h-full object-cover hidden sm:block"
-      />
+      <div className="sm:col-span-5 hidden sm:block relative min-h-fit">
+        <Image
+          src="/images/modal-3.jpg"
+          fill
+          alt="model image"
+          className="object-cover w-full h-full"
+        />
+      </div>
 
-      <div className="sm:col-span-7 col-span-12 h-full flex flex-col bg-white">
+      <div className="sm:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
         <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
           {getModalTitle()}
         </h2>
 
-        <div className="flex-grow overflow-y-auto max-h-[427px]"> {/* Adjusted max-h if needed */}
+        <div className="flex flex-col gap-6 overflow-y-auto p-6">
+          {" "}
+          {/* Adjusted max-h if needed */}
           <AnimatePresence mode="wait">
             {viewMode === "list" ? (
               <motion.div
@@ -197,7 +211,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 exit="exit"
                 variants={viewVariants}
                 transition={viewVariants.transition}
-                className="px-6 pt-4 pb-6"
               >
                 {addresses.length > 0 ? (
                   <div className="flex flex-col gap-5">
@@ -213,10 +226,14 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                           {address.addressLine}
                         </p>
                         {address.landmark && (
-                            <p className="text-gray-600 text-sm">Landmark: {address.landmark}</p>
+                          <p className="text-gray-600 text-sm">
+                            Landmark: {address.landmark}
+                          </p>
                         )}
                         {address.city && (
-                            <p className="text-gray-600 text-sm">City: {address.city}</p>
+                          <p className="text-gray-600 text-sm">
+                            City: {address.city}
+                          </p>
                         )}
                         <p className="text-gray-700 mb-4 text-sm mt-1">
                           Phone: {address.phone}
@@ -265,7 +282,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 exit="exit"
                 variants={viewVariants}
                 transition={viewVariants.transition}
-                className="p-6"
               >
                 <form
                   onSubmit={(e) => {
@@ -289,7 +305,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       rows={3}
                       required
                     />
-                     <AnimatedInput
+                    <AnimatedInput
                       label="Landmark"
                       name="landmark" // Key in formData
                       type="text"
@@ -335,7 +351,9 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 onClick={handleCancel}
               />
               <Button
-                label={viewMode === "editForm" ? "Update Address" : "Save Address"}
+                label={
+                  viewMode === "editForm" ? "Update Address" : "Save Address"
+                }
                 variant="btn-dark"
                 size="xl"
                 onClick={handleSaveAddress} // Can also be type="submit" if inside the <form>

@@ -16,6 +16,7 @@ const Footer = () => {
     { href: "/about-us", label: "About Us" },
     { href: "/contact", label: "Contact Us" },
     { href: "/blogs", label: "Blogs" },
+    { href: "/support", label: "Help & Support" },
   ];
 
   const learnLinks = [

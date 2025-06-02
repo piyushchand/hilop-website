@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CalendarRange } from 'lucide-react';
+import { CalendarRange, Clock } from 'lucide-react';
 
 interface AnimatedInputProps {
   label: string;
   name: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time';
   value?: string;
   required?: boolean;
 }
@@ -125,15 +125,15 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
             text-gray-900 placeholder-transparent leading-[24px] appearance-none
           `}
         />
-        {type === 'date' && (
-          <button
-            type="button"
-            onClick={handleIconClick}
-            className="text-gray-700 hover:text-green-900"
-          >
-            <CalendarRange size={20} />
-          </button>
-        )}
+       {(type === 'date' || type === 'time') && (
+  <button
+    type="button"
+    onClick={handleIconClick}
+    className="text-gray-700 hover:text-green-900"
+  >
+    {type === 'date' ? <CalendarRange size={20} /> : <Clock size={20} />}
+  </button>
+)}
       </div>
     </div>
   );

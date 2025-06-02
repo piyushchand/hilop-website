@@ -15,24 +15,25 @@ export default function AccountDetailsModal({
 }: AccountDetailsModalProps) {
   return (
     <Modal
-      className="max-w-[930px] grid grid-cols-12 rounded-lg overflow-hidden shadow-lg"
+      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-12"
       isOpen={isOpen}
       onClose={onClose}
     >
+      <div className="sm:col-span-5 hidden sm:block relative min-h-fit">
+
       <Image
         src="/images/modal-1.jpg"
-        width={428}
-        height={682}
-        alt="model image"
-        className="col-span-5 h-full object-cover hidden sm:block"
+        fill
+        alt="model image 1"
+        className="object-cover w-full h-full"
       />
-      <div className="sm:col-span-7 col-span-12 h-full flex flex-col">
-        <h2 className="text-lg md:text-2xl font-semibold mb-4 p-6 border-b border-gray-200">
+      </div>
+      <div className="sm:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
+        <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
           Edit Account Details
         </h2>
-        <div className="p-6">
-          <div className="flex flex-col gap-5 mb-6">
-            <AnimatedInput
+        <div className="flex flex-col gap-6 overflow-y-auto p-6">
+        <AnimatedInput
               label="Full Name"
               name="fullName"
               type="text"
@@ -53,7 +54,6 @@ export default function AccountDetailsModal({
               type="date"
               required
             />
-          </div>
         </div>
         <div className="flex justify-center gap-4 p-6 border-t border-gray-200 mt-auto">
           <Button

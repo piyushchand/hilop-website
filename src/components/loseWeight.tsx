@@ -73,7 +73,7 @@ const LoseWeight = () => {
             <div className="bg-vanilla p-6 lg:p-10 rounded-3xl">
               <Image
                 src="/images/weight-loss/eat-healthy.jpg"
-                width={336}
+                width={644}
                 height={336}
                 alt="weightloss product"
                 className="mb-6 rounded-3xl md:h-[336px] h-56 w-full object-cover"

@@ -69,12 +69,11 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
                     id={`faq-header-${item.id}`}
                   >
                     <h3 className="text-h3 font-medium w-full">{item.question}</h3>
-                    <div className="flex min-h-8 min-w-8 md:min-h-12 md:min-w-12 items-center justify-center rounded-full bg-primary transition-transform duration-300">
-                      <ChevronDown
-                        className={`text-white transition-transform duration-300 ${
-                          isOpen ? "-rotate-180" : "rotate-0"
+                    <div className={`flex text-white min-h-8 min-w-8 md:min-h-12 md:min-w-12 items-center justify-center rounded-full  transition-transform duration-300 ${
+                      isOpen ? "bg-dark -rotate-180" : "bg-primary rotate-0"
                         }`}
-                      />
+                      >
+                      <ChevronDown />
                     </div>
                   </button>
 

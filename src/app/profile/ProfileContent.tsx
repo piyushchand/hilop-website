@@ -53,7 +53,7 @@ const cardData = [
     title: "Book a Call",
     subtitle: "Book a Call",
     action: "redirect",
-    link: "/myplans",
+    link: "/book-call",
   },
   {
     id: 7,
@@ -105,7 +105,7 @@ export default function ProfileContent() {
   return (
     <>
       <section className="w-full py-10 bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
-        <div className="container h-full flex flex-col sm:flex-row sm:items-center justify-between">
+        <div className="container h-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="top-content-badge">Profile Page</h1>
             <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">John Doe</h2>
