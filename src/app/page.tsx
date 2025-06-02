@@ -162,8 +162,8 @@ export default function Home() {
                   >
                     <Image
                       src={imageSrc}
-                      width={443}
-                      height={332}
+                      width={435}
+                      height={336}
                       className="rounded-3xl w-full"
                       alt={title}
                     />

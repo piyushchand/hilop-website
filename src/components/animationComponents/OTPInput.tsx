@@ -55,7 +55,7 @@ const OTPInput: React.FC = () => {
           type="text"
           inputMode="numeric"
           maxLength={1}
-          className="w-14 h-14 text-center text-xl border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-800"
+          className="sm:w-14 w-full h-14 text-center text-xl border-2 border-gray-200 rounded-md focus:outline-none focus:border-green-800"
           value={digit}
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(e, index)}

@@ -9,6 +9,7 @@ interface ButtonProps {
     | 'btn-secondary'
     | 'btn-dark'
     | 'btn-light'
+    | 'btn-gray'
     | 'btn-Border';
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
@@ -44,6 +45,7 @@ const Button = ({
   const variantClasses: Record<string, string> = {
     'btn-light': 'bg-white/10 backdrop-blur-lg border border-gray-200 hover:primary',
     'btn-secondary': 'border bg-white border-gray-200 hover:bg-gray-200',
+    'btn-gray': 'border bg-gray-200 border-gray-200 hover:bg-gray-300',
     'btn-Border': 'border border-gray-200 hover:bg-gray-200',
     'btn-dark':
       'bg-dark border border-gray-900 !text-white',

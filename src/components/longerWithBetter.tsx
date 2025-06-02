@@ -155,8 +155,8 @@ const LongerWithBetter = () => {
             >
               <Image
                 src="/images/improving-sexual/personalized-solution.jpg"
-                width={336}
-                height={336}
+                width={732}
+                height={570}
                 alt="personalized solution"
                 className="absolute inset-0 h-full w-full object-cover"
               />

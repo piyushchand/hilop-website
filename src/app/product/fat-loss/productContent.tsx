@@ -161,13 +161,13 @@ export default function Productdata() {
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           <div className="order-2 lg:order-1">
             <span className="top-content-badge !flex gap-2 items-center">
-              <BadgeCheck className="text-green-800" /> Premium Formula
+              <BadgeCheck className="text-green-800" /> Herbal Fat Loss
             </span>
             <h1 className="text-3xl md:text-4xl lg:text-5xl 2xl:text-6xl mb-3 sm:mb-6 font-semibold">
-              Herbal Fat Loss
+              Slimvibe
             </h1>
             <h2 className="md:text-xl text-lg font-medium text-gray-800 mb-6">
-              Naturally Accelerate Fat Loss
+            Natural Supplements for Weight loss (60 Capsules)
             </h2>
             <p className="mb-3 text-gray-700">
               Our Herbal Fat Loss Formula is crafted with a powerful blend of
