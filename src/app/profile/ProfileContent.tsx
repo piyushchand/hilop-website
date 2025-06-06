@@ -32,7 +32,7 @@ const cardData = [
     title: "Orders",
     subtitle: "View History",
     action: "redirect",
-    link: "/cart",
+    link: "/my-order",
   },
   {
     id: 4,

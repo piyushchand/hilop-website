@@ -46,10 +46,10 @@ export default function BookCall() {
       <section className="container lg:mb-40 mb-20">
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-2xl font-medium md:mb-6 mb-3">
+            <h2 className="text-2xl font-medium md:mb-4 mb-3">
               Why Book an Appointment?
             </h2>
-            <div className="flex-col flex gap-2 mb-6">
+            <div className="flex-col flex gap-2 mb-8">
               {stats.map((item, index) => (
                 <div key={index} className="flex items-start gap-2">
                   <Image
@@ -62,8 +62,8 @@ export default function BookCall() {
                 </div>
               ))}
             </div>
-            <h2 className="text-2xl font-medium md:mb-6 mb-6">
-              Why Book an Appointment?
+            <h2 className="text-2xl font-medium md:mb-4 mb-3">
+            📞 What Happens After You Book?
             </h2>
             <p className="text-gray-700">
               Once you submit the appointment form, our expert admin will call
