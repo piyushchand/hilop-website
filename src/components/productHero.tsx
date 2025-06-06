@@ -14,7 +14,7 @@ export function ProductHero() {
     <>
        <div className="flex md:flex-row flex-col gap-4 p-6 bg-white rounded-2xl justify-between mb-6">
           {stats.map((item, index) => (
-            <div key={index} className="flex items-start ">
+            <div key={index} className="flex items-start gap-2">
               <Image
                 src="/images/icon/list.svg"
                 alt="About hero image"
