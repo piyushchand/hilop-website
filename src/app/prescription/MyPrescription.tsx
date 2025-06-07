@@ -225,14 +225,14 @@ const prescriptionid: Prescription[] = [
 ];
 
 export default function MyPrescription() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number>(prescriptionid.length - 1);
 
   const activePrescription = activeIndex !== null ? prescriptionid[activeIndex] : null;
 
   return (
     <>
       {/* Hero Section */}
-      <section className="w-full py-20 bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
+      <section className="w-full py-10 lg:py-20 bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
         <div className="container">
           <h1 className="text-2xl md:text-5xl 2xl:text-6xl font-semibold mb-8">
             My Prescription
@@ -276,26 +276,29 @@ export default function MyPrescription() {
               1280: { slidesPerView: 5 },
             }}
           >
-            {prescriptionid.map((item, index) => (
-              <SwiperSlide key={item.orderid}>
-                <div
-                  onClick={() => setActiveIndex(index)}
-                  className={`flex flex-col h-full p-5 rounded-xl cursor-pointer transition-all border relative ${
-                    activeIndex === index
-                      ? "bg-green-100 border-green-300"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <p className="text-green-500 font-bold text-4xl absolute right-5 top-3">
-                    {index + 1}
-                  </p>
-                  <p className="text-gray-600 font-medium mb-4 pr-8">
-                    Order <span className="text-black">{item.orderid}</span>
-                  </p>
-                  <p className="text-md md:text-xl font-medium">{item.date}</p>
-                </div>
-              </SwiperSlide>
-            ))}
+            {[...prescriptionid].reverse().map((item, reversedIndex) => {
+    const originalIndex = prescriptionid.length - 1 - reversedIndex;
+    return (
+      <SwiperSlide key={item.orderid}>
+        <div
+          onClick={() => setActiveIndex(originalIndex)}
+          className={`flex flex-col h-full p-5 rounded-xl cursor-pointer transition-all border relative ${
+            activeIndex === originalIndex
+              ? "bg-green-100 border-green-300"
+              : "bg-white border-gray-200"
+          }`}
+        >
+          <p className="text-green-500 font-bold text-4xl absolute right-5 top-3">
+            {prescriptionid.length - reversedIndex}
+          </p>
+          <p className="text-gray-600 font-medium mb-4 pr-8">
+            Order : <span className="text-black">{item.orderid}</span>
+          </p>
+          <p className="text-md md:text-xl font-medium">{item.date}</p>
+        </div>
+      </SwiperSlide>
+    );
+  })}
           </Swiper>
 
           {activePrescription && (
@@ -313,7 +316,7 @@ export default function MyPrescription() {
                     {activePrescription.date}
                     </h3>
                     <p className="text-gray-600">
-                    Order <span className="text-black">ID: {activePrescription.orderid}</span>
+                    Order : <span className="text-black">ID: {activePrescription.orderid}</span>
                     </p>
                   </div>
                 </div>

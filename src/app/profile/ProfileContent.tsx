@@ -39,7 +39,7 @@ const cardData = [
     title: "Buy Again",
     subtitle: "Stay Consistent",
     action: "redirect",
-    link: "/myplans",
+    link: "/buy",
   },
   {
     id: 5,
@@ -60,14 +60,14 @@ const cardData = [
     title: "My Prescription",
     subtitle: "Check Your Prescribed Plan",
     action: "redirect",
-    link: "/myplans",
+    link: "/prescription",
   },
   {
     id: 8,
     title: "Hilop Coins",
     subtitle: "View Balance",
     action: "redirect",
-    link: "/myplans",
+    link: "/hilop-coins",
   },
 ];
 export default function ProfileContent() {
