@@ -119,7 +119,7 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({
   }
 
   return (
-    <button onClick={onClick} className={`w-fit ${className}`}>
+    <button onClick={onClick} className={`w-fit h-fit ${className}`}>
       {buttonContent}
     </button>
   );

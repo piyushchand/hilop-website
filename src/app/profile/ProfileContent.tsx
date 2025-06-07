@@ -39,7 +39,7 @@ const cardData = [
     title: "Buy Again",
     subtitle: "Stay Consistent",
     action: "redirect",
-    link: "/buy",
+    link: "/cart",
   },
   {
     id: 5,
