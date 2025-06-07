@@ -9,7 +9,6 @@ import Button from "../uiFramework/Button";
 import AnimatedInput from "../animationComponents/AnimatedInput"; // Assuming this takes value and onChange
 import AnimatedTextarea from "../animationComponents/AnimatedTextarea"; // Assuming this takes value and onChange
 
-// Define the Address type
 interface Address {
   id: string;
   name: string;
@@ -25,7 +24,7 @@ type AddressModalProps = {
 };
 
 const initialAddressFormState: Omit<Address, "id"> & { id?: string } = {
-  id: undefined, // Will be set when editing
+  id: undefined,
   name: "",
   addressLine: "",
   phone: "",
@@ -69,7 +68,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     Omit<Address, "id"> & { id?: string }
   >(initialAddressFormState);
 
-  // Reset form and view when modal is closed or properly re-opened
   useEffect(() => {
     if (isOpen) {
       setViewMode("list");
@@ -85,13 +83,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   };
 
   const handleAddNewClick = () => {
-    setFormData(initialAddressFormState); // Reset form data for new entry
+    setFormData(initialAddressFormState);
     setViewMode("addForm");
   };
 
   const handleEditClick = (address: Address) => {
     setFormData({
-      // Populate form with existing address data
       id: address.id,
       name: address.name,
       addressLine: address.addressLine,

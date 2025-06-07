@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import {
   CardBody,
   CardContainer,
@@ -8,6 +10,7 @@ import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
+import TestModal from "@/components/model/TestModal";
 import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
@@ -40,7 +43,7 @@ const productCard = [
     imageSrc: "/images/weight-loss/fatloss-clip.jpg",
     tag: "Fat Loss",
     title: "HerbaTrim",
-    viewWorkLink: "/herbatrim-work",
+    viewWorkLink: "/product/fat-loss",
     takeTestHref: "/herbatrim-test",
   },
   {
@@ -48,7 +51,7 @@ const productCard = [
     imageSrc: "/images/instant-boost/instantboost-clip.jpg",
     tag: "Instant Boost",
     title: "VitalVigor",
-    viewWorkLink: "/herbatrim-work",
+    viewWorkLink: "/product/fat-loss",
     takeTestHref: "/herbatrim-test",
   },
   {
@@ -56,7 +59,7 @@ const productCard = [
     imageSrc: "/images/improving-sexual/improving-sexual-clip.jpg",
     tag: "Improving sexual",
     title: "EverYoung Boost",
-    viewWorkLink: "/herbatrim-work",
+    viewWorkLink: "/product/fat-loss",
     takeTestHref: "/herbatrim-test",
   },
 ];
@@ -98,6 +101,7 @@ const texts = [
   "Instant Sex",
 ];
 export default function Home() {
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
@@ -142,7 +146,7 @@ export default function Home() {
         <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
           {productCard.map(
             (
-              { id, imageSrc, tag, title, viewWorkLink, takeTestHref },
+              { id, imageSrc, tag, title, viewWorkLink },
               index
             ) => (
               <CardContainer
@@ -181,7 +185,7 @@ export default function Home() {
                   <CardItem translateZ={10} className=" w-full">
                     <div className="grid xl:grid-cols-2 gap-2 lg:gap-4">
                       <Button
-                        label="View Our Work"
+                        label="View Details"
                         variant="btn-light"
                         size="xl"
                         className="w-full"
@@ -192,7 +196,7 @@ export default function Home() {
                         theme="primary"
                         className="w-full"
                         size="lg"
-                        href={takeTestHref}
+                        onClick={() => setIsTestModalOpen(true)}
                       />
                     </div>
                   </CardItem>
@@ -202,6 +206,7 @@ export default function Home() {
           )}
         </div>
       </section>
+      <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
       <LoseWeight />
       {/* <VelocityScroll>100% Natural Product</VelocityScroll> */}
       <ParallaxText baseVelocity={80}>

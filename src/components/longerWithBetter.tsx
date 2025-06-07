@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import Paragraph from "./animationComponents/TextVisble";
 import { motion } from "framer-motion";
@@ -8,6 +9,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import TestModal from "./model/TestModal";
 const testimonials = [
   {
     name: "Purav Jha",
@@ -50,6 +52,7 @@ const itemVariants = {
 };
 
 const LongerWithBetter = () => {
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   return (
     <>
@@ -83,14 +86,14 @@ const LongerWithBetter = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/"
+                link="/product/fat-loss"
               />
               <Button
                 label="Take the test"
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                link="/"
+                onClick={() => setIsTestModalOpen(true)}
               />
             </div>
           </div>
@@ -111,7 +114,7 @@ const LongerWithBetter = () => {
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  link="/"
+                  onClick={() => setIsTestModalOpen(true)}
                 />
                 <Button
                   label="Buy Now"
@@ -137,7 +140,7 @@ const LongerWithBetter = () => {
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  link="/"
+                  onClick={() => setIsTestModalOpen(true)}
                 />
                 <Button
                   label="Buy Now"
@@ -184,12 +187,7 @@ const LongerWithBetter = () => {
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.6 }} // 'once' runs it one time only, 'amount' defines visibility threshold
                 >
-                  {[
-                    "Get hard",
-                    "Last longer",
-                    "Staying hard",
-                    "All of the above",
-                  ].map((text, index) => (
+                  {[ "Get hard", "Last longer", "Staying hard", "All of the above", ].map((text, index) => (
                     <motion.span
                       key={index}
                       className="bg-black/20 backdrop-blur-lg text-xs lg:text-base rounded-full px-2 py-1 lg:px-4 lg:py-2 text-white"
@@ -252,6 +250,7 @@ const LongerWithBetter = () => {
           </div>
         </div>
       </section>
+      <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
     </>
   );
 };

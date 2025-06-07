@@ -61,7 +61,6 @@ export default function AccountDetailsModal({
             variant="btn-dark"
             size="xl"
             onClick={() => {
-              // Add your save logic here
               onClose();
             }}
           />

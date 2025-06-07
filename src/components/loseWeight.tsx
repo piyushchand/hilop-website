@@ -1,11 +1,13 @@
 "use client";
-
+import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Paragraph from "./animationComponents/TextVisble";
 import Button from "./uiFramework/Button";
+import TestModal from "./model/TestModal";
 
 const LoseWeight = () => {
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   return (
     <>
       <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
@@ -39,15 +41,16 @@ const LoseWeight = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/"
+                link="/product/fat-loss"
               />
               <Button
                 label="Take the test"
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                link="/"
+                onClick={() => setIsTestModalOpen(true)}
               />
+               <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6 lg:gap-10">
