@@ -5,11 +5,9 @@ import ArrowButton from "./uiFramework/ArrowButton";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AuthModal from "@/app/auth/AuthLayout";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false); // New state for profile dropdown
 
   const profileRef = useRef<HTMLDivElement>(null); // Ref for profile dropdown
@@ -84,18 +82,18 @@ const Navbar = () => {
                 </AnimatePresence>
               </div>
             </button>
-            <button className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center">
+            <Link href='/cart' className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center">
               <ShoppingCart className="w-5 h-5 text-dark" />
               <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                 2
               </span>
-            </button>
+            </Link>
           </div>
           <ArrowButton
             label="Login"
             theme="light"
             size="lg"
-            onClick={() => setOpen(true)}
+            href="/auth/login"
           />
           {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
@@ -145,7 +143,6 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-          <AuthModal isOpen={open} onClose={() => setOpen(false)} />
           <button
             className="md:hidden flex items-center"
             onClick={() => setMobileMenuOpen(true)}

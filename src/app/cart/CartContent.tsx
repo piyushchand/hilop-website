@@ -1,306 +1,229 @@
 "use client";
-
-import React, { useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { useState } from "react";
+import Image from "next/image";
+import React from "react";
 import "swiper/css";
 import "swiper/css/pagination";
-import Button from "@/components/uiFramework/Button";
-import Image from "next/image";
-import Modal from "@/components/animationComponents/animated-model";
-import Link from "next/link";
-
-// Dummy Orders (example only)
-const dummyOrders = Array.from({ length: 12 }).map((_, i) => ({
-  id: String(i + 1),
-  status: i % 2 === 0 ? "Delivered" : "Ongoing",
-  date: "2024-07-15",
-  total: 59.99,
-  address: "Shop Number 3, Sabira Manzil, Near Union Bank, Rani Sati Marg, Malad (E), Kedarmal Rd, Malad East",
-  items: [
-    {
-      name: "The Ordinary Multi-Peptide + Copper Peptides 1% Serum - 30ml",
-      quantity: 1,
-      price: 70.0,
-    },
-    {
-      name: "The Ordinary Niacinamide 10% + Zinc 1% - 30ml",
-      quantity: 1,
-      price: 50.0,
-    },
-  ],
-  summary: {
-    mrp: 120.0,
-    discount: 10.0,
-    coupon: 0.0,
-    shipping: 10.0,
-    finalAmount: 110.0,
-  },
-}));
-
-// Types
-type OrderItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
-
-type Order = {
-  id: string;
-  status: "Ongoing" | "Delivered" | "Cancelled" | "Others";
-  date: string;
-  total: number;
-  address: string; 
-  items: OrderItem[];
-  summary: {
-    mrp: number;
-    discount: number;
-    coupon: number;
-    shipping: number;
-    finalAmount: number;
-  };
-};
-
-const filterOptions: Array<
-  "All" | "Ongoing" | "Delivered" | "Cancelled" | "Others"
-> = ["All", "Ongoing", "Delivered", "Cancelled", "Others"];
+import ArrowButton from "@/components/uiFramework/ArrowButton";
 
 export default function Cart() {
-  const [activeFilter, setActiveFilter] =
-    useState<(typeof filterOptions)[number]>("All");
-  const [modalOrder, setModalOrder] = useState<Order | null>(null);
-  const [visibleCount, setVisibleCount] = useState(4);
-
-  const filteredOrders =
-    activeFilter === "All"
-      ? dummyOrders
-      : dummyOrders.filter((order) => order.status === activeFilter);
-
-  const visibleOrders = filteredOrders.slice(0, visibleCount);
-
-  const handleShowMore = () => {
-    setVisibleCount((prev) => prev + 4);
-  };
-
+  const [checked, setChecked] = useState(false);
   return (
     <section className="w-full bg-gray-100 mb-16 lg:mb-40">
-      <div className="container lg:mt-20 mt-10">
-        <h1 className="text-5xl 2xl:text-6xl font-semibold mb-6 lg:mb-10">
-          My Orders
-        </h1>
-
-        {/* Swiper Filter */}
-        <Swiper
-          spaceBetween={16}
-          slidesPerView="auto"
-          className="mb-8"
-          centeredSlides={false}
-        >
-          {filterOptions.map((status) => (
-            <SwiperSlide key={status} className="!w-fit">
-              <Button
-                onClick={() => {
-                  setActiveFilter(status);
-                  setVisibleCount(4);
-                }}
-                className="w-full"
-                label={status}
-                variant={activeFilter === status ? "btn-primary" : "btn-light"}
-                size="xl"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        {/* Orders Grid */}
-        {visibleOrders.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {visibleOrders.map((order) => (
-                <div
-                  key={order.id}
-                  onClick={() => setModalOrder(order as Order)}
-                  className="bg-white rounded-lg border border-gray-200 transition-shadow cursor-pointer hover:shadow-lg"
-                >
-                  <div className="flex px-5 py-3 justify-between items-center border-b border-gray-200">
-                    <div>
-                      <h3 className="text-2xl font-medium text-dark mb-1">
-                        Kit #{order.id}
-                      </h3>
-                      <p className="text-gray-700">
-                        Order id #{order.id.padStart(7, "0")}
-                      </p>
+      <div className="container lg:pt-20 pt-10 relative">
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Left Section */}
+          <div className="lg:w-2/3 w-full">
+            {/* Choose Your Subscription Plan */}
+            <div className="bg-white p-6 rounded-3xl mb-6">
+              <h2 className="text-lg md:text-2xl font-semibold mb-2">
+                Choose Your Subscription Plan
+              </h2>
+              <p className="text-gray-600 mb-7">
+                Special discount for ordering 45 days
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <label className="inline-flex items-center w-full">
+                  <input
+                    type="radio"
+                    name="subscription"
+                    value="1"
+                    className="peer hidden"
+                  />
+                  <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/20 peer-checked:text-white">
+                    <div className="flex items-center gap-3 mb-3">
+                      <p className="text-dark font-medium">1 Month</p>
                     </div>
-                    <div>
-                      <p className="text-lg text-gray-800 font-medium">
-                        {new Date(order.date).toLocaleDateString("en-US", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="text-gray-700 text-end">6:08 pm</p>
+                    <div className="flex gap-3">
+                      <span className="text-primary font-medium">₹1200</span>{" "}
                     </div>
-                  </div>
-                  <div className="p-5 border-b border-gray-200 flex flex-col gap-3">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex gap-4 items-center">
-                        <Image
-                          src="/images/product.png"
-                          alt="Product image"
-                          width={80}
-                          height={80}
-                          className="w-20 h-20 rounded-lg object-cover"
-                        />
-                        <div>
-                          <p className="text-lg text-gray-700 mb-1 line-clamp-2">
-                            {item.name}
-                          </p>
-                          <p className="text-base font-medium text-dark">
-        Qty: {item.quantity} × ${item.price.toFixed(2)}
-      </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-5 flex justify-between">
-                    <span
-                      className={`text-sm font-medium px-2 py-1 rounded-full ${
-                        order.status === "Delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "Ongoing"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                    <Link
-                      href={`/invoices/${order.id}.pdf`}
-                      download
-                      className="text-green-800 hover:underline text-center font-semibold block"
-                    >
-                      Download invoice
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                  </span>
+                </label>
+                <label className="inline-flex items-center w-full">
+                  <input
+                    type="radio"
+                    name="subscription"
+                    value="1"
+                    className="peer hidden"
+                  />
+                  <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/20 peer-checked:text-white">
+                    <div className="flex items-center gap-3 mb-3">
+                      <p className="text-dark font-medium">1 Month</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-dark font-medium">20% OFF</span>
+                      <span className="text-primary font-medium">
+                        ₹1200
+                      </span>{" "}
+                    </div>
+                  </span>
+                </label>
+                <label className="inline-flex items-center w-full">
+                  <input
+                    type="radio"
+                    name="subscription"
+                    value="1"
+                    className="peer hidden"
+                  />
+                  <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/20 peer-checked:text-white">
+                    <div className="flex items-center gap-3 mb-3">
+                      <p className="text-dark font-medium">1 Month</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-dark font-medium">20% OFF</span>
+                      <span className="text-primary font-medium">
+                        ₹1200
+                      </span>{" "}
+                    </div>
+                  </span>
+                </label>
+              </div>
             </div>
 
-            {visibleOrders.length < filteredOrders.length && (
-              <div className="mt-8 flex justify-center">
-                <Button
-                  label="Show More"
-                  onClick={handleShowMore}
-                  variant="btn-dark"
-                  size="xl"
-                  className="text-center"
+            {/* Product List */}
+            <div>
+              <div className="flex items-center gap-4">
+                <Image
+                  width={180}
+                  height={180}
+                  src="/images/product.png"
+                  alt="Copper Peptides 1% Serum"
+                  className="md:size-[180px] size-16 sm:size-24 object-cover rounded-lg"
                 />
-              </div>
-            )}
-          </>
-        ) : (
-          <p className="text-center text-gray-500 py-20">
-            No orders found for &ldquo;{activeFilter}&rdquo;.
-          </p>
-        )}
-
-        {/* Order Detail Modal */}
-        {modalOrder && (
-          <Modal
-            className="max-w-sm w-full h-fit rounded-lg overflow-hidden shadow-lg"
-            isOpen={!!modalOrder}
-            onClose={() => setModalOrder(null)}
-          >
-            <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
-              Kit #{modalOrder.id}
-            </h2>
-            <div className="max-h-[65vh] md:max-h-auto overflow-y-auto">
-              <div className="p-6 flex items-center justify-between">
-                <p className="text-gray-700 text-sm">
-                  Order id #{modalOrder.id.padStart(7, "0")}
-                </p>
-                <p className="text-gray-700 text-sm">{modalOrder.date}</p>
-              </div>
-              <div className="px-6 flex flex-col gap-3">
-                {modalOrder.items.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-4 items-center border-b last:border-0 pb-3 border-gray-200"
-                  >
-                    <Image
-                      src="/images/product.png"
-                      alt="Product image"
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="text-lg text-gray-700 mb-1 line-clamp-2">{item.name}</p>
-                      <p className="text-base font-medium text-dark">
-        Qty: {item.quantity} × ${item.price.toFixed(2)}
-      </p>
+                <div className="flex flex-col sm:flex-row gap-2 md:gap-4 sm:items-center w-full sm:justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold">
+                      Copper Peptides 1% Serum
+                    </h3>
+                    <p className="text-sm md:text-base text-gray-600 mb-1">
+                      (1 Month Pack)
+                    </p>
+                    <div className="flex items-center text-sm md:text-base">
+                      <span className="text-gray-500 line-through mr-2">
+                        ₹800
+                      </span>
+                      <span className="text-lg font-bold text-green-600">
+                        ₹600
+                      </span>
                     </div>
                   </div>
-                ))}
+                  <div className="flex items-center border border-gray-300 rounded-md w-fit">
+                    <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-md">
+                      -
+                    </button>
+                    <span className="px-3 py-1 border-l border-r border-gray-300">
+                      1
+                    </span>
+                    <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-md">
+                      +
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="p-6">
-                <p className="font-medium text-dark text-lg">Address</p>
-                <p className="text-gray-600">
-                {modalOrder.address}
-                </p>
+            </div>
+          </div>
+
+          {/* Right Section */}
+          <div className="lg:w-1/3 w-full">
+            {/* Offers & Benefits */}
+            <div className="mb-6">
+              <h2 className="text-lg md:text-2xl font-medium mb-4">
+                Offers & Benefits
+              </h2>
+              <div className="mb-4">
+                <div className="flex border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                  <input
+                    type="text"
+                    id="couponCode"
+                    className="appearance-none focus:outline-none w-full"
+                    placeholder="Enter Coupon Code"
+                  />
+                  <button className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300">
+                    Apply
+                  </button>
+                </div>
               </div>
-              <div className="p-6 bg-gray-100 flex flex-col gap-3">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">
-                    Bag MRP ({modalOrder.items.length} items)
-                  </p>
-                  <p className="text-gray-600 font-medium">
-                    ${modalOrder.summary.mrp.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Discount From Coins</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.discount.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Subscription Discount</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.coupon.toFixed(2)}
-                  </p>
-                </div>{" "}
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Coupon Discount</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.coupon.toFixed(2)}
+              <div
+                onClick={() => setChecked(!checked)}
+                className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
+        ${
+          checked ? "bg-green-50 border-green-500" : "bg-white border-gray-200"
+        } border`}
+              >
+                <Image
+                  width={32}
+                  height={32}
+                  src="/images/icon/hilop-coin.svg"
+                  alt="Hilop Coins"
+                />
+                <div>
+                  <h3 className="text-gray-900">Apply Hilop Coins</h3>
+                  <p className="text-sm text-gray-600">
+                    You have 2,000 coins available, giving you 20% off on your
+                    purchase!
                   </p>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Shipping</p>
-                  <p className="text-gray-600 font-medium">
-                    ${modalOrder.summary.shipping.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pt-3">
-                  <p className="text-dark font-semibold">Amount to be paid</p>
-                  <Button
-                    label={`$${modalOrder.summary.finalAmount.toFixed(2)}`}
-                    variant="btn-dark"
-                    size="xl"
+                <div className="ml-auto pointer-events-none">
+                  <input
+                    type="checkbox"
+                    name="subscription"
+                    checked={checked}
+                    value="1"
+                    className="peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                   />
                 </div>
               </div>
             </div>
-            <Link
-              href={`/invoices/${modalOrder.id}.pdf`}
-              download
-              className="text-green-800 hover:underline p-6 text-center font-semibold block"
-            >
-              Download invoice
-            </Link>
-          </Modal>
-        )}
+
+            {/* Order Summary */}
+            <div className="">
+              <h2 className="text-xl md:text-2xl font-medium mb-4">
+                Order Summary
+              </h2>
+              <div className="space-y-2 bg-white rounded-2xl p-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Bag MRP (2 items)</span>
+                  <span className="font-medium text-lg">₹999</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Discount From Coins</span>
+                  <span className="text-green-500 text-lg">-₹100</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Subscription Discount</span>
+                  <span className="text-green-500 text-lg">-₹0</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Coupon Discount</span>
+                  <span className="text-green-500 text-lg">-₹0</span>
+                </div>
+                <div className="flex justify-between border-t border-gray-200 pt-2 mt-2 items-center">
+                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-gray-600 text-lg">Free</span>
+                </div>
+                <div className="flex justify-between text-lg font-medium border-t border-gray-200 pt-2 mt-2 items-center">
+                  <span>Order total</span>
+                  <span>₹863.05</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fixed Bottom Bar */}
+      <div className="fixed z-50 bottom-0 left-0 w-full bg-white gap-2 md:gap-4 border-t border-gray-200 p-4 flex flex-col sm:flex-row justify-end items-center lg:px-20 px-4">
+        <div className="flex items-center">
+          <span className="text-xl md:text-2xl font-bold text-green-600 mr-2">
+            ₹863.05
+          </span>
+          <span className="text-gray-500 line-through">₹144.94</span>
+        </div>
+        <ArrowButton
+          label="Place Order"
+          theme="dark"
+          className="w-fit"
+          size="lg"
+        />
       </div>
     </section>
   );

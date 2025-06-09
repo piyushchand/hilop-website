@@ -1,17 +1,13 @@
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import LoginForm from "./LoginForm";
-import SignupForm from "./SignupForm";
-import OtpForm from "./OtpForm";
+"use client";
+
+import { ReactNode } from "react";
 import Image from "next/image";
+import { X } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
-export type AuthView = "login" | "signup" | "otp";
 
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+const MotionLink = motion(Link);
 
 const imageGrid = [
   {
@@ -41,86 +37,76 @@ const imageGrid = [
     className: "col-span-4",
   },
 ];
-const container = {
+const containerVariants = {
   hidden: {},
-  show: {
+  visible: {
     transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.2,
+      staggerChildren: 0.15,
     },
   },
 };
 
-const item = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 30 },
+  visible: { opacity: 1, scale: 1, y: 0 },
 };
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [view, setView] = useState<AuthView>("login");
-
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "unset";
-  }, [isOpen]);
-
+export default function AuthLayout({
+  children,
+  bottomContent,
+}: {
+  children: ReactNode;
+  bottomContent?: ReactNode;
+}) {
   return (
-    <>
-      {/* Backdrop */}
-      {isOpen && (
-  <div className="fixed top-0 right-0 w-full max-h-screen z-50">
-  </div>
-)}
+    <div className="relative grid w-full h-screen grid-cols-1 overflow-hidden bg-white lg:grid-cols-2">
+      {/* Close Button */}
+      <MotionLink
+          href="/"
+          className="absolute top-6 right-6 sm:top-10 sm:right-10 z-30 w-10 h-10 text-white bg-dark rounded-full flex items-center justify-center hover:text-gray-300"
+          initial={{ rotate: -180, opacity: 0 }}
+          animate={{ rotate: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          whileHover={{ rotate: 90 }}
+      >
+        <X size={28} />
+      </MotionLink>
 
-      {/* Off-canvas panel */}
-      <div
-  className={`fixed top-0 right-0 w-full max-h-screen z-50 ${
-    isOpen ? "block" : "hidden"
-  }`}
->
-        <div className="relative grid w-full grid-cols-1 lg:grid-cols-2 bg-white h-screen max-h-screen overflow-y-auto">
-          <motion.button
-            className="absolute top-6 right-6 sm:top-12 z-20 sm:right-12 w-12 h-12 text-white hover:text-gray-300 bg-dark rounded-full flex justify-center items-center"
-            onClick={onClose}
-            initial={{ rotate: -180, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            whileHover={{ rotate: 90 }}
-          >
-            <X size={32} />
-          </motion.button>
-          <div className="bg-white h-full w-full sm:p-12 p-6 flex flex-col justify-between">
-            {/* Close button */}
+      {/* Left Content */}
+      <div className="flex flex-col justify-between w-full h-full px-6 py-8 overflow-y-auto sm:px-10 lg:px-16">
+        <Link href="/">
+          <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} />
+        </Link>
 
-            {/* Auth views */}
-            {view === "login" && <LoginForm setView={setView} />}
-            {view === "signup" && <SignupForm setView={setView} />}
-            {view === "otp" && <OtpForm setView={setView} />}
-          </div>
-          <div className="relative bg-green-100 hidden h-full w-full items-center justify-center lg:flex">
-            <motion.div
-              key={isOpen ? "open" : "closed"}
-              className="grid grid-cols-12 gap-4 w-full overflow-hidden h-screen p-4"
-              variants={container}
-              initial="hidden"
-              animate={isOpen ? "show" : "hidden"}
-            >
-              {imageGrid.map((image, index) => (
-                <motion.div
-                  key={index}
-                  className={`relative rounded-lg overflow-hidden ${image.className}`}
-                  variants={item}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover w-full h-full"
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
+        <div>{children}</div>
+        {bottomContent && (
+          <div className="mt-8 text-sm text-gray-500">{bottomContent}</div>
+        )}
       </div>
-    </>
+
+      {/* Right Image Grid */}
+      <div className="relative hidden w-full h-full lg:flex items-center justify-center bg-green-100">
+        <motion.div
+          className="grid grid-cols-12 gap-4 w-full h-full p-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {imageGrid.map((image, index) => (
+            <motion.div
+              key={index}
+              className={`relative rounded-lg overflow-hidden ${image.className}`}
+              variants={itemVariants}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                style={{ objectFit: "cover" }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
   );
 }

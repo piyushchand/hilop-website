@@ -1,30 +1,31 @@
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
-import Link from "next/link";
+import AuthLayout from "../AuthLayout";
 
-interface Props {
-  setView: (view: "login" | "signup" | "otp") => void;
-}
-export default function LoginForm({ setView }: Props) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted!");
-    // You'd typically access form values from state here
-  };
+export default function LoginPage() {
   return (
-    <>
-      <Link href="/">
-        <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} />
-      </Link>
+    <AuthLayout
+      bottomContent={
+        <p className="text-sm mt-4 text-center text-gray-600 font-medium">
+          {" "}
+          Do not have an account yet?{" "}
+          <a
+            href="/auth/signup"
+            className="hover:underline text-green-800 font-semibold cursor-pointer"
+          >
+            Sign up for free
+          </a>
+        </p>
+      }
+    >
       <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
         <h2 className="text-3xl font-semibold mb-2">Welcome Back</h2>
         <p className="font-medium mb-6 text-gray-600">
           Let’s get you logged in.
         </p>
         {/* Input + T&C */}
-        <form onSubmit={handleSubmit}>
+        <form>
           {/* Input with initial content (like "Rogie") */}
           <AnimatedInput
             label="Mobile number"
@@ -32,13 +33,16 @@ export default function LoginForm({ setView }: Props) {
             type="tel"
             required
           />
-        <div  onClick={() => setView("otp")}> <Button
-            label="Get OTP"
-            variant="btn-dark"
-            size="xl"
-            className="w-full mt-6"
-            link="/"
-          /></div> 
+          <div>
+            {" "}
+            <Button
+              label="Get OTP"
+              variant="btn-dark"
+              size="xl"
+              className="w-full mt-6"
+              link="/auth/otp"
+            />
+          </div>
         </form>
         <div className="text-center text-sm my-4">Or login with</div>
         <div className="flex gap-4">
@@ -62,17 +66,6 @@ export default function LoginForm({ setView }: Props) {
           </button>
         </div>
       </div>
-     <div>
-     <p className="text-sm mt-4 text-center text-gray-600 font-medium">
-        Do not have an account yet?{" "}
-        <span
-          className="hover:underline text-green-800 font-semibold cursor-pointer"
-          onClick={() => setView("signup")}
-        >
-          Sign up for free
-        </span>
-      </p>
-     </div>
-    </>
+    </AuthLayout>
   );
 }

@@ -1,8 +1,7 @@
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import type { Metadata, Viewport } from "next";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ClientLayout from "@/components/ClientLayout";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 const poppins = Poppins({
@@ -146,12 +145,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {/* <Header /> */}
-        <Navbar />
-        {/* <ScrollProvider>{children}</ScrollProvider> */}
-        {children}
-        <Footer />
-        {/* <SmoothCursor /> */}
+      <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
