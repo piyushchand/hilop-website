@@ -1,28 +1,29 @@
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
-import Link from "next/link";
+import AuthLayout from "../AuthLayout";
 
-interface Props {
-  setView: (view: "login" | "signup" | "otp") => void;
-}
-export default function SignupForm({ setView }: Props) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted!");
-    // You'd typically access form values from state here
-  };
+export default function SignupPage() {
   return (
-    <>
-      <Link href="/">
-        <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} />
-      </Link>
+    <AuthLayout
+    bottomContent={
+      <p className="text-sm mt-4 text-center text-gray-600 font-medium">
+        {" "}
+        Don’t have an account yet?
+        <a
+          href="/auth/login"
+          className="hover:underline text-green-800 font-semibold cursor-pointer"
+        >
+          Log in
+        </a>
+      </p>
+    }
+    >
       <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
         <h2 className="text-3xl font-semibold mb-2">Register</h2>
         <p className="font-medium mb-6 text-gray-600">Create your account</p>
         {/* Input + T&C */}
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className="flex flex-col gap-5 mb-6">
             <AnimatedInput
               label="Full Name"
@@ -92,15 +93,6 @@ export default function SignupForm({ setView }: Props) {
           </button>
         </div>
       </div>
-      <p className="text-sm mt-4 text-center">
-        Don’t have an account yet?{" "}
-        <button
-          className="text-green-700 font-semibold underline"
-          onClick={() => setView("login")}
-        >
-          Log in
-        </button>
-      </p>
-    </>
+    </AuthLayout>
   );
 }

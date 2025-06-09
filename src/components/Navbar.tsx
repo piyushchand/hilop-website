@@ -5,11 +5,9 @@ import ArrowButton from "./uiFramework/ArrowButton";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AuthModal from "@/app/auth/AuthLayout";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [open, setOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false); // New state for profile dropdown
 
   const profileRef = useRef<HTMLDivElement>(null); // Ref for profile dropdown
@@ -95,7 +93,7 @@ const Navbar = () => {
             label="Login"
             theme="light"
             size="lg"
-            onClick={() => setOpen(true)}
+            href="/auth/login"
           />
           {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
@@ -145,7 +143,6 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-          <AuthModal isOpen={open} onClose={() => setOpen(false)} />
           <button
             className="md:hidden flex items-center"
             onClick={() => setMobileMenuOpen(true)}
