@@ -84,12 +84,12 @@ const Navbar = () => {
                 </AnimatePresence>
               </div>
             </button>
-            <button className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center">
+            <Link href='/cart' className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center">
               <ShoppingCart className="w-5 h-5 text-dark" />
               <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                 2
               </span>
-            </button>
+            </Link>
           </div>
           <ArrowButton
             label="Login"
