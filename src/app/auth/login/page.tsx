@@ -1,17 +1,84 @@
+'use client';
+
+import { useState } from 'react';
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import AuthLayout from "../AuthLayout";
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthOperations } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import { logger } from '@/utils/logger';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { isLoading, error, clearError, setError } = useAuth();
+  const { loginWithMobile } = useAuthOperations();
+  
+  const [mobileNumber, setMobileNumber] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Get the raw digits from the formatted input
+    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setMobileNumber(value);
+    
+    // Clear error when user starts typing
+    if (error) clearError();
+  };
+
+  const formatPhoneNumber = (phone: string) => {
+    // Remove any non-digit characters
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // Always add 91 prefix for Indian numbers
+    if (cleaned.length === 10) {
+      return `91${cleaned}`;
+    }
+    
+    return cleaned;
+  };
+
+  const validatePhoneNumber = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const phoneRegex = /^[6-9]\d{9}$/; // Indian mobile number format
+    
+    return phoneRegex.test(cleanPhone) && cleanPhone.length === 10;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!mobileNumber.trim()) {
+      setError('Please enter your mobile number');
+      return;
+    }
+
+    if (!validatePhoneNumber(mobileNumber)) {
+      setError('Please enter a valid 10-digit Indian mobile number starting with 6-9');
+      return;
+    }
+
+    try {
+      const formattedNumber = formatPhoneNumber(mobileNumber);
+      const response = await loginWithMobile({ mobile_number: formattedNumber });
+
+      if (response?.user_id) {
+        router.push(`/auth/otp?type=login&userId=${response.user_id}&mobile=${formattedNumber}`);
+      } else {
+        setError("No user ID returned. Please try again or contact support.");
+      }
+    } catch (error) {
+      logger.error('Login error:', error);
+    }
+  };
+
   return (
     <AuthLayout
       bottomContent={
         <p className="text-sm mt-4 text-center text-gray-600 font-medium">
-          {" "}
-          Do not have an account yet?{" "}
+          Dont have an account yet?{" "}
           <a
-            href="/auth/signup"
+            href="/auth/register"
             className="hover:underline text-green-800 font-semibold cursor-pointer"
           >
             Sign up for free
@@ -22,46 +89,65 @@ export default function LoginPage() {
       <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
         <h2 className="text-3xl font-semibold mb-2">Welcome Back</h2>
         <p className="font-medium mb-6 text-gray-600">
-          Let’s get you logged in.
+          Lets get you logged in.
         </p>
-        {/* Input + T&C */}
-        <form>
-          {/* Input with initial content (like "Rogie") */}
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
           <AnimatedInput
             label="Mobile number"
-            name="Mobile number"
+            name="mobile_number"
             type="tel"
+            value={mobileNumber}
+            onChange={handleInputChange}
             required
           />
+          
           <div>
-            {" "}
             <Button
-              label="Get OTP"
+              label={isLoading ? "Sending OTP..." : "Get OTP"}
               variant="btn-dark"
               size="xl"
               className="w-full mt-6"
-              link="/auth/otp"
+              disabled={isLoading || !mobileNumber.trim() || mobileNumber.length !== 10}
+              onClick={handleSubmit}
             />
           </div>
         </form>
+        
         <div className="text-center text-sm my-4">Or login with</div>
+        
         <div className="flex gap-4">
-          <button className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5">
+          <button 
+            type="button"
+            className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+            disabled={isLoading}
+          >
             <Image
               src="/images/icon/google.svg"
               width={22}
               height={22}
               alt="google icons"
-            />{" "}
+            />
             Google
           </button>
-          <button className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5">
+          
+          <button 
+            type="button"
+            className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+            disabled={isLoading}
+          >
             <Image
               src="/images/icon/facebook.svg"
               width={22}
               height={22}
               alt="facebook icons"
-            />{" "}
+            />
             Facebook
           </button>
         </div>

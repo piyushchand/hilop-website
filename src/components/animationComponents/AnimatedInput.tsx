@@ -9,6 +9,7 @@ interface AnimatedInputProps {
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time';
   value?: string;
   required?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const formatIndianNumber = (num: string) => {
@@ -23,6 +24,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   type = 'text',
   value: initialValue = '',
   required = false,
+  onChange,
 }) => {
   const initialTelValue = type === 'tel' ? '+91 ' : '';
   const [value, setValue] = useState<string>(type === 'tel' ? initialTelValue : initialValue);
@@ -63,7 +65,21 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
     const formattedDigits = formatIndianNumber(digits);
 
     // Final value
-    setValue(`+91 ${formattedDigits}`);
+    const finalValue = `+91 ${formattedDigits}`;
+    setValue(finalValue);
+
+    // Call onChange with the raw digits
+    if (onChange) {
+      const syntheticEvent = {
+        ...e,
+        target: {
+          ...e.target,
+          name: e.target.name,
+          value: digits
+        }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(syntheticEvent);
+    }
   };
 
   // Prevent backspace/delete in prefix +91
@@ -81,6 +97,15 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
       window.requestAnimationFrame(() => {
         if (inputRef.current) inputRef.current.setSelectionRange(4, 4);
       });
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (type === 'tel') {
+      handleTelChange(e);
+    } else {
+      setValue(e.target.value);
+      if (onChange) onChange(e);
     }
   };
 
@@ -114,7 +139,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           ref={inputRef}
           type={type}
           value={value}
-          onChange={type === 'tel' ? handleTelChange : (e) => setValue(e.target.value)}
+          onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={type === 'tel' ? handleTelKeyDown : undefined}
