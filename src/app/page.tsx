@@ -18,6 +18,9 @@ import Button from "@/components/uiFramework/Button";
 import ParallaxText from "@/components/velocityScroll";
 import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
+import ProductCard from "@/components/productCard";
+import { getProductList } from "@/services/apiServices";
+
 
 const features = [
   {
@@ -100,11 +103,13 @@ const texts = [
   "Weight Loss",
   "Instant Sex",
 ];
+const { data: products } = await getProductList();
 export default function Home() {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
+      
         <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
@@ -142,69 +147,11 @@ export default function Home() {
             ))}
           </div>
         </div>
-
         <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
-          {productCard.map(
-            (
-              { id, imageSrc, tag, title, viewWorkLink },
-              index
-            ) => (
-              <CardContainer
-                key={id}
-                containerClassName={`h-full col-span-4 sm:col-span-2 md:col-span-1  ${
-                  index === productCard.length - 1
-                    ? "sm:col-start-2 md:col-start-auto"
-                    : ""
-                }`}
-                className="btn-arrow-animation h-full rounded-3xl bg-white p-3 lg:p-4 xl:p-6"
-              >
-                <CardBody>
-                  {/* Image layer with highest translateZ for pop-out effect */}
-                  <CardItem
-                    translateZ={50}
-                    className="relative mb-5 rounded-3xl overflow-hidden w-full"
-                  >
-                    <Image
-                      src={imageSrc}
-                      width={435}
-                      height={336}
-                      className="rounded-3xl w-full"
-                      alt={title}
-                    />
-                    <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
-                      {tag}
-                    </p>
-                  </CardItem>
-
-                  {/* Title layer */}
-                  <CardItem translateZ={20} className="mb-4">
-                    <h4 className="text-xl lg:text-2xl font-medium">{title}</h4>
-                  </CardItem>
-
-                  {/* Buttons layer */}
-                  <CardItem translateZ={10} className=" w-full">
-                    <div className="grid xl:grid-cols-2 gap-2 lg:gap-4">
-                      <Button
-                        label="View Details"
-                        variant="btn-light"
-                        size="xl"
-                        className="w-full"
-                        link={viewWorkLink}
-                      />
-                      <ArrowButton
-                        label="Take the test"
-                        theme="primary"
-                        className="w-full"
-                        size="lg"
-                        onClick={() => setIsTestModalOpen(true)}
-                      />
-                    </div>
-                  </CardItem>
-                </CardBody>
-              </CardContainer>
-            )
-          )}
-        </div>
+                {products.map(product => (
+                    <ProductCard key={product._id} product={product} />
+                ))}
+            </div>
       </section>
       <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
       <LoseWeight />

@@ -14,6 +14,7 @@ interface ButtonProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  disabled?: boolean;
 }
 
 const Button = ({
@@ -24,6 +25,7 @@ const Button = ({
   size = 'md',
   onClick,
   className = '',
+  disabled = false,
 }: ButtonProps) => {
   const getSizeClasses = () => {
     switch (size) {
@@ -53,7 +55,7 @@ const Button = ({
       'bg-primary border border-primary text-white hover:bg-green-800 hover:border-green-800',
   };
 
-  const commonClasses = `btn-tn relative flex w-fit justify-center items-center overflow-hidden rounded-full transition-colors duration-500 ease-in-out ${variantClasses[variant] || ''} ${getSizeClasses()} ${className}`;
+  const commonClasses = `btn-tn relative flex w-fit justify-center items-center overflow-hidden rounded-full transition-colors duration-500 ease-in-out ${variantClasses[variant] || ''} ${getSizeClasses()} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
 
   if (link && newTab) {
     return (
@@ -83,6 +85,7 @@ const Button = ({
     <button
       onClick={onClick}
       className={commonClasses}
+      disabled={disabled}
     >
       <span className="btn-tn-lable-1">{label}</span>
       <span className="btn-tn-lable-2 absolute">{label}</span>

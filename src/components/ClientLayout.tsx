@@ -7,7 +7,7 @@ import Footer from "./Footer";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noLayoutRoutes = ["/auth/login", "/auth/signup", "/auth/otp"];
+  const noLayoutRoutes = ["/auth/login", "/auth/register", "/auth/otp", "/not-found"];
   const isAuthRoute = noLayoutRoutes.includes(pathname);
 
   return (
