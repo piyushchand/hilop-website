@@ -1,10 +1,5 @@
 "use client";
-import { useState } from "react";
-import {
-  CardBody,
-  CardContainer,
-  CardItem,
-} from "@/components/animationComponents/3DCard";
+import { useState, useEffect } from "react";
 import { MorphingText } from "@/components/animationComponents/MorphingText";
 import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
@@ -13,13 +8,12 @@ import LoseWeight from "@/components/loseWeight";
 import TestModal from "@/components/model/TestModal";
 import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
-import ArrowButton from "@/components/uiFramework/ArrowButton";
-import Button from "@/components/uiFramework/Button";
 import ParallaxText from "@/components/velocityScroll";
 import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
-import { getProductList } from "@/services/apiServices";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Product } from "@/types";
 
 
 const features = [
@@ -40,32 +34,6 @@ const features = [
   },
 ];
 
-const productCard = [
-  {
-    id: 1,
-    imageSrc: "/images/weight-loss/fatloss-clip.jpg",
-    tag: "Fat Loss",
-    title: "HerbaTrim",
-    viewWorkLink: "/product/fat-loss",
-    takeTestHref: "/herbatrim-test",
-  },
-  {
-    id: 2,
-    imageSrc: "/images/instant-boost/instantboost-clip.jpg",
-    tag: "Instant Boost",
-    title: "VitalVigor",
-    viewWorkLink: "/product/fat-loss",
-    takeTestHref: "/herbatrim-test",
-  },
-  {
-    id: 3,
-    imageSrc: "/images/improving-sexual/improving-sexual-clip.jpg",
-    tag: "Improving sexual",
-    title: "EverYoung Boost",
-    viewWorkLink: "/product/fat-loss",
-    takeTestHref: "/herbatrim-test",
-  },
-];
 const homepagefaqdata = [
   {
     id: "faq1",
@@ -103,9 +71,35 @@ const texts = [
   "Weight Loss",
   "Instant Sex",
 ];
-const { data: products } = await getProductList();
+
 export default function Home() {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1'}/products?lang=${language}`, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const result = await response.json();
+        if (result.success) {
+          setProducts(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [language]); // Refetch when language changes
+
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
@@ -148,10 +142,19 @@ export default function Home() {
           </div>
         </div>
         <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
-                {products.map(product => (
-                    <ProductCard key={product._id} product={product} />
-                ))}
-            </div>
+          {loading ? (
+            <div className="col-span-full text-center py-8">Loading products...</div>
+          ) : (
+            products.map((product, index) => (
+              <ProductCard 
+                key={product._id} 
+                product={product} 
+                index={index}
+                totalItems={products.length}
+              />
+            ))
+          )}
+        </div>
       </section>
       <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
       <LoseWeight />

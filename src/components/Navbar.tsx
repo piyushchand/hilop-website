@@ -18,6 +18,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,15 +26,24 @@ const Navbar = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { language, setLanguage } = useLanguage();
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
-    document.body.classList.toggle("overflow-hidden", mobileMenuOpen);
-    return () => document.body.classList.remove("overflow-hidden");
+    if (typeof window !== 'undefined') {
+      document.body.classList.toggle("overflow-hidden", mobileMenuOpen);
+      return () => {
+        if (typeof window !== 'undefined') {
+          document.body.classList.remove("overflow-hidden");
+        }
+      };
+    }
   }, [mobileMenuOpen]);
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         profileRef.current &&
@@ -46,10 +56,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const [language, setLanguage] = useState<"en" | "hi">("en");
-
   const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "hi" : "en"));
+    setLanguage(language === "en" ? "hi" : "en");
   };
 
   return (

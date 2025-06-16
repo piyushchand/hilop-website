@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import ClientLayout from "@/components/ClientLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 const poppins = Poppins({
@@ -146,9 +147,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

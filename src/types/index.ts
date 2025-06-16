@@ -1,10 +1,23 @@
 // src/types/index.ts
 
+export interface MultilingualText {
+    en: string;
+    hi: string;
+}
+
 export interface Price {
     base_price: number;
     final_price: number;
     discount: number;
     discount_type: 'fixed' | 'percentage'; // Use a union type for known values
+}
+
+export interface Reviews {
+    total_count: number;
+    average_rating: number;
+    rating_distribution: {
+        [key: string]: number;
+    };
 }
 
 export interface Product {
@@ -19,7 +32,9 @@ export interface Product {
     prescription: boolean;
     test_id: string;
     duration_days: number;
-    for: string; // Purpose or intended use of the product
+    for: MultilingualText | string; // Can be either multilingual text or a simple string
+    description_tags?: string[];
+    reviews?: Reviews;
 }
 
 // Type for the list API response
