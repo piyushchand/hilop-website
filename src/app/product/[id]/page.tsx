@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Navigation, Scrollbar, Thumbs } from "swiper/modules";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLoading } from "@/contexts/LoadingContext";
 import { getText } from "@/utils/getText";
 import Image from "next/image";
 import "swiper/css";
@@ -18,67 +19,115 @@ import { Testimonials } from "@/components/testimonials";
 import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 
-// Dynamic image mapping based on product name
-const PRODUCT_CUSTOM_IMAGES: Record<string, string> = {
-  Slimvibe: "/images/weight-loss/why-choose.jpg",
-  BoldRise: "/images/instant-boost/why-choose.jpg",
-  Hardveda: "/images/improving-sexual/why-choose.jpg",
-};
+// Define a type for the dynamic content to ensure consistency
+interface ProductDynamicContent {
+  customImage: string;
+  whyChooseTitle: string;
+  benefitTags: string[];
+  benefitImage: string;
+  howItWorksDescription: { en: string; hi: string };
+  howToUseDescription: { en: string; hi: string };
+  whyChooseUsSectionDescription: { en: string; hi: string };
+}
 
-// Dynamic custom content mapping based on product name
-const PRODUCT_CUSTOM_CONTENT: Record<string, { title: string }> = {
+// Consolidated Dynamic content mapping based on product name
+const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
   Slimvibe: {
-    title: "Our Herbal Fat Loss Formula?",
+    customImage: "/images/weight-loss/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Fat Loss Formula?",
+    benefitTags: [
+      "Individuals looking to support their weight loss goals naturally.",
+      "Those who want to increase their energy levels and improve overall health.",
+      "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
+    ],
+    benefitImage: "/images/weight-loss/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "Our Slimvibe formula works by boosting your metabolism, reducing cravings, and promoting natural fat burning. It helps you achieve sustainable weight loss without harsh chemicals.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला आपके मेटाबॉलिज्म को बढ़ाकर, क्रेविंग को कम करके और प्राकृतिक वसा जलने को बढ़ावा देकर काम करता है। यह आपको कठोर रसायनों के बिना स्थायी वजन घटाने में मदद करता है।",
+    },
+    howToUseDescription: {
+      en: "Take two capsules daily with water, preferably before meals. For best results, combine with a balanced diet and regular exercise.",
+      hi: "रोजाना दो कैप्सूल पानी के साथ लें, अधिमानतः भोजन से पहले। सर्वोत्तम परिणामों के लिए, संतुलित आहार और नियमित व्यायाम के साथ मिलाएं।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our Slimvibe formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience tailored for natural weight loss. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
+    },
   },
   BoldRise: {
-    title: "Our Herbal Instant Sexual Enhancer?",
+    customImage: "/images/instant-boost/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Instant Sexual Enhancer?",
+    benefitTags: [
+      "Men looking to enhance their performance and energy levels naturally.",
+      "Those who want to increase their libido and desire without relying on chemicals.",
+      "Individuals who are looking to support their overall vitality and well-being.",
+    ],
+    benefitImage: "/images/instant-boost/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "BoldRise works by naturally increasing blood flow and enhancing your body's natural response to arousal, providing an instant boost in performance and stamina.",
+      hi: "बोल्डराइज स्वाभाविक रूप से रक्त प्रवाह को बढ़ाकर और उत्तेजना के लिए आपके शरीर की प्राकृतिक प्रतिक्रिया को बढ़ाकर काम करता है, जो प्रदर्शन और सहनशक्ति में तत्काल वृद्धि प्रदान करता है।",
+    },
+    howToUseDescription: {
+      en: "Take one capsule 30 minutes before activity. Do not exceed one capsule per day.",
+      hi: "गतिविधि से 30 मिनट पहले एक कैप्सूल लें। प्रति दिन एक कैप्सूल से अधिक न लें।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our BoldRise formula uses a powerful blend of natural herbs to provide immediate and noticeable improvements in sexual performance and energy, without any artificial additives.",
+      hi: "हमारा बोल्डराइज फॉर्मूला यौन प्रदर्शन और ऊर्जा में तत्काल और ध्यान देने योग्य सुधार प्रदान करने के लिए प्राकृतिक जड़ी-बूटियों के एक शक्तिशाली मिश्रण का उपयोग करता है, जिसमें कोई कृत्रिम योजक नहीं होता है।",
+    },
   },
   Hardveda: {
-    title: "Our Herbal Sexual Wellness formula?",
+    customImage: "/images/improving-sexual/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Sexual Wellness formula?",
+    benefitTags: [
+      "Men looking to naturally boost their testosterone levels and support sexual wellness.",
+      "Individuals experiencing low energy, reduced libido, or a decrease in overall vitality.",
+      "Those who want to enhance performance, stamina, and confidence in intimate moments.",
+      "Active individuals who want to support muscle mass, strength, and energy levels.",
+    ],
+    benefitImage: "/images/improving-sexual/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "Hardveda supports sexual wellness by optimizing hormonal balance and improving overall reproductive health, leading to increased vitality and improved performance over time.",
+      hi: "हार्डवेदा हार्मोनल संतुलन को अनुकूलित करके और समग्र प्रजनन स्वास्थ्य में सुधार करके यौन कल्याण का समर्थन करता है, जिससे समय के साथ बढ़ी हुई जीवन शक्ति और बेहतर प्रदर्शन होता है।",
+    },
+    howToUseDescription: {
+      en: "Take one capsule twice daily after meals. Consistent use is recommended for optimal results.",
+      hi: "भोजन के बाद दिन में दो बार एक कैप्सूल लें। इष्टतम परिणामों के लिए लगातार उपयोग की सिफारिश की जाती है।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Hardveda is formulated with traditional Ayurvedic herbs known for their powerful benefits in male sexual health, offering a natural and holistic approach to wellness.",
+      hi: "हार्डवेदा पारंपरिक आयुर्वेदिक जड़ी-बूटियों के साथ तैयार किया गया है जो पुरुष यौन स्वास्थ्य में उनके शक्तिशाली लाभों के लिए जानी जाती हैं, जो कल्याण के लिए एक प्राकृतिक और समग्र दृष्टिकोण प्रदान करती हैं।",
+    },
   },
-};
-
-// Dynamic benefit tags mapping based on product name
-const PRODUCT_BENEFIT_TAGS: Record<string, string[]> = {
-  Slimvibe: [
-    "Individuals looking to support their weight loss goals naturally.",
-    "Those who want to increase their energy levels and improve overall health.",
-    "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
-  ],
-  BoldRise: [
-    "Men looking to enhance their performance and energy levels naturally.",
-    "Those who want to increase their libido and desire without relying on chemicals.",
-    "Individuals who are looking to support their overall vitality and well-being.",
-  ],
-  Hardveda: [
-    "Men looking to naturally boost their testosterone levels and support sexual wellness.",
-    "Individuals experiencing low energy, reduced libido, or a decrease in overall vitality.",
-    "Those who want to enhance performance, stamina, and confidence in intimate moments.",
-    "Active individuals who want to support muscle mass, strength, and energy levels.",
-  ],
-};
-
-// Dynamic "Who can Benefit" image mapping
-const PRODUCT_BENEFIT_IMAGES: Record<string, string> = {
-  Slimvibe: "/images/weight-loss/who-can-benefit.jpg",
-  BoldRise: "/images/instant-boost/who-can-benefit.jpg",
-  Hardveda: "/images/improving-sexual/who-can-benefit.jpg",
 };
 
 // Helper function to get product-specific content with fallbacks
-const getProductContent = (productName: string) => {
+const getProductContent = (productName: string): ProductDynamicContent => {
   const normalizedName = productName?.trim();
-  
-  return {
-    customImage: PRODUCT_CUSTOM_IMAGES[normalizedName] || "/images/why-choose.png",
-    customTitle: PRODUCT_CUSTOM_CONTENT[normalizedName]?.title || "Our Herbal Wellness Formula?",
-    benefitTags: PRODUCT_BENEFIT_TAGS[normalizedName] || [
+  const defaultContent: ProductDynamicContent = {
+    customImage: "/images/why-choose.png",
+    whyChooseTitle: "Our Herbal Wellness Formula?",
+    benefitTags: [
       "Individuals looking to support their wellness goals naturally.",
       "Those who want to improve their overall health and vitality.",
       "People who prefer natural, holistic approaches to wellness.",
     ],
-    benefitImage: PRODUCT_BENEFIT_IMAGES[normalizedName] || "/images/why-choose.png",
+    benefitImage: "/images/why-choose.png",
+    howItWorksDescription: {
+      en: "Our herbal wellness formula works by naturally supporting your body's systems, promoting balance and overall well-being. It is designed to gently enhance your health without harsh side effects.",
+      hi: "हमारा हर्बल वेलनेस फॉर्मूला स्वाभाविक रूप से आपके शरीर की प्रणालियों का समर्थन करके, संतुलन और समग्र कल्याण को बढ़ावा देकर काम करता है। इसे बिना किसी कठोर दुष्प्रभाव के आपके स्वास्थ्य को धीरे-धीरे बढ़ाने के लिए डिज़ाइन किया गया है।",
+    },
+    howToUseDescription: {
+      en: "Follow the instructions on the product label. Generally, take the recommended dosage daily with water.",
+      hi: "उत्पाद लेबल पर दिए गए निर्देशों का पालन करें। आम तौर पर, पानी के साथ रोजाना अनुशंसित खुराक लें।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our wellness formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
+      hi: "हमारा वेलनेस फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
+    },
   };
+
+  return PRODUCT_DYNAMIC_CONTENT[normalizedName] || defaultContent;
 };
 
 interface ProductPrice {
@@ -118,8 +167,8 @@ interface Product {
   price?: ProductPrice;
   for?: { en: string; hi: string };
   label?: { en: string; hi: string };
-  how_it_works?: { en: string; hi: string };
-  how_to_use?: { en: string; hi: string };
+  how_it_works?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
+  how_to_use?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
   description?: { en: string; hi: string };
   description_tags?: string[];
   why_choose_us?: (string | WhyChooseUsItem)[];
@@ -177,22 +226,26 @@ const howItWorks = [
 export default function ProductPage() {
   const params = useParams();
   const { language } = useLanguage();
+  const { showLoading, hideLoading } = useLoading();
   const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
+  
+  const handleThumbsSwiper = (swiper: SwiperType) => {
+    // Add custom class to swiper-wrapper
+    swiper.wrapperEl.classList.add('justify-center');
+  };
 
   useEffect(() => {
     const productId = params?.id as string;
     if (!productId) {
       setError("Product ID is missing");
-      setLoading(false);
       return;
     }
 
     const fetchProduct = async () => {
       try {
-        setLoading(true);
+        showLoading();
         setError(null);
         const apiUrl = `${
           process.env.NEXT_PUBLIC_API_URL || "http://3.110.216.61/api/v1"
@@ -225,29 +278,16 @@ export default function ProductPage() {
           err instanceof Error ? err.message : "An unexpected error occurred"
         );
       } finally {
-        setLoading(false);
+        hideLoading();
       }
     };
 
     fetchProduct();
   }, [params?.id, language]);
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-        </div>
-      </div>
-    );
-  }
-
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 h-screen flex justify-center items-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">
             {error || "Product not found"}
@@ -261,6 +301,8 @@ export default function ProductPage() {
       </div>
     );
   }
+
+  const dynamicProductContent = getProductContent(product.name);
 
   const whyChooseUs = Array.isArray(product.why_choose_us)
     ? product.why_choose_us
@@ -363,7 +405,10 @@ export default function ProductPage() {
             </Swiper>
 
             <Swiper
-              onSwiper={setThumbsSwiper}
+              onSwiper={(swiper) => {
+                handleThumbsSwiper(swiper);
+                setThumbsSwiper(swiper);
+              }}
               spaceBetween={16}
               slidesPerView={3}
               watchSlidesProgress
@@ -401,9 +446,9 @@ export default function ProductPage() {
             />
           </div>
           <div>
-            <h2 className="md:text-3xl lg:text-5xl text-2xl font-semibold mb-8">
+          <h2 className="md:text-3xl lg:text-5xl text-2xl font-semibold mb-8">
               <span className="text-green-800">Why Choose</span>{" "}
-              {getProductContent(product.name).customTitle}
+              {dynamicProductContent.whyChooseTitle}
             </h2>
             <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
@@ -556,7 +601,7 @@ export default function ProductPage() {
       </section>
       <section className="container mb-16 lg:mb-40 grid md:grid-cols-2 gap-6 lg:gap-10 items-center">
         <Image
-          src={getProductContent(product.name).benefitImage}
+          src={dynamicProductContent.benefitImage}
           alt="Who can Benefit?"
           width={740}
           height={740}
@@ -570,7 +615,7 @@ export default function ProductPage() {
             className="mb-6 lg:mb-10"
           />
           <div className="space-y-3 mb-6 lg:mb-10">
-            {getProductContent(product.name).benefitTags.map((item, index) => (
+          {dynamicProductContent.benefitTags.map((item, index) => (
               <Checkmark key={index} text={item} />
             ))}
           </div>
@@ -598,7 +643,7 @@ export default function ProductPage() {
             highlightedWord="Use"
           />
           <p className="text-base md:text-lg lg:text-2xl">
-            {getText(product.how_to_use || "", language)}
+          {getText(dynamicProductContent.howToUseDescription, language)}
           </p>
         </div>
       </section>
@@ -612,11 +657,11 @@ export default function ProductPage() {
               className="lg:mb-10 mb-6"
               highlightedWord="Choose Us?"
             />
-            <p className="text-base md:text-lg lg:text-2xl">
-              Our wellness formula is crafted using premium, organic herbal
-              ingredients, ensuring a clean, chemical-free experience. Support
-              your natural balance and feel confident as you move toward a
-              healthier, more energized lifestyle.
+            <p className="text-base md:text-lg lg:text-2xl text-gray-600">
+            {getText(
+                dynamicProductContent.whyChooseUsSectionDescription,
+                language
+              )}
             </p>
           </div>
           <Image

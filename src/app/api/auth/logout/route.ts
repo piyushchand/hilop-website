@@ -7,7 +7,7 @@ export async function POST() {
     const response = NextResponse.json({ success: true });
     
     // Clear both authentication cookies
-    response.cookies.delete('auth_token');
+    response.cookies.delete('accessToken');
     response.cookies.delete('is_authenticated');
     
     // Optionally notify the backend about logout

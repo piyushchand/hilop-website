@@ -12,20 +12,22 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with English by default
-  const [language, setLanguage] = useState<Language>('en');
-
-  // Load saved language preference on mount
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
+  // Initialize with saved language preference or default to English
+  const getInitialLanguage = (): Language => {
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language') as Language;
+      return savedLanguage || 'en';
     }
-  }, []);
+    return 'en';
+  };
+
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
 
   // Save language preference when it changes
   useEffect(() => {
-    localStorage.setItem('language', language);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', language);
+    }
   }, [language]);
 
   return (

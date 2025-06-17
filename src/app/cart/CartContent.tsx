@@ -168,6 +168,7 @@ export default function Cart() {
                     type="checkbox"
                     name="subscription"
                     checked={checked}
+                    onChange={() => setChecked(!checked)}
                     value="1"
                     className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                   />

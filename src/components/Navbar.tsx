@@ -23,10 +23,16 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const { language, setLanguage } = useLanguage();
+
+  // Set mounted state to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
@@ -59,6 +65,22 @@ const Navbar = () => {
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
   };
+
+  // Don't render anything until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
+        <div className="container py-3 flex items-center justify-between">
+          <Link href="/">
+            <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} priority />
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="h-[52px] w-[120px] bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
@@ -120,7 +142,12 @@ const Navbar = () => {
           </div>
 
           {/* Login/Profile */}
-          {!isLoading && (
+          {isLoading ? (
+            // Show loading skeleton instead of hiding content
+            <div className="hidden md:flex gap-4">
+              <div className="h-[52px] w-[120px] bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          ) : (
             <>
               {!user ? (
                 <div className="hidden md:flex gap-4">
@@ -264,7 +291,11 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Auth Links */}
-        {!isLoading && (
+        {isLoading ? (
+          <div className="p-4 border-t border-gray-200">
+            <div className="h-10 w-full bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        ) : (
           <div className="p-4 border-t border-gray-200">
             {!user ? (
               <div className="flex flex-col gap-4">

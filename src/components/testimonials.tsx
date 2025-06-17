@@ -6,9 +6,9 @@ import { useEffect, useState } from 'react';
 
 interface Review {
   _id: string;
-  user: {
+  user?: {
     name: string;
-  };
+  } | null;
   product: string;
   rating: number;
   description: string;
@@ -24,17 +24,21 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ review }: ReviewCardProps) => {
+  // Add null checks and fallbacks
+  const userName = review?.user?.name || 'Anonymous Customer';
+  const description = review?.description || 'No review content available';
+  
   return (
     <div
       className={cn(
         'relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center'
       )}
     >
-      <span className=" inline-block mb-10 text-gray-700">{review.user.name}</span>
-      <p className="mb-10 sm:text-2xl line-clamp-6">{review.description}</p>
+      <span className=" inline-block mb-10 text-gray-700">{userName}</span>
+      <p className="mb-10 sm:text-2xl line-clamp-6">{description}</p>
       <div className="flex items-center gap-2 text-green-800 justify-center mt-auto">
         <BadgeCheck className="text-green-800" />
-        <p>Real Hilop Customers</p>
+        <p>Real Hilop</p>
       </div>
     </div>
   );
@@ -70,7 +74,17 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
             : result.data;
 
           console.log('Processed Reviews:', reviewsData);
-          setReviews(reviewsData);
+          
+          // Filter out invalid reviews and ensure they have required properties
+          const validReviews = reviewsData.filter((review: Review) => 
+            review && 
+            review._id && 
+            review.description && 
+            typeof review.description === 'string' &&
+            review.description.trim().length > 0
+          );
+          
+          setReviews(validReviews);
         }
       } catch (error) {
         console.error('Error fetching reviews:', error);

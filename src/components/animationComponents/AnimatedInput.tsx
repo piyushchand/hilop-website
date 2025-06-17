@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarRange, Clock } from 'lucide-react';
 
@@ -27,10 +27,21 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   onChange,
 }) => {
   const initialTelValue = type === 'tel' ? '+91 ' : '';
-  const [value, setValue] = useState<string>(type === 'tel' ? initialTelValue : initialValue);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Use the value prop directly for controlled component behavior
+  const getDisplayValue = () => {
+    if (type === 'tel') {
+      if (!initialValue) return '+91 ';
+      const digits = initialValue.replace(/\D/g, '');
+      const formattedDigits = formatIndianNumber(digits);
+      return `+91 ${formattedDigits}`;
+    }
+    return initialValue;
+  };
+
+  const value = getDisplayValue();
   const showFloatingLabel = isFocused || value.length > 0;
 
   const handleFocus = () => setIsFocused(true);
@@ -66,7 +77,6 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
 
     // Final value
     const finalValue = `+91 ${formattedDigits}`;
-    setValue(finalValue);
 
     // Call onChange with the raw digits
     if (onChange) {
@@ -104,7 +114,6 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
     if (type === 'tel') {
       handleTelChange(e);
     } else {
-      setValue(e.target.value);
       if (onChange) onChange(e);
     }
   };

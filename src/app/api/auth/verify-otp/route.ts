@@ -45,40 +45,44 @@ export async function POST(request: Request) {
       }
     };
 
-    const nextResponse = NextResponse.json(responseData);
-
-    if (data.success && data.token) {
-      nextResponse.cookies.set('auth_token', data.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: COOKIE_MAX_AGE,
+      // ✅ Create empty response and THEN modify
+      const res = new NextResponse(JSON.stringify(responseData), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-
-      nextResponse.cookies.set('is_authenticated', 'true', {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: COOKIE_MAX_AGE,
-      });
-
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('✅ Cookies set:', {
-          auth_token: data.token,
-          is_authenticated: 'true',
-          maxAge: COOKIE_MAX_AGE
+  
+      // ✅ Now set cookies
+      if (data.success && data.token) {
+        res.cookies.set('accessToken', data.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: COOKIE_MAX_AGE,
         });
+  
+        res.cookies.set('is_authenticated', 'true', {
+          httpOnly: false,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: COOKIE_MAX_AGE,
+        });
+  
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('✅ Cookies set successfully');
+        }
       }
+  
+      return res;
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      return NextResponse.json(
+        { success: false, message: 'Failed to connect to the server', error: 'connection_error' },
+        { status: 500 }
+      );
     }
-
-    return nextResponse;
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to connect to the server', error: 'connection_error' },
-      { status: 500 }
-    );
   }
-}
+  

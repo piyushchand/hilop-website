@@ -6,7 +6,8 @@ import {
     LoginRequest,
     LoginResponse,
     VerifyLoginRequest,
-    VerifyLoginResponse
+    VerifyLoginResponse,
+    User
   } from '@/types/auth';
 import { logger } from '@/utils/logger';
   

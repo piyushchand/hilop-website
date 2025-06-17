@@ -75,13 +75,13 @@ const texts = [
 export default function Home() {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
   const { language } = useLanguage();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true);
+        setProductsLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1'}/products?lang=${language}`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to fetch products');
@@ -93,12 +93,12 @@ export default function Home() {
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
-        setLoading(false);
+        setProductsLoading(false);
       }
     };
 
     fetchProducts();
-  }, [language]); // Refetch when language changes
+  }, [language]); // Removed showLoading and hideLoading dependencies
 
   return (
     <>
@@ -142,8 +142,10 @@ export default function Home() {
           </div>
         </div>
         <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
-          {loading ? (
+          {productsLoading ? (
             <div className="col-span-full text-center py-8">Loading products...</div>
+          ) : products.length === 0 ? (
+            <div className="col-span-full text-center py-8">No products available</div>
           ) : (
             products.map((product, index) => (
               <ProductCard 
