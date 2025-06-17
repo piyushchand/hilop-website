@@ -1,58 +1,43 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import OTPInput from "@/components/animationComponents/OTPInput";
 import Button from "@/components/uiFramework/Button";
 import AuthLayout from "../AuthLayout";
 import { useAuth } from '@/contexts/AuthContext';
-import { useAuthOperations } from '@/hooks/useAuth';
+import { toast } from 'react-hot-toast';
+
+const OTP_TIMEOUT = 120; // 2 minutes in seconds
 
 export default function OtpPage() {
-  const { isLoading, error, clearError, user, logout } = useAuth();
-  const { verifyRegistrationOTP, verifyLoginOTP, loginWithMobile } = useAuthOperations();
+  const { isLoading, error, clearError, verifyOTP } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(120);
+  const [timer, setTimer] = useState(OTP_TIMEOUT);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const otpType = searchParams.get('type'); // 'register' or 'login'
+  const otpType = searchParams.get('type');
   const userId = searchParams.get('userId');
   const mobileNumber = searchParams.get('mobile');
-  const fromPath = searchParams.get('from');
 
   useEffect(() => {
     if (!otpType || !userId || !mobileNumber) {
+      toast.error('Invalid OTP verification link');
       router.replace(otpType === 'register' ? '/auth/register' : '/auth/login');
     }
-  }, [otpType, userId, mobileNumber]);
+  }, [otpType, userId, mobileNumber, router]);
 
   useEffect(() => {
     if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
+      const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
       return () => clearInterval(interval);
-    } else {
-      setCanResend(true);
     }
+    setCanResend(true);
   }, [timer]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -68,25 +53,18 @@ export default function OtpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    if (!otp || otp.length !== 6) return;
-    if (!userId) return;
+    if (!otp || otp.length !== 6) {
+      toast.error('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    if (!userId || !otpType) {
+      toast.error('Invalid verification session');
+      return;
+    }
   
     try {
-      if (otpType === 'register') {
-        const response = await verifyRegistrationOTP(otp, userId);
-        if (response.success && response.token && response.user) {
-          // Redirect to the intended path or default to profile
-          const redirectPath = fromPath || '/profile';
-          router.push(redirectPath);
-        }
-      } else {
-        const response = await verifyLoginOTP(otp, userId);
-        if (response.success && response.token && response.user) {
-          // Redirect to the intended path or default to profile
-          const redirectPath = fromPath || '/profile';
-          router.push(redirectPath);
-        }
-      }
+      await verifyOTP(otp, userId, otpType as 'login' | 'register');
     } catch (error) {
       console.error('OTP verification error:', error);
     }
@@ -99,33 +77,30 @@ export default function OtpPage() {
       setIsResending(true);
       clearError();
 
-      if (otpType === 'login') {
-        await loginWithMobile({ mobile_number: mobileNumber });
-      } else {
-        alert('Resend OTP for registration is not supported. Please sign up again.');
-        router.replace('/auth/register');
-        return;
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile_number: mobileNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend OTP');
       }
 
-      setTimer(120);
+      toast.success('OTP resent successfully!');
+      setTimer(OTP_TIMEOUT);
       setCanResend(false);
       setOtp('');
     } catch (error) {
-      console.error('Resend OTP error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to resend OTP');
     } finally {
       setIsResending(false);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    setDropdownOpen(false);
-    router.push("/auth/login"); // Redirect to login page after logout
-  };
-
-  const getPageTitle = () => {
-    return otpType === 'register' ? 'Complete Registration' : 'Login Verification';
-  };
+  const getPageTitle = () => otpType === 'register' ? 'Complete Registration' : 'Login Verification';
 
   const getPageDescription = () => {
     const formattedMobile = mobileNumber
@@ -176,16 +151,14 @@ export default function OtpPage() {
             disabled={isLoading}
           />
 
-          <div className="mt-6">
-            <Button
-              label={isLoading ? 'Verifying...' : 'Verify OTP'}
-              variant="btn-dark"
-              size="xl"
-              className="w-full"
-              disabled={isLoading || otp.length !== 6}
-              onClick={handleSubmit}
-            />
-          </div>
+          <Button
+            label={isLoading ? 'Verifying...' : 'Verify OTP'}
+            variant="btn-dark"
+            size="xl"
+            className="w-full mt-6"
+            disabled={isLoading || otp.length !== 6}
+            onClick={handleSubmit}
+          />
         </form>
 
         <div className="mt-6 text-center">
@@ -204,32 +177,6 @@ export default function OtpPage() {
           )}
         </div>
       </div>
-      {user && (
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen((open) => !open)}
-            className="focus:outline-none"
-            aria-label="Profile"
-          >
-            {/* Replace with your profile icon */}
-            <img
-              src="/profile-icon.svg"
-              alt="Profile"
-              className="w-8 h-8 rounded-full border"
-            />
-          </button>
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50">
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </AuthLayout>
   );
 }

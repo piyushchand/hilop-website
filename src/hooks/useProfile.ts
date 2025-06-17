@@ -9,16 +9,17 @@ interface ProfileResponse {
 }
 
 export function useProfile() {
-  const { token, dispatch } = useAuth();
+  const { token, user, setUser } = useAuth();
 
   const fetchProfile = useCallback(async () => {
     if (!token) return null;
 
     try {
-      const response = await fetch('http://3.110.216.61/api/v1/user/profile', {
-        method: 'POST',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/profile`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
       });
@@ -30,17 +31,14 @@ export function useProfile() {
       }
 
       // Update user data in auth context
-      dispatch({ type: 'SET_USER', payload: data.data });
-      
-      // Update stored user data
-      localStorage.setItem('user_data', JSON.stringify(data.data));
+      setUser(data.data);
 
       return data.data;
     } catch (error) {
       console.error('Error fetching profile:', error);
       throw error;
     }
-  }, [token, dispatch]);
+  }, [token, setUser]);
 
-  return { fetchProfile };
+  return { fetchProfile, user };
 } 

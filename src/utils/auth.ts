@@ -83,7 +83,6 @@ export const formatPhoneNumber = (phone: string): string => {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
     OTP: '/auth/otp',
-    DASHBOARD: '/dashboard',
   } as const;
 
   

@@ -28,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <CardBody>
                 <CardItem
                     translateZ={50}
-                    className="relative mb-5 rounded-3xl overflow-hidden w-full"
+                    className="relative mb-5 rounded-3xl overflow-hidden w-full bg-gray-200"
                 >
                     <Image
                         src={product.images[0] || '/images/placeholder.png'}

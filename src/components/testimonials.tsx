@@ -32,7 +32,7 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
     >
       <span className=" inline-block mb-10 text-gray-700">{review.user.name}</span>
       <p className="mb-10 sm:text-2xl line-clamp-6">{review.description}</p>
-      <div className="flex items-center gap-2 text-green-800 justify-center">
+      <div className="flex items-center gap-2 text-green-800 justify-center mt-auto">
         <BadgeCheck className="text-green-800" />
         <p>Real Hilop Customers</p>
       </div>

@@ -2,8 +2,8 @@
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/scrollbar";
-import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Checkmark } from "./checkmark";
 
 const stats = {
   en: [
@@ -25,16 +25,8 @@ export function ProductHero() {
   return (
     <>
       <div className="flex md:flex-row flex-col gap-4 p-6 bg-white rounded-2xl justify-between mb-6">
-        {currentStats.map((item, index) => (
-          <div key={index} className="flex items-start gap-2">
-            <Image
-              src="/images/icon/list.svg"
-              alt="About hero image"
-              width={24}
-              height={24}
-            />
-            <p className="text-gray-700">{item.text}</p>
-          </div>
+      {currentStats.map((item, index) => (
+          <Checkmark key={index} text={item.text} className="mb-2" />
         ))}
       </div>
       <p className="md:text-xl text-lg font-medium text-dark mb-6">
