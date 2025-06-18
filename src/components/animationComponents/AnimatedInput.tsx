@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarRange, Clock } from 'lucide-react';
 
@@ -13,9 +13,7 @@ interface AnimatedInputProps {
 }
 
 const formatIndianNumber = (num: string) => {
-  const part1 = num.slice(0, 5);
-  const part2 = num.slice(5, 10);
-  return part2 ? `${part1} ${part2}` : part1;
+  return num.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
 };
 
 const AnimatedInput: React.FC<AnimatedInputProps> = ({
@@ -26,95 +24,84 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   required = false,
   onChange,
 }) => {
-  const initialTelValue = type === 'tel' ? '+91 ' : '';
-  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [inputValue, setInputValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Use the value prop directly for controlled component behavior
-  const getDisplayValue = () => {
-    if (type === 'tel') {
-      if (!initialValue) return '+91 ';
-      const digits = initialValue.replace(/\D/g, '');
-      const formattedDigits = formatIndianNumber(digits);
-      return `+91 ${formattedDigits}`;
-    }
-    return initialValue;
-  };
+  // Update internal state when prop changes
+  React.useEffect(() => {
+    setInputValue(initialValue);
+  }, [initialValue]);
 
-  const value = getDisplayValue();
-  const showFloatingLabel = isFocused || value.length > 0;
+  const getDisplayValue = () => {
+    if (type === 'tel' && inputValue) {
+      const cleanValue = inputValue.replace(/\D/g, '');
+      if (cleanValue.length >= 10) {
+        return formatIndianNumber(cleanValue);
+      }
+      return cleanValue;
+    }
+    return inputValue;
+  };
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
   const handleIconClick = () => {
-    if (inputRef.current) {
-      inputRef.current.showPicker?.(); // for date picker on modern browsers
+    if (type === 'tel' && inputRef.current) {
       inputRef.current.focus();
     }
   };
 
-  // Handles changes for tel input with formatting +91 XXXXX XXXXX
   const handleTelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-
-    // Remove spaces
-    inputValue = inputValue.replace(/\s/g, '');
-
-    // Ensure it starts with +91
-    if (!inputValue.startsWith('+91')) {
-      inputValue = '+91' + inputValue.replace(/^\+?/, '').replace(/^91/, '');
-    }
-
-    // Extract digits after +91
-    let digits = inputValue.slice(3).replace(/\D/g, '');
-
-    // Limit digits to max 10
-    if (digits.length > 10) digits = digits.slice(0, 10);
-
-    // Format digits
-    const formattedDigits = formatIndianNumber(digits);
-
-    // Final value
-    const finalValue = `+91 ${formattedDigits}`;
-
-    // Call onChange with the raw digits
-    if (onChange) {
-      const syntheticEvent = {
-        ...e,
-        target: {
-          ...e.target,
-          name: e.target.name,
-          value: digits
-        }
-      } as React.ChangeEvent<HTMLInputElement>;
-      onChange(syntheticEvent);
-    }
+    const value = e.target.value;
+    const cleanValue = value.replace(/\D/g, '').slice(0, 10);
+    
+    setInputValue(cleanValue);
+    
+    // Create a synthetic event with the clean value
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: cleanValue,
+        name: e.target.name
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    onChange?.(syntheticEvent);
   };
 
-  // Prevent backspace/delete in prefix +91
   const handleTelKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const cursorPos = e.currentTarget.selectionStart || 0;
-    if ((e.key === 'Backspace' && cursorPos <= 4) || (e.key === 'Delete' && cursorPos < 4)) {
+    // Allow: backspace, delete, tab, escape, enter, and navigation keys
+    if ([8, 9, 27, 13, 46, 37, 39].includes(e.keyCode) ||
+        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        (e.keyCode === 65 && e.ctrlKey === true) ||
+        (e.keyCode === 67 && e.ctrlKey === true) ||
+        (e.keyCode === 86 && e.ctrlKey === true) ||
+        (e.keyCode === 88 && e.ctrlKey === true)) {
+      return;
+    }
+    
+    // Ensure that it is a number and stop the keypress
+    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) &&
+        (e.keyCode < 96 || e.keyCode > 105)) {
       e.preventDefault();
     }
   };
 
-  // Prevent cursor moving before +91 
   const handleTelClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    const cursorPos = e.currentTarget.selectionStart || 0;
-    if (cursorPos < 4) {
-      window.requestAnimationFrame(() => {
-        if (inputRef.current) inputRef.current.setSelectionRange(4, 4);
-      });
-    }
+    // Move cursor to end of input
+    const target = e.target as HTMLInputElement;
+    target.setSelectionRange(target.value.length, target.value.length);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (type === 'tel') {
       handleTelChange(e);
     } else {
-      if (onChange) onChange(e);
+      setInputValue(e.target.value);
+      onChange?.(e);
     }
   };
 
@@ -125,12 +112,12 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
         className={`
           absolute left-3 top-1/2 -translate-y-1/2 
           bg-white px-1 transition-all duration-200 pointer-events-none
-          ${showFloatingLabel ? 'top-1 text-xs' : 'text-base'}
+          ${isFocused || inputValue ? 'top-1 text-xs' : 'text-base'}
           ${isFocused ? 'text-green-800' : 'text-gray-600/80'}
         `}
         animate={{
-          top: showFloatingLabel ? '0.10rem' : '50%',
-          fontSize: showFloatingLabel ? '0.75rem' : '1rem',
+          top: isFocused || inputValue ? '0.10rem' : '50%',
+          fontSize: isFocused || inputValue ? '0.75rem' : '1rem',
         }}
         transition={{ duration: 0.2 }}
       >
@@ -146,8 +133,8 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           id={name}
           name={name}
           ref={inputRef}
-          type={type}
-          value={value}
+          type={type === 'tel' ? 'text' : type}
+          value={getDisplayValue()}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}

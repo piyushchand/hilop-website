@@ -13,8 +13,21 @@ import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Product } from "@/types";
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 
+// Loading component
+const Loading = () => (
+  <div className="w-full py-20 bg-cover bg-center bg-greenleaf">
+    <div className="container h-full flex flex-col justify-center items-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
+        <p className="text-gray-600">Please wait while we load the page.</p>
+      </div>
+    </div>
+  </div>
+);
 
 const features = [
   {
@@ -77,6 +90,17 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { isInitialized: useRequireAuthInitialized } = useRequireAuth();
+
+  // Debug authentication state
+  useEffect(() => {
+    if (user) {
+      console.log('🏠 Home page: User is authenticated:', user.name);
+    } else {
+      console.log('🏠 Home page: No user authenticated');
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -98,7 +122,9 @@ export default function Home() {
     };
 
     fetchProducts();
-  }, [language]); // Removed showLoading and hideLoading dependencies
+  }, [language]);
+
+  if (!useRequireAuthInitialized) return <Loading />;
 
   return (
     <>

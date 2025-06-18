@@ -1,6 +1,5 @@
 // src/services/apiService.ts
-import { ProductListApiResponse, ProductApiResponse } from '../types';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { ProductListApiResponse, ProductApiResponse } from '@/types';
 
 // NOTE: No need for axios, Next.js extends the global `fetch` API
 // with caching and revalidating capabilities. It's the recommended way.

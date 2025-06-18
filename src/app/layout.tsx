@@ -5,6 +5,7 @@ import ClientLayout from "@/components/ClientLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LoadingProvider } from "@/contexts/LoadingContext";
+import AuthDebugger from "@/components/AuthDebugger";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 const poppins = Poppins({
@@ -152,6 +153,7 @@ export default function RootLayout({
           <LoadingProvider>
             <AuthProvider>
               <ClientLayout>{children}</ClientLayout>
+              <AuthDebugger />
             </AuthProvider>
           </LoadingProvider>
         </LanguageProvider>

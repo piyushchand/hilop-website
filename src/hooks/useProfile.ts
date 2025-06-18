@@ -5,7 +5,6 @@ export function useProfile() {
     user, 
     isInitialized, 
     refreshUserData, 
-    syncUserWithBackend,
     updateUser 
   } = useAuth();
 
@@ -13,7 +12,6 @@ export function useProfile() {
     user,
     isInitialized,
     refreshUserData,
-    syncUserWithBackend,
     updateUser,
     // Helper to check if user is loaded and ready
     isReady: isInitialized && !!user,

@@ -283,7 +283,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language]);
+  }, [params?.id, language, showLoading, hideLoading]);
 
   if (error || !product) {
     return (

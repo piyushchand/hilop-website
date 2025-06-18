@@ -25,9 +25,18 @@ const Navbar = () => {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, isInitialized } = useAuth();
   const router = useRouter();
   const { language, setLanguage } = useLanguage();
+
+  // Debug logging for authentication state
+  useEffect(() => {
+    console.log('🔍 Navbar: Auth state changed', {
+      user: user ? { name: user.name, email: user.email } : null,
+      isLoading,
+      isInitialized
+    });
+  }, [user, isLoading, isInitialized]);
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -68,6 +77,22 @@ const Navbar = () => {
 
   // Don't render anything until mounted to prevent hydration mismatch
   if (!mounted) {
+    return (
+      <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
+        <div className="container py-3 flex items-center justify-between">
+          <Link href="/">
+            <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} priority />
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="h-[52px] w-[120px] bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // Show loading state while auth is initializing
+  if (!isInitialized) {
     return (
       <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
         <div className="container py-3 flex items-center justify-between">

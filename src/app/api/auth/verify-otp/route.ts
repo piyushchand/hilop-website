@@ -71,9 +71,14 @@ export async function POST(request: Request) {
           maxAge: COOKIE_MAX_AGE,
         });
   
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('✅ Cookies set successfully');
-        }
+        console.log('✅ Cookies set successfully for user:', data.user?.name || 'Unknown');
+        console.log('🍪 Cookie details:', {
+          accessToken: '***hidden***',
+          is_authenticated: 'true',
+          maxAge: COOKIE_MAX_AGE,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax'
+        });
       }
   
       return res;

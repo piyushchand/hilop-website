@@ -24,14 +24,14 @@ class Logger {
     return Logger.instance;
   }
 
-  private formatMessage(level: LogLevel, message: string, data?: any): string {
+  private formatMessage(level: LogLevel, message: string, data?: unknown): string {
     const timestamp = this.showTimestamp ? `[${new Date().toISOString()}]` : '';
     const prefix = `[${this.prefix}]`;
-    const levelStr = `[${level.toUpperCase()}]`;
-    return `${timestamp} ${prefix} ${levelStr} ${message}`;
+    const dataString = data ? ` ${JSON.stringify(data)}` : '';
+    return `${timestamp}${prefix} [${level.toUpperCase()}] ${message}${dataString}`;
   }
 
-  private log(level: LogLevel, message: string, data?: any) {
+  private log(level: LogLevel, message: string, data?: unknown) {
     const formattedMessage = this.formatMessage(level, message, data ? '' : message);
     
     switch (level) {
@@ -54,19 +54,19 @@ class Logger {
     }
   }
 
-  public success(message: string, data?: any) {
+  public success(message: string, data?: unknown) {
     this.log('success', message, data);
   }
 
-  public info(message: string, data?: any) {
+  public info(message: string, data?: unknown) {
     this.log('info', message, data);
   }
 
-  public warn(message: string, data?: any) {
+  public warn(message: string, data?: unknown) {
     this.log('warn', message, data);
   }
 
-  public error(message: string, data?: any) {
+  public error(message: string, data?: unknown) {
     this.log('error', message, data);
   }
 }
