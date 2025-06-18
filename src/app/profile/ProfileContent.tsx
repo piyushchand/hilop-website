@@ -187,6 +187,7 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
             label="Logout"
             theme="light"
             size="lg"
+            className="cursor-pointer"
           />
         </div>
       </section>

@@ -45,49 +45,39 @@ export async function POST(request: Request) {
       }
     };
 
-      // ✅ Create empty response and THEN modify
-      const res = new NextResponse(JSON.stringify(responseData), {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    // ✅ Create empty response and THEN modify
+    const res = new NextResponse(JSON.stringify(responseData), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // ✅ Now set cookies
+    if (data.success && data.token) {
+      res.cookies.set('accessToken', data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: COOKIE_MAX_AGE,
       });
-  
-      // ✅ Now set cookies
-      if (data.success && data.token) {
-        res.cookies.set('accessToken', data.token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: COOKIE_MAX_AGE,
-        });
-  
-        res.cookies.set('is_authenticated', 'true', {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: COOKIE_MAX_AGE,
-        });
-  
-        console.log('✅ Cookies set successfully for user:', data.user?.name || 'Unknown');
-        console.log('🍪 Cookie details:', {
-          accessToken: '***hidden***',
-          is_authenticated: 'true',
-          maxAge: COOKIE_MAX_AGE,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax'
-        });
-      }
-  
-      return res;
-    } catch (error) {
-      console.error('OTP verification error:', error);
-      return NextResponse.json(
-        { success: false, message: 'Failed to connect to the server', error: 'connection_error' },
-        { status: 500 }
-      );
+
+      res.cookies.set('is_authenticated', 'true', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: COOKIE_MAX_AGE,
+      });
     }
+
+    return res;
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    return NextResponse.json(
+      { success: false, message: 'Failed to connect to the server', error: 'connection_error' },
+      { status: 500 }
+    );
   }
-  
+} 

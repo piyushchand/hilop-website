@@ -27,17 +27,14 @@ export function middleware(request: NextRequest) {
   
   // Get authentication status from cookies
   const isAuthenticated = request.cookies.has('is_authenticated');
-  const hasAccessToken = request.cookies.has('accessToken');
   
   // If user is not authenticated and trying to access protected route
-  if (isProtectedRoute && (!isAuthenticated || !hasAccessToken)) {
-    console.log(`🚫 Access denied to protected route: ${pathname}`);
+  if (isProtectedRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
   
   // If user is authenticated and trying to access auth routes, redirect to home
-  if (isAuthRoute && isAuthenticated && hasAccessToken) {
-    console.log(`🔄 Authenticated user redirected from auth route: ${pathname}`);
+  if (isAuthRoute && isAuthenticated) {
     return NextResponse.redirect(new URL('/', request.url));
   }
   

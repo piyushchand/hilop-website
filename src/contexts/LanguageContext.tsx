@@ -1,37 +1,32 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useHydrationSafeString } from '@/hooks/useHydrationSafeState';
 
 type Language = 'en' | 'hi';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+  isInitialized: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with saved language preference or default to English
-  const getInitialLanguage = (): Language => {
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language;
-      return savedLanguage || 'en';
-    }
-    return 'en';
-  };
+  const [language, setLanguage] = useHydrationSafeString<Language>('en', 'language');
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
-
-  // Save language preference when it changes
+  // Validate language value and set initialization
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('language', language);
+    if (language !== 'en' && language !== 'hi') {
+      setLanguage('en');
     }
-  }, [language]);
+    setIsInitialized(true);
+  }, [language, setLanguage]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, isInitialized }}>
       {children}
     </LanguageContext.Provider>
   );

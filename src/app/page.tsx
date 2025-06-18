@@ -13,7 +13,6 @@ import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { Product } from "@/types";
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 
@@ -90,17 +89,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const { language } = useLanguage();
-  const { user } = useAuth();
   const { isInitialized: useRequireAuthInitialized } = useRequireAuth();
-
-  // Debug authentication state
-  useEffect(() => {
-    if (user) {
-      console.log('🏠 Home page: User is authenticated:', user.name);
-    } else {
-      console.log('🏠 Home page: No user authenticated');
-    }
-  }, [user]);
 
   useEffect(() => {
     const fetchProducts = async () => {

@@ -51,10 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize auth state on mount - call /api/auth/me to check authentication
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log('🚀 Initializing auth state...');
       await refreshUserData();
       setState(prev => ({ ...prev, isInitialized: true }));
-      console.log('✅ Auth initialization complete');
     };
 
     initializeAuth();
@@ -70,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Function to refresh user data from /api/auth/me
   const refreshUserData = async (): Promise<boolean> => {
     try {
-      console.log('🔄 Fetching user data from /api/auth/me...');
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         if (response.status === 401) {
-          console.log('❌ User not authenticated (401)');
           setState(prev => ({ 
             ...prev, 
             user: null,
@@ -94,7 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!data.success || !data.data) {
-        console.log('❌ Invalid response from /api/auth/me');
         setState(prev => ({ 
           ...prev, 
           user: null,
@@ -104,7 +99,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      console.log('✅ User data fetched successfully:', data.data);
       setState(prev => ({ 
         ...prev, 
         user: data.data,
@@ -114,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       return true;
     } catch (error) {
-      console.error('❌ Failed to fetch user data:', error);
+      console.error('Failed to fetch user data:', error);
       setState(prev => ({ 
         ...prev, 
         user: null,
@@ -207,7 +201,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Cookies are automatically set by the API response
-      console.log('✅ OTP verified, cookies set automatically');
       
       // Fetch fresh user data from /api/auth/me
       const userFetched = await refreshUserData();
@@ -217,7 +210,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         toast.success(type === 'login' ? 'Login successful!' : 'Registration completed!');
         
         // Redirect to home page
-        console.log('🔄 Redirecting to home page...');
         router.push('/');
       } else {
         throw new Error('Failed to fetch user data after authentication');
