@@ -14,7 +14,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useHydrationSafeString<Language>('en', 'language');
+  const [language, setLanguage] = useHydrationSafeString('en', 'language') as [Language, (value: Language) => void];
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Validate language value and set initialization
@@ -38,4 +38,4 @@ export function useLanguage() {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
-} 
+}

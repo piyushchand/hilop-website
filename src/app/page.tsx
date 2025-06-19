@@ -89,7 +89,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const { language } = useLanguage();
-  const { isInitialized: useRequireAuthInitialized } = useRequireAuth();
+  const { isInitialized: useRequireAuthInitialized } = useRequireAuth({ requireAuth: false });
 
   useEffect(() => {
     const fetchProducts = async () => {
