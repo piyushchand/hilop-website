@@ -19,7 +19,9 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${API_URL}/user/profile`, {
+    console.log('Fetching orders from external API');
+    
+    const response = await fetch(`${API_URL}/orders`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -41,26 +43,24 @@ export async function GET() {
       }
       
       const errorText = await response.text();
-      console.error('Backend error response:', errorText);
+      console.error('Orders API error response:', errorText);
       
       return NextResponse.json(
         { 
           success: false, 
-          message: `Failed to fetch profile: ${response.status}`,
-          error: 'profile_fetch_failed'
+          message: `Failed to fetch orders: ${response.status}`,
+          error: 'orders_fetch_failed'
         },
         { status: response.status }
       );
     }
 
     const data = await response.json();
+    console.log('Orders API response:', data);
 
-    return NextResponse.json({
-      success: true,
-      data: data.data || data.user || data // Handle different response formats
-    });
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error('Orders fetch error:', error);
     return NextResponse.json(
       { 
         success: false, 

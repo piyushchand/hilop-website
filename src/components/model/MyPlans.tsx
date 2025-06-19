@@ -35,7 +35,7 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
               {" "}
               Your doctor recommended Treatment plan{" "}
             </p>
-            <ArrowButton label="View Prescriptions" theme="light" size="lg" />
+            <ArrowButton href="/prescription" label="View Prescriptions" theme="light" size="lg" />
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
               {" "}
               Your doctor recommended Treatment plan{" "}
             </p>
-            <ArrowButton label="View Prescriptions" theme="light" size="lg" />
+            <ArrowButton href="/prescription" label="View prescriptions" theme="light" size="lg" />
        </div>
       </div>
     </Modal>

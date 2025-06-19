@@ -27,9 +27,7 @@ export async function GET(
     // Try different possible endpoints
     const endpoints = [
       `/prescriptions/${prescriptionId}`,
-      `/prescription/${prescriptionId}`,
       `/user/prescriptions/${prescriptionId}`,
-      `/user/prescription/${prescriptionId}`
     ];
 
     for (const endpoint of endpoints) {

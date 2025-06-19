@@ -3,7 +3,10 @@ import { cookies } from 'next/headers';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1';
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
@@ -19,10 +22,14 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${API_URL}/user/profile`, {
+    const { id: orderId } = await params;
+
+    console.log('Fetching invoice for order:', orderId);
+    
+    const response = await fetch(`${API_URL}/orders/${orderId}/invoice`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/pdf',
         'Authorization': `Bearer ${accessToken.value}`,
       },
       credentials: 'include',
@@ -41,26 +48,37 @@ export async function GET() {
       }
       
       const errorText = await response.text();
-      console.error('Backend error response:', errorText);
+      console.error('Invoice API error response:', errorText);
       
       return NextResponse.json(
         { 
           success: false, 
-          message: `Failed to fetch profile: ${response.status}`,
-          error: 'profile_fetch_failed'
+          message: `Failed to fetch invoice: ${response.status}`,
+          error: 'invoice_fetch_failed'
         },
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    // Get the PDF blob
+    const pdfBlob = await response.blob();
+    console.log('Invoice PDF blob received, size:', pdfBlob.size);
+
+    // Convert blob to base64 for transmission
+    const arrayBuffer = await pdfBlob.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
 
     return NextResponse.json({
       success: true,
-      data: data.data || data.user || data // Handle different response formats
+      data: {
+        pdf_base64: base64,
+        filename: `invoice-${orderId}.pdf`,
+        content_type: pdfBlob.type,
+        size: pdfBlob.size
+      }
     });
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error('Invoice fetch error:', error);
     return NextResponse.json(
       { 
         success: false, 

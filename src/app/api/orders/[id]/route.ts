@@ -3,7 +3,10 @@ import { cookies } from 'next/headers';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1';
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
@@ -19,7 +22,11 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${API_URL}/user/profile`, {
+    const { id: orderId } = await params;
+
+    console.log('Fetching order detail for:', orderId);
+    
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -41,26 +48,24 @@ export async function GET() {
       }
       
       const errorText = await response.text();
-      console.error('Backend error response:', errorText);
+      console.error('Order detail API error response:', errorText);
       
       return NextResponse.json(
         { 
           success: false, 
-          message: `Failed to fetch profile: ${response.status}`,
-          error: 'profile_fetch_failed'
+          message: `Failed to fetch order detail: ${response.status}`,
+          error: 'order_detail_fetch_failed'
         },
         { status: response.status }
       );
     }
 
     const data = await response.json();
+    console.log('Order detail API response:', data);
 
-    return NextResponse.json({
-      success: true,
-      data: data.data || data.user || data // Handle different response formats
-    });
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error('Order detail fetch error:', error);
     return NextResponse.json(
       { 
         success: false, 

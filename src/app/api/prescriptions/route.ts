@@ -22,12 +22,8 @@ export async function GET() {
     // Try different possible endpoints
     const endpoints = [
       '/prescriptions',
-      '/prescription',
       '/user/prescriptions',
-      '/user/prescription'
     ];
-
-    let lastError = null;
 
     for (const endpoint of endpoints) {
       try {
@@ -48,11 +44,9 @@ export async function GET() {
           return NextResponse.json(data);
         } else {
           console.log(`Endpoint ${endpoint} returned status: ${response.status}`);
-          lastError = `Endpoint ${endpoint} returned ${response.status}`;
         }
       } catch (error) {
         console.log(`Error with endpoint ${endpoint}:`, error);
-        lastError = error;
       }
     }
 

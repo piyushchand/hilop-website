@@ -57,7 +57,7 @@ export default function Modal({ isOpen, onClose, children, className = "" }: Mod
           >
             {children}
             <motion.button
-              className="absolute top-5 right-5 z-20 bg-dark rounded-xl"
+              className="absolute top-5 right-5 z-20 bg-dark rounded-xl cursor-pointer"
               onClick={onClose}
             >
               <motion.div
