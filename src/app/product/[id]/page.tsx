@@ -1,126 +1,200 @@
 "use client";
-import { useState } from "react";
-import { ProductHero } from "@/components/productHero";
-import { BadgeCheck } from "lucide-react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Button from "@/components/uiFramework/Button";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import { A11y, Navigation, Scrollbar, Thumbs } from "swiper/modules";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useLoading } from "@/contexts/LoadingContext";
+import { getText } from "@/utils/getText";
+import Image from "next/image";
 import "swiper/css";
 import "swiper/css/thumbs";
-import Paragraph from "@/components/animationComponents/TextVisble";
-import Button from "@/components/uiFramework/Button";
+import { BadgeCheck } from "lucide-react";
 import Accordion from "@/components/uiFramework/Accordion";
 import RoundButton from "@/components/uiFramework/RoundButton";
-import FaqAccordion from "@/components/FaqAccordion";
+import Paragraph from "@/components/animationComponents/TextVisble";
 import { Testimonials } from "@/components/testimonials";
-const images = [
-  "/images/product.png",
-  "/images/about-us/our-commitment.jpg",
-  "/images/about-us/our-mission.jpg",
-  "/images/about-us/our-mission.jpg",
-  "/images/about-us/our-mission.jpg",
-  "/images/about-us/our-mission.jpg",
-  "/images/about-us/our-mission.jpg",
-];
-const productWhyChoose = [
-  {
-    id: "faq1",
-    question: "Boost Metabolism",
-    answer:
-      "Our carefully selected herbs work synergistically to increase your metabolic rate, helping your body burn calories faster, even at rest.",
-  },
-  {
-    id: "faq2",
-    question: "Natural Appetite Suppression",
-    answer:
-      "Say goodbye to constant cravings and overeating. The herbal ingredients help to naturally curb hunger, promoting a balanced and sustainable eating pattern.",
-  },
-  {
-    id: "faq3",
-    question: "Energy and Focus",
-    answer:
-      "Feel energized and focused throughout the day without the jitters. Our formula includes herbs that support sustained energy and mental clarity while you work toward your fat loss goals.",
-  },
-  {
-    id: "faq4",
-    question: "Support Healthy Digestion",
-    answer:
-      "A healthy digestive system is key to weight management. Our herbal blend promotes digestive health, ensuring that your body absorbs nutrients efficiently and eliminates waste naturally.",
-  },
-];
+import FaqAccordion from "@/components/FaqAccordion";
+import { Checkmark } from "@/components/checkmark";
 
-const keyIngredients = [
-  {
-    image: "/images/key-ingredients/green-tea-extract.jpg",
-    title: "Green Tea Extract",
-    description:
-      "Known for its fat-burning properties, green tea extract helps boost metabolism and supports overall weight loss.",
-  },
-  {
-    image: "/images/key-ingredients/garcinia-cambogia.jpg",
-    title: "Garcinia Cambogia",
-    description:
-      "This popular herb aids in reducing fat storage, while also controlling appetite, making it easier to stay on track with your goals.",
-  },
-  {
-    image: "/images/key-ingredients/ginger-root.jpg",
-    title: "Ginger Root",
-    description:
-      "A natural thermogenic, ginger helps increase your body temperature, accelerating fat burning. It also supports digestion and reduces bloating.",
-  },
-  {
-    image: "/images/key-ingredients/cayenne-pepper.jpg",
-    title: "Cayenne Pepper",
-    description:
-      "The active compound, capsaicin, in cayenne pepper, stimulates the body’s metabolism and helps burn calories.",
-  },
-  {
-    image: "/images/key-ingredients/turmeric.jpg",
-    title: "Turmeric",
-    description:
-      "A powerful anti-inflammatory, turmeric supports a healthy metabolism and helps combat the fat-storage process.",
-  },
-];
+// Define a type for the dynamic content to ensure consistency
+interface ProductDynamicContent {
+  customImage: string;
+  whyChooseTitle: string;
+  benefitTags: string[];
+  benefitImage: string;
+  howItWorksDescription: { en: string; hi: string };
+  howToUseDescription: { en: string; hi: string };
+  whyChooseUsSectionDescription: { en: string; hi: string };
+}
 
-const weightlossfaqdata = [
-  {
-    id: "faq1",
-    question: "How do i order from your company? How do i order from your company?",
-    answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+// Consolidated Dynamic content mapping based on product name
+const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
+  Slimvibe: {
+    customImage: "/images/weight-loss/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Fat Loss Formula?",
+    benefitTags: [
+      "Individuals looking to support their weight loss goals naturally.",
+      "Those who want to increase their energy levels and improve overall health.",
+      "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
+    ],
+    benefitImage: "/images/weight-loss/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "Our Slimvibe formula works by boosting your metabolism, reducing cravings, and promoting natural fat burning. It helps you achieve sustainable weight loss without harsh chemicals.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला आपके मेटाबॉलिज्म को बढ़ाकर, क्रेविंग को कम करके और प्राकृतिक वसा जलने को बढ़ावा देकर काम करता है। यह आपको कठोर रसायनों के बिना स्थायी वजन घटाने में मदद करता है।",
+    },
+    howToUseDescription: {
+      en: "Take two capsules daily with water, preferably before meals. For best results, combine with a balanced diet and regular exercise.",
+      hi: "रोजाना दो कैप्सूल पानी के साथ लें, अधिमानतः भोजन से पहले। सर्वोत्तम परिणामों के लिए, संतुलित आहार और नियमित व्यायाम के साथ मिलाएं।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our Slimvibe formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience tailored for natural weight loss. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
+    },
   },
-  {
-    id: "faq2",
-    question: "How do i order from your company?",
-    answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+  BoldRise: {
+    customImage: "/images/instant-boost/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Instant Sexual Enhancer?",
+    benefitTags: [
+      "Men looking to enhance their performance and energy levels naturally.",
+      "Those who want to increase their libido and desire without relying on chemicals.",
+      "Individuals who are looking to support their overall vitality and well-being.",
+    ],
+    benefitImage: "/images/instant-boost/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "BoldRise works by naturally increasing blood flow and enhancing your body's natural response to arousal, providing an instant boost in performance and stamina.",
+      hi: "बोल्डराइज स्वाभाविक रूप से रक्त प्रवाह को बढ़ाकर और उत्तेजना के लिए आपके शरीर की प्राकृतिक प्रतिक्रिया को बढ़ाकर काम करता है, जो प्रदर्शन और सहनशक्ति में तत्काल वृद्धि प्रदान करता है।",
+    },
+    howToUseDescription: {
+      en: "Take one capsule 30 minutes before activity. Do not exceed one capsule per day.",
+      hi: "गतिविधि से 30 मिनट पहले एक कैप्सूल लें। प्रति दिन एक कैप्सूल से अधिक न लें।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our BoldRise formula uses a powerful blend of natural herbs to provide immediate and noticeable improvements in sexual performance and energy, without any artificial additives.",
+      hi: "हमारा बोल्डराइज फॉर्मूला यौन प्रदर्शन और ऊर्जा में तत्काल और ध्यान देने योग्य सुधार प्रदान करने के लिए प्राकृतिक जड़ी-बूटियों के एक शक्तिशाली मिश्रण का उपयोग करता है, जिसमें कोई कृत्रिम योजक नहीं होता है।",
+    },
   },
-  {
-    id: "faq3",
-    question: "How do i order from your company?",
-    answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+  Hardveda: {
+    customImage: "/images/improving-sexual/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Sexual Wellness formula?",
+    benefitTags: [
+      "Men looking to naturally boost their testosterone levels and support sexual wellness.",
+      "Individuals experiencing low energy, reduced libido, or a decrease in overall vitality.",
+      "Those who want to enhance performance, stamina, and confidence in intimate moments.",
+      "Active individuals who want to support muscle mass, strength, and energy levels.",
+    ],
+    benefitImage: "/images/improving-sexual/who-can-benefit.jpg",
+    howItWorksDescription: {
+      en: "Hardveda supports sexual wellness by optimizing hormonal balance and improving overall reproductive health, leading to increased vitality and improved performance over time.",
+      hi: "हार्डवेदा हार्मोनल संतुलन को अनुकूलित करके और समग्र प्रजनन स्वास्थ्य में सुधार करके यौन कल्याण का समर्थन करता है, जिससे समय के साथ बढ़ी हुई जीवन शक्ति और बेहतर प्रदर्शन होता है।",
+    },
+    howToUseDescription: {
+      en: "Take one capsule twice daily after meals. Consistent use is recommended for optimal results.",
+      hi: "भोजन के बाद दिन में दो बार एक कैप्सूल लें। इष्टतम परिणामों के लिए लगातार उपयोग की सिफारिश की जाती है।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Hardveda is formulated with traditional Ayurvedic herbs known for their powerful benefits in male sexual health, offering a natural and holistic approach to wellness.",
+      hi: "हार्डवेदा पारंपरिक आयुर्वेदिक जड़ी-बूटियों के साथ तैयार किया गया है जो पुरुष यौन स्वास्थ्य में उनके शक्तिशाली लाभों के लिए जानी जाती हैं, जो कल्याण के लिए एक प्राकृतिक और समग्र दृष्टिकोण प्रदान करती हैं।",
+    },
   },
-  {
-    id: "faq4",
-    question: "How do i order from your company?",
-    answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
-  },
-  {
-    id: "faq5",
-    question: "How do i order from your company?",
-    answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
-  },
-];
+};
+
+// Helper function to get product-specific content with fallbacks
+const getProductContent = (productName: string): ProductDynamicContent => {
+  const normalizedName = productName?.trim();
+  const defaultContent: ProductDynamicContent = {
+    customImage: "/images/why-choose.png",
+    whyChooseTitle: "Our Herbal Wellness Formula?",
+    benefitTags: [
+      "Individuals looking to support their wellness goals naturally.",
+      "Those who want to improve their overall health and vitality.",
+      "People who prefer natural, holistic approaches to wellness.",
+    ],
+    benefitImage: "/images/why-choose.png",
+    howItWorksDescription: {
+      en: "Our herbal wellness formula works by naturally supporting your body's systems, promoting balance and overall well-being. It is designed to gently enhance your health without harsh side effects.",
+      hi: "हमारा हर्बल वेलनेस फॉर्मूला स्वाभाविक रूप से आपके शरीर की प्रणालियों का समर्थन करके, संतुलन और समग्र कल्याण को बढ़ावा देकर काम करता है। इसे बिना किसी कठोर दुष्प्रभाव के आपके स्वास्थ्य को धीरे-धीरे बढ़ाने के लिए डिज़ाइन किया गया है।",
+    },
+    howToUseDescription: {
+      en: "Follow the instructions on the product label. Generally, take the recommended dosage daily with water.",
+      hi: "उत्पाद लेबल पर दिए गए निर्देशों का पालन करें। आम तौर पर, पानी के साथ रोजाना अनुशंसित खुराक लें।",
+    },
+    whyChooseUsSectionDescription: {
+      en: "Our wellness formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
+      hi: "हमारा वेलनेस फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
+    },
+  };
+
+  return PRODUCT_DYNAMIC_CONTENT[normalizedName] || defaultContent;
+};
+
+interface ProductPrice {
+  current_price?: number;
+  final_price?: number;
+  original_price?: number;
+  base_price?: number;
+  discount?: number;
+  discount_type?: "fixed" | "percentage";
+}
+
+interface WhyChooseUsItem {
+  title?: string;
+  description?: string;
+  question?: string;
+  answer?: string;
+}
+
+interface FaqAccordionItem {
+  title?: string;
+  description?: string;
+  question?: string;
+  answer?: string;
+}
+
+interface KeyIngredient {
+  image: string;
+  title: string;
+  description: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  images: string[];
+  pricing: ProductPrice;
+  price?: ProductPrice;
+  for?: { en: string; hi: string };
+  label?: { en: string; hi: string };
+  how_it_works?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
+  how_to_use?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
+  description?: { en: string; hi: string };
+  description_tags?: string[];
+  why_choose_us?: (string | WhyChooseUsItem)[];
+  faqs?: (string | FaqAccordionItem)[];
+  key_ingredients?: KeyIngredient[];
+  reviews: {
+    total_count: number;
+    average_rating: number;
+    reviews: Array<{
+      _id: string;
+      user: {
+        name: string;
+      };
+      product: string;
+      rating: number;
+      description: string;
+    }>;
+  };
+  custom_image?: string;
+}
 
 const howItWorks = [
   {
     title: "Take a Free Online Assessment",
     description:
-      "Answer a few quick questions about your weight, lifestyle, and goals. Our expert-backed system will create a customized weight-loss plan tailored specifically for your body’s needs.",
+      "Answer a few quick questions about your weight, lifestyle, and goals. Our expert-backed system will create a customized weight-loss plan tailored specifically for your body's needs.",
   },
   {
     title: "Get a 100% Natural, Customized Treatment",
@@ -145,84 +219,213 @@ const howItWorks = [
   {
     title: "See Real Results—Or Your Money Back!",
     description:
-      "Most customers see noticeable changes in just 30 days! If you're not satisfied, you’re protected by our 100% money-back guarantee—no risk, no worries.",
+      "Most customers see noticeable changes in just 30 days! If you're not satisfied, you're protected by our 100% money-back guarantee—no risk, no worries.",
   },
 ];
-const Benefit = [
-  { text: "Individuals looking to support their weight loss goals naturally." },
-  { text: "Those who want to increase their energy levels and improve overall health." },
-  { text: "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach." },
-]
-export default function Productdata() {
+
+export default function ProductPage() {
+  const params = useParams();
+  const { language } = useLanguage();
+  const { showLoading, hideLoading } = useLoading();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
+  
+  const handleThumbsSwiper = (swiper: SwiperType) => {
+    // Add custom class to swiper-wrapper
+    swiper.wrapperEl.classList.add('justify-center');
+  };
+
+  useEffect(() => {
+    const productId = params?.id as string;
+    if (!productId) {
+      setError("Product ID is missing");
+      return;
+    }
+
+    const fetchProduct = async () => {
+      try {
+        showLoading();
+        setError(null);
+        const apiUrl = `${
+          process.env.NEXT_PUBLIC_API_URL || "http://3.110.216.61/api/v1"
+        }/products/${productId}?lang=${language}`;
+
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch product: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+
+        if (!data.success || !data.data) {
+          throw new Error("Invalid response format from server");
+        }
+
+        setProduct(data.data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unexpected error occurred"
+        );
+      } finally {
+        hideLoading();
+      }
+    };
+
+    fetchProduct();
+  }, [params?.id, language, showLoading, hideLoading]);
+
+  if (error || !product) {
+    return (
+      <div className="container mx-auto px-4 py-8 h-screen flex justify-center items-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            {error || "Product not found"}
+          </h1>
+          <Button
+            link="/"
+            label={language === "en" ? "Return to Home" : "होम पर वापस जाएं"}
+            variant="btn-primary"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const dynamicProductContent = getProductContent(product.name);
+
+  const whyChooseUs = Array.isArray(product.why_choose_us)
+    ? product.why_choose_us
+        .map((item: string | WhyChooseUsItem) => {
+          if (typeof item === "string") {
+            return { question: item, answer: item };
+          }
+          return {
+            question: item.title || item.question || "",
+            answer: item.description || item.answer || "",
+          };
+        })
+        .filter((item) => item.question && item.answer)
+    : [];
+
+  const faqItems = Array.isArray(product.faqs)
+    ? product.faqs
+        .map((item: string | FaqAccordionItem, index: number) => {
+          if (typeof item === "string") {
+            return {
+              id: `faq-${index}`,
+              question: item,
+              answer: item,
+            };
+          }
+          return {
+            id: `faq-${index}`,
+            question: item.title || item.question || "",
+            answer: item.description || item.answer || "",
+          };
+        })
+        .filter((item) => item.question && item.answer)
+    : [];
+
   return (
     <>
       <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           <div className="order-2 lg:order-1">
             <span className="top-content-badge !flex gap-2 items-center">
-              <BadgeCheck className="text-green-800" /> Herbal Fat Loss
+              <BadgeCheck className="text-green-800" />{" "}
+              {getText(product.for || "", language)}
             </span>
             <h1 className="text-3xl md:text-4xl lg:text-5xl 2xl:text-6xl mb-3 sm:mb-6 font-semibold">
-              Slimvibe
+              {product.name}
             </h1>
             <h2 className="md:text-xl text-lg font-medium text-gray-800 mb-6">
-            Natural Supplements for Weight loss (60 Capsules)
+              {getText(product.label || "", language)}
             </h2>
             <p className="mb-3 text-gray-700">
-              Our Herbal Fat Loss Formula is crafted with a powerful blend of
-              natural ingredients designed to help you achieve your fitness
-              goals. Using ancient herbal wisdom combined with modern science,
-              our formula helps speed up metabolism, curb cravings, and support
-              your body’s natural fat-burning processes
+              {getText(product.description || "", language)}
             </p>
-            <ProductHero />
+            <div className="flex md:flex-row flex-col gap-4 p-6 bg-white rounded-2xl justify-between mb-6">
+              {(product.description_tags || []).map(
+                (item: string, index: number) => (
+                  <Checkmark key={index} text={item} />
+                )
+              )}
+            </div>
+            <p className="md:text-xl text-lg font-medium text-dark mb-6">
+              Start your transformation today with a personalized plan!
+            </p>
             <div className="flex gap-4">
               <Button
                 label="Get Started Now"
                 variant="btn-dark"
                 size="xl"
-                link="/"
+                link={`/checkout?product=${product.id}`}
               />
-              <Button label="Buy Now" variant="btn-light" size="xl" link="/" />
+              <Button
+                label="Buy Now"
+                variant="btn-light"
+                size="xl"
+                link={`/checkout?product=${product.id}`}
+              />
             </div>
           </div>
           <div className="order-1 lg:order-1 relative w-full flex flex-col items-center sm:rounded-4xl rounded-2xl overflow-hidden border border-gray-200 bg-green-100">
             <Swiper
               spaceBetween={10}
-              thumbs={{ swiper: thumbsSwiper }}
+              thumbs={{
+                swiper:
+                  thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
+              }}
               modules={[Thumbs]}
               className="w-full aspect-square"
             >
-              {images.map((src, idx) => (
-                <SwiperSlide key={idx}>
+              {product.images.map((image: string, index: number) => (
+                <SwiperSlide key={index}>
                   <Image
-                    src={src}
-                    alt={`Product ${idx + 1}`}
+                    src={image}
+                    alt={`${product.name} image ${index + 1}`}
                     width={500}
                     height={500}
                     className="w-full object-cover h-full"
+                    priority={index === 0}
                   />
                 </SwiperSlide>
               ))}
             </Swiper>
 
             <Swiper
-              onSwiper={setThumbsSwiper}
+              onSwiper={(swiper) => {
+                handleThumbsSwiper(swiper);
+                setThumbsSwiper(swiper);
+              }}
               spaceBetween={16}
               slidesPerView={3}
               watchSlidesProgress
               modules={[Thumbs]}
-              className=" w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
+              className="w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
             >
-              {images.map((src, idx) => (
-                <SwiperSlide key={idx} className="cursor-pointer">
+              {product.images.map((image: string, index: number) => (
+                <SwiperSlide
+                  key={index}
+                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300"
+                >
                   <Image
-                    src={src}
-                    alt={`Thumb ${idx + 1}`}
+                    src={image}
+                    alt={`${product.name} thumbnail ${index + 1}`}
                     width={60}
                     height={60}
-                    className="rounded-md sm:rounded-xl border border-gray-300 w-full h-full object-cover aspect-square"
+                    className="w-full h-full object-cover aspect-square"
                   />
                 </SwiperSlide>
               ))}
@@ -230,33 +433,34 @@ export default function Productdata() {
           </div>
         </div>
       </section>
+
       <section className="container mb-16 lg:mb-40">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
-          <Image
-            src="/images/fat-loss.jpg"
-            alt="why Choose herbal fat loss"
-            width={740}
-            height={766}
-            className="rounded-2xl"
-          />
           <div>
-            <Paragraph
-              paragraph="Why Choose Our Herbal Fat Loss Formula?"
-              textColor="text-dark"
-              textSize="md:text-3xl lg:text-5xl text-2xl font-semibold"
-              className="mb-8"
-              highlightedWord="Why Choose"
+            <Image
+              src={getProductContent(product.name).customImage}
+              alt={product.name}
+              width={740}
+              height={766}
+              className="rounded-2xl w-full h-auto"
             />
-            <Accordion items={productWhyChoose} className="mx-auto mb-8" />
+          </div>
+          <div>
+          <h2 className="md:text-3xl lg:text-5xl text-2xl font-semibold mb-8">
+              <span className="text-green-800">Why Choose</span>{" "}
+              {dynamicProductContent.whyChooseTitle}
+            </h2>
+            <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
               label="Get Started today"
               variant="btn-dark"
               size="xl"
-              link="/"
+              link={`/checkout?product=${product.id}`}
             />
           </div>
         </div>
       </section>
+
       <section className="mb-16 lg:mb-40 overflow-hidden">
         <div className="container">
           <span className="top-content-badge">Key Ingredients</span>
@@ -269,8 +473,8 @@ export default function Productdata() {
           <Swiper
             modules={[Navigation, Scrollbar, A11y]}
             className="!overflow-visible"
-            slidesPerView={3}
             spaceBetween={24}
+            slidesPerView={1}
             autoHeight
             navigation={{
               nextEl: ".process-next-button",
@@ -282,182 +486,153 @@ export default function Productdata() {
               hide: false,
             }}
             breakpoints={{
-              320: {
-                slidesPerView: 1.3,
-                spaceBetween: 20,
-              },
-              640: {
-                slidesPerView: 1.5,
-                spaceBetween: 24,
-              },
-              768: {
-                slidesPerView: 2,
-                spaceBetween: 24,
-              },
-              1024: {
-                slidesPerView: 3,
-                spaceBetween: 24,
-              },
+              640: { slidesPerView: 1, spaceBetween: 24 },
+              768: { slidesPerView: 2, spaceBetween: 24 },
+              1024: { slidesPerView: 3, spaceBetween: 24 },
             }}
           >
-            {keyIngredients.map((keyIngredients, index) => (
-              <SwiperSlide key={index} className="!h-full">
+            {(product.key_ingredients || []).map((item, idx) => (
+              <SwiperSlide key={idx} className="!h-full">
                 <div className="relative p-6 md:p-10 rounded-2xl bg-white h-full">
                   <div className="relative text-center">
                     <Image
-                      src={keyIngredients.image}
-                      alt={keyIngredients.title}
+                      src={item.image}
+                      alt={item.title}
                       width={200}
                       height={200}
-                      className="mx-auto mb-4 rounded-full aspect-square"
+                      className="mx-auto mb-4 rounded-full aspect-square object-cover"
                     />
                     <h3 className="font-medium text-lg sm:text-2xl mb-2 lg:mb-4">
-                      {keyIngredients.title}
+                      {item.title}
                     </h3>
-                    <p className="text-gray-500">
-                      {keyIngredients.description}
-                    </p>
+                    <p className="text-gray-500">{item.description}</p>
                   </div>
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
-          <div className="mt-8 flex items-center justify-between">
-            <div className="process-scrollbar-custom h-2 w-1/2 rounded-full bg-gray-200">
-              <div className="swiper-scrollbar-drag !bg-primary"></div>
+
+          {(product.key_ingredients || []).length > 3 && (
+            <div className="mt-8 flex items-center justify-between z-50">
+              <div className="process-scrollbar-custom h-2 w-1/2 rounded-full bg-gray-200">
+                <div className="swiper-scrollbar-drag rounded-full h-full !bg-primary"></div>
+              </div>
+              <div className="ml-6 flex space-x-3">
+                <RoundButton
+                  className="process-prev-custom swiper-custome-button rotate-180"
+                  variant="btn-dark"
+                  size="lg"
+                />
+                <RoundButton
+                  className="process-next-button swiper-custome-button"
+                  variant="btn-dark"
+                  size="lg"
+                />
+              </div>
             </div>
-            <div className="ml-6 flex space-x-3">
-              <RoundButton
-                className="process-prev-custom swiper-custome-button rotate-180"
-                variant="btn-dark"
-                size="lg"
-              />
-              <RoundButton
-                className="process-next-button swiper-custome-button"
-                variant="btn-dark"
-                size="lg"
-              />
-            </div>
-          </div>
+          )}
         </div>
       </section>
+
       <section className="mb-16 lg:mb-40">
-        <div className="container ">
+        <div className="container">
           <div className="p-10 bg-white rounded-2xl overflow-hidden">
-            <Paragraph
-              paragraph="How It Works"
-              textColor="text-dark"
-              className="lg:mb-10 md:mb-6 mb-4"
-              highlightedWord="Works"
-            />
-            <p className="text-gray-700 mb-6">
-              Our herbal fat loss formula works by targeting multiple aspects of
-              fat burning. It helps raise your metabolism, reduce hunger
-              cravings, and boost energy levels, making it easier to maintain a
-              healthy, active lifestyle. When combined with a balanced diet and
-              regular exercise, you can see real, sustainable results in your
-              fat loss journey.
-            </p>
-            <Button
-              label="Get Started today"
-              variant="btn-dark"
-              size="xl"
-              link="/"
-            />
-            <Swiper
-              className="!pt-8 border-t border-gray-200 mt-8 !overflow-visible how-it-works-product-slider"
-              slidesPerView={3}
-              spaceBetween={24}
-              autoHeight
-              breakpoints={{
-                320: {
-                  slidesPerView: 1,
-                  spaceBetween: 20,
-                },
-                640: {
-                  slidesPerView: 1.5,
-                  spaceBetween: 24,
-                },
-                768: {
-                  slidesPerView: 2,
-                  spaceBetween: 24,
-                },
-                1024: {
-                  slidesPerView: 3,
-                  spaceBetween: 24,
-                },
-              }}
-            >
-              {howItWorks.map((howItWorks, index) => (
-                <SwiperSlide
-                  key={index}
-                  className="relative !h-full !flex !flex-col items-center"
-                >
-                  <div className="bg-green-100 rounded-full min-h-16 min-w-16 flex justify-center items-center ">
-                    <span className="text-3xl font-semibold text-green-800">
-                      {index + 1}
-                    </span>
-                  </div>
-                  <Image
-                    src="/images/icon/slider-drip.svg"
-                    alt="Clutch Logo"
-                    width={53}
-                    height={42}
-                    className="-mt-3.5"
-                  />
-                  <div className="p-6 xl:p-10 rounded-2xl bg-green-100 h-full">
-                    <h3 className="font-medium text-lg sm:text-xl sm:mb-4 mb-3">
-                      {howItWorks.title}
-                    </h3>
-                    <p className="text-gray-700 mt-auto">
-                      {howItWorks.description}
-                    </p>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </div>
-      </section>
-      <section className="container mb-16 lg:mb-40">
-        <div className=" grid md:grid-cols-2 gap-10 items-center">
-        <Image
-              src="/images/product.png"
-              alt="Clutch Logo"
-              width={691}
-              height={586}
-              className="rounded-2xl aspect-square object-cover"
-            />
-        <div >
+            <div className="relative">
               <Paragraph
-                paragraph="Who Can Benefit?"
+                paragraph="How It Works"
                 textColor="text-dark"
-                className="lg:mb-10 mb-6"
-                highlightedWord="Benefit?"
+                className="mb-4"
+                highlightedWord="Works"
               />
-              <div className="space-y-5 lg:mb-10 mb-6">
-          {Benefit.map((item, index) => (
-            <div key={index} className="flex items-start ">
-              <Image
-                src="/images/icon/list.svg"
-                alt="About hero image"
-                width={24}
-                height={24}
-              />
-              <p className="text-gray-700">{item.text}</p>
-            </div>
-          ))}
-        </div>
-              <div className="flex gap-4">
+              <p className="text-gray-700 mb-6">
+                {getText(product.how_it_works || "", language)}
+              </p>
               <Button
-                label="Get Started Now"
+                label="Get Started today"
                 variant="btn-dark"
                 size="xl"
-                link="/"
+                link={`/checkout?product=${product.id}`}
               />
-              <Button label="Buy Now" variant="btn-light" size="xl" link="/" />
+
+              <Swiper
+                className="mt-8 !overflow-visible how-it-works-product-slider"
+                slidesPerView={1}
+                spaceBetween={24}
+                autoHeight
+                breakpoints={{
+                  320: { slidesPerView: 1, spaceBetween: 20 },
+                  640: { slidesPerView: 1.5, spaceBetween: 24 },
+                  768: { slidesPerView: 2, spaceBetween: 24 },
+                  1024: { slidesPerView: 3, spaceBetween: 24 },
+                }}
+              >
+                <div className="w-full border-t-2 border-dashed border-green-600 absolute top-8 left-0 z-0" />
+                {howItWorks.map((item, index) => (
+                  <SwiperSlide
+                    key={index}
+                    className="relative !h-full !flex !flex-col items-center z-10"
+                  >
+                    <div className="bg-green-100 rounded-full min-h-16 min-w-16 flex justify-center items-center ">
+                      <span className="text-3xl font-semibold text-green-800">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <Image
+                      src="/images/icon/slider-drip.svg"
+                      alt="Slider visual element"
+                      width={53}
+                      height={42}
+                      className="-mt-3.5"
+                    />
+                    <div className="p-6 xl:p-10 rounded-2xl bg-green-100 h-full">
+                      <h3 className="font-medium text-lg sm:text-xl sm:mb-4 mb-3">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-700 mt-auto">
+                        {item.description}
+                      </p>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
-            </div>
+          </div>
+        </div>
+      </section>
+      <section className="container mb-16 lg:mb-40 grid md:grid-cols-2 gap-6 lg:gap-10 items-center">
+        <Image
+          src={dynamicProductContent.benefitImage}
+          alt="Who can Benefit?"
+          width={740}
+          height={740}
+          className="aspect-square object-cover rounded-3xl"
+        />
+        <div className="">
+          <Paragraph
+            paragraph="Who can Benefit?"
+            textColor="text-dark"
+            highlightedWord="Who can"
+            className="mb-6 lg:mb-10"
+          />
+          <div className="space-y-3 mb-6 lg:mb-10">
+          {dynamicProductContent.benefitTags.map((item, index) => (
+              <Checkmark key={index} text={item} />
+            ))}
+          </div>
+          <div className="flex gap-4">
+            <Button
+              label="Get Started Now"
+              variant="btn-dark"
+              size="xl"
+              link={`/checkout?product=${product.id}`}
+            />
+            <Button
+              label="Buy Now"
+              variant="btn-light"
+              size="xl"
+              link={`/checkout?product=${product.id}`}
+            />
+          </div>
         </div>
       </section>
       <section className="container mb-16 lg:mb-40">
@@ -468,38 +643,39 @@ export default function Productdata() {
             highlightedWord="Use"
           />
           <p className="text-base md:text-lg lg:text-2xl">
-            Take 1 tablet morning and evening daily with a glass of water,
-            preferably 30 minutes before meals. For optimal results, pair with a
-            healthy diet and exercise routine.
+          {getText(dynamicProductContent.howToUseDescription, language)}
           </p>
         </div>
       </section>
+
       <section className=" mb-16 lg:mb-40 lg:py-20 py-10 bg-gray-200">
         <div className="container grid md:grid-cols-2 gap-10 items-center">
-        <div className="lg:order-1 order-2">
-              <Paragraph
-                paragraph="Why Choose Us?"
-                textColor="text-dark"
-                className="lg:mb-10 mb-6"
-                highlightedWord="Choose Us?"
-              />
-              <p className="text-base md:text-lg lg:text-2xl">
-                Take 1 tablet morning and evening daily with a glass of water,
-                preferably 30 minutes before meals. For optimal results, pair
-                with a healthy diet and exercise routine.
-              </p>
-            </div>
-            <Image
-              src="/images/why-choose.png"
-              alt="Clutch Logo"
-              width={691}
-              height={586}
-              className="lg:order-2 order-1"
+          <div className="lg:order-1 order-2">
+            <Paragraph
+              paragraph="Why Choose Us?"
+              textColor="text-dark"
+              className="lg:mb-10 mb-6"
+              highlightedWord="Choose Us?"
             />
+            <p className="text-base md:text-lg lg:text-2xl text-gray-600">
+            {getText(
+                dynamicProductContent.whyChooseUsSectionDescription,
+                language
+              )}
+            </p>
+          </div>
+          <Image
+            src="/images/why-choose.png"
+            alt="Why choose us"
+            width={691}
+            height={586}
+            className="lg:order-2 order-1"
+          />
         </div>
       </section>
-      <Testimonials />
-      <FaqAccordion items={weightlossfaqdata} className="mx-auto" />
+
+      <Testimonials filteredByProductId={product.id} />
+      <FaqAccordion items={faqItems} className="mx-auto" />
     </>
   );
 }

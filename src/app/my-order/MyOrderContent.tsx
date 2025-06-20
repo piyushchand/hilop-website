@@ -1,85 +1,223 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import Modal from "@/components/animationComponents/animated-model";
-import Link from "next/link";
+import { OrderService, Order } from "@/services/orderService";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
-// Dummy Orders (example only)
-const dummyOrders = Array.from({ length: 12 }).map((_, i) => ({
-  id: String(i + 1),
-  status: i % 2 === 0 ? "Delivered" : "Ongoing",
-  date: "2024-07-15",
-  total: 59.99,
-  address: "Shop Number 3, Sabira Manzil, Near Union Bank, Rani Sati Marg, Malad (E), Kedarmal Rd, Malad East",
-  items: [
-    {
-      name: "The Ordinary Multi-Peptide + Copper Peptides 1% Serum - 30ml",
-      quantity: 1,
-      price: 70.0,
-    },
-    {
-      name: "The Ordinary Niacinamide 10% + Zinc 1% - 30ml",
-      quantity: 1,
-      price: 50.0,
-    },
-  ],
-  summary: {
-    mrp: 120.0,
-    discount: 10.0,
-    coupon: 0.0,
-    shipping: 10.0,
-    finalAmount: 110.0,
-  },
-}));
+// Types for the component
+type OrderStatus = "processing" | "delivered" | "cancelled" | "shipped" | "pending";
 
-// Types
-type OrderItem = {
-  name: string;
-  quantity: number;
-  price: number;
-};
-
-type Order = {
-  id: string;
-  status: "Ongoing" | "Delivered" | "Cancelled" | "Others";
-  date: string;
-  total: number;
-  address: string; 
-  items: OrderItem[];
-  summary: {
-    mrp: number;
-    discount: number;
-    coupon: number;
-    shipping: number;
-    finalAmount: number;
-  };
-};
-
-const filterOptions: Array<
-  "All" | "Ongoing" | "Delivered" | "Cancelled" | "Others"
-> = ["All", "Ongoing", "Delivered", "Cancelled", "Others"];
+const filterOptions: Array<"All" | OrderStatus> = ["All", "processing", "delivered", "cancelled", "shipped", "pending"];
 
 export default function MyOrder() {
-  const [activeFilter, setActiveFilter] =
-    useState<(typeof filterOptions)[number]>("All");
+  const [activeFilter, setActiveFilter] = useState<(typeof filterOptions)[number]>("All");
   const [modalOrder, setModalOrder] = useState<Order | null>(null);
   const [visibleCount, setVisibleCount] = useState(4);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [invoiceDownloading, setInvoiceDownloading] = useState(false);
 
-  const filteredOrders =
-    activeFilter === "All"
-      ? dummyOrders
-      : dummyOrders.filter((order) => order.status === activeFilter);
+  // Fetch orders on component mount
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await OrderService.getOrderList();
+        if (response.success) {
+          setOrders(response.data);
+        } else {
+          setError("Failed to fetch orders");
+        }
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError("Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const filteredOrders = activeFilter === "All" 
+    ? orders 
+    : orders.filter((order) => order.status === activeFilter);
 
   const visibleOrders = filteredOrders.slice(0, visibleCount);
+
+  // Get available statuses that have orders
+  const getAvailableStatuses = () => {
+    const statusCounts = orders.reduce((acc, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Always include "All" and add statuses that have orders
+    return ["All", ...filterOptions.filter(status => status !== "All" && statusCounts[status])] as Array<"All" | OrderStatus>;
+  };
+
+  const getStatusCount = (status: "All" | OrderStatus) => {
+    if (status === "All") return orders.length;
+    return orders.filter(order => order.status === status).length;
+  };
+
+  const availableStatuses = getAvailableStatuses();
+
+  // Reset activeFilter if current filter is not available
+  useEffect(() => {
+    if (!availableStatuses.includes(activeFilter)) {
+      setActiveFilter("All");
+    }
+  }, [availableStatuses, activeFilter]);
 
   const handleShowMore = () => {
     setVisibleCount((prev) => prev + 4);
   };
+
+  const handleOrderClick = async (order: Order) => {
+    try {
+      setModalLoading(true);
+      const response = await OrderService.getOrderDetail(order._id);
+      if (response.success) {
+        setModalOrder(response.data);
+      } else {
+        console.error("Failed to fetch order details");
+        // Fallback to basic order data
+        setModalOrder(order);
+      }
+    } catch (err) {
+      console.error("Error fetching order details:", err);
+      // Fallback to basic order data
+      setModalOrder(order);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    try {
+      setInvoiceDownloading(true);
+      const result = await OrderService.downloadInvoice(orderId);
+      
+      if (result.success && 'data' in result && result.data) {
+        console.log('Invoice download response:', result.data);
+        
+        // Handle the API response format you showed
+        if (result.data.pdf_base64) {
+          try {
+            // Convert base64 to blob and download
+            const byteCharacters = atob(result.data.pdf_base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = result.data.filename || `invoice-${orderId}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            console.log('PDF downloaded successfully:', result.data.filename);
+            alert('Invoice downloaded successfully!');
+          } catch (base64Error) {
+            console.error('Error converting base64 to PDF:', base64Error);
+            alert('Error processing PDF data. Please try again.');
+          }
+        } else {
+          console.error('No PDF data found in response:', result.data);
+          alert('No invoice data available for download.');
+        }
+      } else {
+        console.error('Failed to download invoice:', result);
+        const errorMessage = 'error' in result ? result.error : 'Unknown error';
+        alert(`Failed to download invoice: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Error downloading invoice. Please try again.');
+    } finally {
+      setInvoiceDownloading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "processing":
+        return "bg-yellow-100 text-yellow-800";
+      case "shipped":
+        return "bg-blue-100 text-blue-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "pending":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const formatAddress = (address: Order['shipping_address']) => {
+    if (!address) return '';
+    const parts = [
+      address.address,
+      address.landmark,
+      address.city,
+      address.state,
+      address.zipcode,
+      address.country
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
+
+  if (loading) {
+    return (
+      <section className="w-full bg-gray-100 mb-16 lg:mb-40">
+        <div className="container lg:mt-20 mt-10">
+          <h1 className="text-5xl 2xl:text-6xl font-semibold mb-6 lg:mb-10">
+            My Orders
+          </h1>
+          <div className="flex justify-center items-center py-20">
+            <LoadingSpinner isVisible={true} />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full bg-gray-100 mb-16 lg:mb-40">
@@ -88,28 +226,36 @@ export default function MyOrder() {
           My Orders
         </h1>
 
-        {/* Swiper Filter */}
-        <Swiper
-          spaceBetween={16}
-          slidesPerView="auto"
-          className="mb-8"
-          centeredSlides={false}
-        >
-          {filterOptions.map((status) => (
-            <SwiperSlide key={status} className="!w-fit">
-              <Button
-                onClick={() => {
-                  setActiveFilter(status);
-                  setVisibleCount(4);
-                }}
-                className="w-full"
-                label={status}
-                variant={activeFilter === status ? "btn-primary" : "btn-light"}
-                size="xl"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {/* Swiper Filter - Only show when there are orders */}
+        {orders.length > 0 && (
+          <Swiper
+            spaceBetween={16}
+            slidesPerView="auto"
+            className="mb-8"
+            centeredSlides={false}
+          >
+            {availableStatuses.map((status) => (
+              <SwiperSlide key={status} className="!w-fit">
+                <Button
+                  onClick={() => {
+                    setActiveFilter(status);
+                    setVisibleCount(4);
+                  }}
+                  className="w-full"
+                  label={`${status.charAt(0).toUpperCase() + status.slice(1)}${status !== "All" ? ` (${getStatusCount(status)})` : ''}`}
+                  variant={activeFilter === status ? "btn-primary" : "btn-light"}
+                  size="xl"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        )}
 
         {/* Orders Grid */}
         {visibleOrders.length > 0 ? (
@@ -117,70 +263,60 @@ export default function MyOrder() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               {visibleOrders.map((order) => (
                 <div
-                  key={order.id}
-                  onClick={() => setModalOrder(order as Order)}
-                  className="bg-white rounded-lg border border-gray-200 transition-shadow cursor-pointer hover:shadow-lg"
+                  key={order._id}
+                  onClick={() => handleOrderClick(order)}
+                  className="bg-white rounded-lg border border-gray-200 transition-shadow cursor-pointer hover:shadow-lg flex flex-col"
                 >
                   <div className="flex px-5 py-3 justify-between items-center border-b border-gray-200">
                     <div>
-                      <h3 className="text-2xl font-medium text-dark mb-1">
-                        Kit #{order.id}
+                      <h3 className="text-lg font-medium text-dark mb-1">
+                        {order.order_number}
                       </h3>
                       <p className="text-gray-700">
-                        Order id #{order.id.padStart(7, "0")}
+                        Order ID: {order._id.slice(-8)}
                       </p>
                     </div>
                     <div>
                       <p className="text-lg text-gray-800 font-medium">
-                        {new Date(order.date).toLocaleDateString("en-US", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                        {formatDate(order.createdAt)}
                       </p>
-                      <p className="text-gray-700 text-end">6:08 pm</p>
+                      <p className="text-gray-700 text-end">
+                        {formatTime(order.createdAt)}
+                      </p>
                     </div>
                   </div>
-                  <div className="p-5 border-b border-gray-200 flex flex-col gap-3">
+                  <div className="p-5 flex flex-col gap-2">
                     {order.items.map((item, i) => (
-                      <div key={i} className="flex gap-4 items-center">
+                      <div key={i} className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200">
                         <Image
-                          src="/images/product.png"
-                          alt="Product image"
+                          src={item.image || "/images/placeholder.svg"}
+                          alt={item.name}
                           width={80}
                           height={80}
-                          className="w-20 h-20 rounded-lg object-cover"
+                          className="w-20 h-20 rounded-lg object-cover bg-gray-200"
                         />
                         <div>
                           <p className="text-lg text-gray-700 mb-1 line-clamp-2">
                             {item.name}
                           </p>
                           <p className="text-base font-medium text-dark">
-        Qty: {item.quantity} × ${item.price.toFixed(2)}
-      </p>
+                            Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
+                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <div className="p-5 flex justify-between">
+                  <div className="p-5 border-t border-gray-200 flex justify-between items-center mt-auto">
                     <span
-                      className={`text-sm font-medium px-2 py-1 rounded-full ${
-                        order.status === "Delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "Ongoing"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                      className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(order.status)}`}
                     >
-                      {order.status}
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
-                    <Link
-                      href={`/invoices/${order.id}.pdf`}
-                      download
-                      className="text-green-800 hover:underline text-center font-semibold block"
-                    >
-                      Download invoice
-                    </Link>
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-dark">
+                        ${order.total ? order.total.toFixed(2) : '0.00'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -211,94 +347,109 @@ export default function MyOrder() {
             isOpen={!!modalOrder}
             onClose={() => setModalOrder(null)}
           >
-            <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
-              Kit #{modalOrder.id}
-            </h2>
-            <div className="max-h-[65vh] md:max-h-auto overflow-y-auto">
-              <div className="p-6 flex items-center justify-between">
-                <p className="text-gray-700 text-sm">
-                  Order id #{modalOrder.id.padStart(7, "0")}
-                </p>
-                <p className="text-gray-700 text-sm">{modalOrder.date}</p>
+            {modalLoading ? (
+              <div className="p-8 flex justify-center">
+                <LoadingSpinner isVisible={true} />
               </div>
-              <div className="px-6 flex flex-col gap-3">
-                {modalOrder.items.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-4 items-center border-b last:border-0 pb-3 border-gray-200"
-                  >
-                    <Image
-                      src="/images/product.png"
-                      alt="Product image"
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="text-lg text-gray-700 mb-1 line-clamp-2">{item.name}</p>
-                      <p className="text-base font-medium text-dark">
-        Qty: {item.quantity} × ${item.price.toFixed(2)}
-      </p>
+            ) : (
+              <>
+                <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
+                  {modalOrder.order_number}
+                </h2>
+                <div className="max-h-[70vh] overflow-y-auto">
+                  {/* Order Info */}
+                  <div className="p-6 flex items-center justify-between border-gray-200">
+                    <p className="text-gray-700 text-sm">
+                      Order ID: {modalOrder._id.slice(-8)}
+                    </p>
+                    <p className="text-gray-700 text-sm">{formatDate(modalOrder.createdAt)}</p>
+                  </div>
+
+                  {/* Items */}
+                  <div className="px-6 border-gray-200">
+                    <h3 className="font-medium text-dark text-lg mb-3">Order Items</h3>
+                    <div className="flex flex-col gap-3">
+                      {modalOrder.items.map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200"
+                        >
+                          <Image
+                            src={item.image || "/images/placeholder.svg"}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 rounded-lg object-cover bg-gray-200"
+                          />
+                          <div className="flex-1">
+                            <p className="text-lg text-dark font-medium mb-1 line-clamp-2">{item.name}</p>
+                            <p className="text-md mb-1 text-gray-600">
+                              Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Total: ${item.total ? item.total.toFixed(2) : '0.00'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="p-6">
-                <p className="font-medium text-dark text-lg">Address</p>
-                <p className="text-gray-600">
-                {modalOrder.address}
-                </p>
-              </div>
-              <div className="p-6 bg-gray-100 flex flex-col gap-3">
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">
-                    Bag MRP ({modalOrder.items.length} items)
-                  </p>
-                  <p className="text-gray-600 font-medium">
-                    ${modalOrder.summary.mrp.toFixed(2)}
-                  </p>
+
+                  {/* Shipping Address */}
+                  {modalOrder.shipping_address && (
+                    <div className="p-6 border-b border-gray-200">
+                      <h3 className="font-medium text-dark text-lg mb-3">Shipping Address</h3>
+                        <p className="text-gray-600 mt-2">{formatAddress(modalOrder.shipping_address)}</p>
+                    </div>
+                  )}
+
+                  {/* Order Summary */}
+                  <div className="p-6 bg-gray-100 flex flex-col gap-3">
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                      <p className="text-dark">Subtotal</p>
+                      <p className="text-gray-600 font-medium">
+                        ${modalOrder.subtotal ? modalOrder.subtotal.toFixed(2) : '0.00'}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                      <p className="text-dark">Shipping Fee</p>
+                      <p className="text-gray-600 font-medium">
+                        ${modalOrder.shipping_fee ? modalOrder.shipping_fee.toFixed(2) : '0.00'}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                      <p className="text-dark">Tax</p>
+                      <p className="text-gray-600 font-medium">
+                        ${modalOrder.tax ? modalOrder.tax.toFixed(2) : '0.00'}
+                      </p>
+                    </div>
+                    {(modalOrder.hilop_coins_discount || 0) > 0 && (
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <p className="text-dark">Hilop Coins Discount</p>
+                        <p className="text-green-800 font-medium">
+                          -${(modalOrder.hilop_coins_discount || 0).toFixed(2)}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-3">
+                      <p className="text-dark font-semibold text-lg">Total Amount</p>
+                      <Button
+                        label={`$${modalOrder.total ? modalOrder.total.toFixed(2) : '0.00'}`}
+                        variant="btn-dark"
+                        size="xl"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Discount From Coins</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.discount.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Subscription Discount</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.coupon.toFixed(2)}
-                  </p>
-                </div>{" "}
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Coupon Discount</p>
-                  <p className="text-green-800 font-medium">
-                    -${modalOrder.summary.coupon.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                  <p className="text-dark">Shipping</p>
-                  <p className="text-gray-600 font-medium">
-                    ${modalOrder.summary.shipping.toFixed(2)}
-                  </p>
-                </div>
-                <div className="flex justify-between items-center pt-3">
-                  <p className="text-dark font-semibold">Amount to be paid</p>
-                  <Button
-                    label={`$${modalOrder.summary.finalAmount.toFixed(2)}`}
-                    variant="btn-dark"
-                    size="xl"
-                  />
-                </div>
-              </div>
-            </div>
-            <Link
-              href={`/invoices/${modalOrder.id}.pdf`}
-              download
-              className="text-green-800 hover:underline p-6 text-center font-semibold block"
-            >
-              Download invoice
-            </Link>
+                <button
+                  onClick={() => handleDownloadInvoice(modalOrder._id)}
+                  disabled={invoiceDownloading}
+                  className="text-green-800 hover:underline p-6 text-center font-semibold block border-t border-gray-200 w-full bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {invoiceDownloading ? 'Downloading...' : 'Download invoice'}
+                </button>
+              </>
+            )}
           </Modal>
         )}
       </div>

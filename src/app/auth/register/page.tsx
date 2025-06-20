@@ -1,11 +1,12 @@
 'use client';
+
 import { useState, useCallback } from 'react';
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import AuthLayout from "../AuthLayout";
-import { useAuthOperations } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'react-hot-toast';
 
 interface FormData {
   name: string;
@@ -15,9 +16,7 @@ interface FormData {
 }
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const { register, isLoading, error, setError, clearError } = useAuthOperations();
-  
+  const { register, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -28,10 +27,13 @@ export default function RegisterPage() {
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const processedValue = name === 'mobile_number' 
+      ? value.replace(/\D/g, '').slice(0, 10)
+      : value;
     
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: processedValue
     }));
     
     if (error) clearError();
@@ -58,14 +60,12 @@ export default function RegisterPage() {
     const mobileNumber = formData.mobile_number.trim();
     if (!mobileNumber) {
       errors.push('Mobile number is required');
+    } else if (mobileNumber.length !== 10) {
+      errors.push('Please enter a valid 10-digit mobile number');
     } else {
-      if (mobileNumber.length !== 10) {
-        errors.push('Please enter a valid 10-digit mobile number');
-      } else {
-        const phoneRegex = /^[6-9]\d{9}$/;
-        if (!phoneRegex.test(mobileNumber)) {
-          errors.push('Please enter a valid Indian mobile number starting with 6-9');
-        }
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(mobileNumber)) {
+        errors.push('Please enter a valid Indian mobile number starting with 6-9');
       }
     }
 
@@ -98,44 +98,25 @@ export default function RegisterPage() {
     if (isLoading) return;
     
     clearError();
-    console.log("formdata",formData)
   
     try {
       validateForm();
   
-      const mobileNumber = formData.mobile_number.trim();
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        mobile_number: `91${mobileNumber}`,
+        mobile_number: `91${formData.mobile_number.trim()}`,
         birthdate: formData.birthdate,
       };
 
-      console.log('Submitting registration data:', registrationData);
-  
-      const response = await register(registrationData);
-      console.log('Registration response:', response);
-  
-      if (response?.success && response?.user_id) {
-        const otpUrl = `/auth/otp?type=register&userId=${response.user_id}&mobile=${registrationData.mobile_number}`;
-        console.log('Redirecting to:', otpUrl);
-        router.push(otpUrl);
-      } else {
-        throw new Error(response?.message || "Registration failed. Please try again.");
-      }
+      await register(registrationData);
     } catch (err) {
-      console.error("Registration error:", err);
       if (err instanceof Error) {
-        setError(err.message);
+        toast.error(err.message);
       } else {
-        setError("Registration failed. Please try again.");
+        toast.error('Registration failed. Please try again.');
       }
     }
-  };
-
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    // TODO: Implement social login
-    console.log(`Social login with ${provider}`);
   };
 
   return (
@@ -214,12 +195,12 @@ export default function RegisterPage() {
               disabled={isLoading}
             />
             <span className="text-sm text-gray-600 font-medium">
-              By registering, you agree to our
-              <a href="/terms" className="underline mx-1 text-dark hover:underline">
+              By registering, you agree to our{' '}
+              <a href="/terms" className="underline text-dark hover:underline">
                 Terms & Conditions
               </a>
-              &
-              <a href="/privacy" className="underline mx-1 text-dark hover:underline">
+              {' '}and{' '}
+              <a href="/privacy" className="underline text-dark hover:underline">
                 Privacy Policy
               </a>
             </span>
@@ -240,7 +221,6 @@ export default function RegisterPage() {
         <div className="flex gap-4">
           <button 
             type="button"
-            onClick={() => handleSocialLogin('google')}
             className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}
           >
@@ -255,7 +235,6 @@ export default function RegisterPage() {
           
           <button 
             type="button"
-            onClick={() => handleSocialLogin('facebook')}
             className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}
           >

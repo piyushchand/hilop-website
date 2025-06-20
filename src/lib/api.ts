@@ -7,7 +7,7 @@ import {
     LoginResponse,
     VerifyLoginRequest,
     VerifyLoginResponse
-  } from '@/types/auth';
+} from '@/types/auth';
 import { logger } from '@/utils/logger';
   
   // Update API base URL to use environment variable or default

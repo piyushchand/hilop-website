@@ -89,7 +89,7 @@ export function useAuthOperations() {
     }
   };
 
-  const verifyToken = async (_token: string): Promise<User | null> => {
+  const verifyToken = async (): Promise<User | null> => {
     try {
       // TODO: Implement token verification endpoint
       // For now, return null as the endpoint is not implemented

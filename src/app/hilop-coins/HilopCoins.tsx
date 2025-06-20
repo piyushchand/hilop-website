@@ -7,6 +7,8 @@ import "swiper/css/navigation";
 import FaqAccordion from "@/components/FaqAccordion";
 import MobileApproch from "@/components/Mobileapproch";
 import { BadgeCheck, Copy } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+
 const homepagefaqdata = [
   {
     id: "faq1",
@@ -62,6 +64,7 @@ const hilopRules = [
 
 export default function HilopCoins() {
   const [copied, setCopied] = useState<boolean>(false);
+  const { user, isLoading, isInitialized } = useAuth();
   const referralLink = "https://hilop.com/refer/user123";
 
   const handleCopy = async () => {
@@ -69,6 +72,19 @@ export default function HilopCoins() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // Show loading or fallback if user data is not ready
+  if (!isInitialized || isLoading) {
+    return (
+      <section className="w-full lg:mb-40 mb-20">
+        <div className="container py-20 flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
+          <p className="text-gray-600">Please wait while we load your Hilop Coins.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       <section className="w-full  lg:mb-40 mb-20">
@@ -108,7 +124,7 @@ export default function HilopCoins() {
                 className="size-12 lg:size-[90px]"
               />
               <h2 className=" text-xl lg:text-5xl 2xl:text-6xl font-medium text-white">
-                <span>1200</span> Coins
+                <span>{user?.hilop_coins ?? 0}</span> Coins
               </h2>
             </div>
           </div>
@@ -122,7 +138,7 @@ export default function HilopCoins() {
               Earn Rewards and Enjoy Discounts!
             </h2>
             <p className="text-gray-600 mb-4">
-              Once you collect 2000 coins, you’ll receive a 20% discount on your
+              Once you collect 2000 coins, you&apos;ll receive a 20% discount on your
               next order!
             </p>
             <p className="text-gray-600 mb-7">
@@ -138,10 +154,10 @@ export default function HilopCoins() {
             </h2>
             <p className="text-gray-600 mb-4">
               Refer a friend today! When they complete their first order,
-              youll unlock a 20% discount on your next purchase.
+              you&apos;ll unlock a 20% discount on your next purchase.
             </p>
             <p className="text-gray-600 mb-7">
-              It’s simple — share, refer, and save!
+              It&apos;s simple — share, refer, and save!
             </p>
             <Button label="Rafer a friend" variant="btn-primary" size="xl" />
           </div>
@@ -166,36 +182,36 @@ export default function HilopCoins() {
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   ✅ Mark your daily doses:
-                </span>{" "}
-                with a simple checkbox and earn{" "}
+                </span>{' '}
+                with a simple checkbox and earn{' '}
                 <span className="text-dark font-semibold">1 Hilop</span> Coin
                 every time you check in.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   🔔 Daily Dose Reminders:
-                </span>{" "}
+                </span>{' '}
                 Get automatic notifications at your preferred time so you never
                 miss a dose.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   🕒 Custom Notification Time:
-                </span>{" "}
+                </span>{' '}
                 Set and change your daily reminder time easily from the app.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   📅 Track Your History:
-                </span>{" "}
+                </span>{' '}
                 See your dose completion history and stay motivated with
                 streaks.
               </p>
               <p className="text-gray-700 mb-7">
                 <span className="text-dark font-semibold">
                   🔁 Smart Reminders:
-                </span>{" "}
-                Forgot to take a dose? We’ll remind you again later!
+                </span>{' '}
+                Forgot to take a dose? We&apos;ll remind you again later!
               </p>
               <Button label="Claim my Dose" variant="btn-dark" size="xl" />
             </div>
@@ -209,8 +225,8 @@ export default function HilopCoins() {
               />
               <h2 className="text-2xl font-medium mb-3">Refer a Friend</h2>
               <p className="text-gray-700 mb-11">
-                When your friend places their first order, you ll get a
-                <span className="font-semibold text-dark"> 20% discount</span>{" "}
+                When your friend places their first order, you&apos;ll get a
+                <span className="font-semibold text-dark"> 20% discount</span>{' '}
                 on your next purchase!
               </p>
               <div className="relative">
@@ -252,7 +268,7 @@ export default function HilopCoins() {
                   <p className="text-gray-700">
                     <span className="text-dark font-semibold">
                       {rule.title}
-                    </span>{" "}
+                    </span>{' '}
                     {rule.description}
                   </p>
                 </div>
