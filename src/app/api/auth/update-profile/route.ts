@@ -1,24 +1,39 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function PUT(request: Request) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
 
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
+
+    let body;
+
+    if (contentType.includes('multipart/form-data')) {
+      body = await request.formData();
+    } else {
+      const jsonData = await request.json();
+      body = JSON.stringify(jsonData);
+    }
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      ...(accessToken && { 'Authorization': `Bearer ${accessToken.value}` }),
+    };
+
+    if (!contentType.includes('multipart/form-data')) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const response = await fetch(`${API_URL}/user/profile`, {
       method: 'PUT',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...(accessToken && { 'Authorization': `Bearer ${accessToken.value}` }),
-      },
+      headers: headers,
       credentials: 'include',
-      body: JSON.stringify(body),
+      body: body,
     });
 
     if (!response.ok) {

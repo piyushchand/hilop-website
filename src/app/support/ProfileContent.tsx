@@ -1,69 +1,138 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
-import {
-  Package,
-  MessageCircleQuestion,
-  Tablets,
-  BookOpenText,
-  TicketSlash,
-  HandCoins,
-  BanknoteArrowDown,
-  CircleHelp,
-} from "lucide-react";
 
 import { PlaceholdersAndVanishInput } from "@/components/animationComponents/SearchInput";
 import Accordion from "@/components/uiFramework/Accordion";
+import {
+  getSupportCategories,
+  getSupportCategoryById,
+  searchSupport,
+} from "@/services/supportService";
+import {
+  SupportCategory,
+  SupportCategoryDetails,
+  SupportSearchResult,
+} from "@/types/support";
+import InlineSpinner from "@/components/uiFramework/InlineSpinner";
+import { debounce } from "lodash";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const placeholdersvanish = [
-  "What's the meaning of life?",
-  "How to build a custom PC?",
-  "Ideas for a weekend getaway?",
-  "Best ramen recipe?",
-  "Learn a new language",
-];
-
-const navItems = [
-  { name: "How to Use", icon: <MessageCircleQuestion strokeWidth="1" size={56} /> },
-  { name: "Prescription", icon: <Tablets strokeWidth="1" size={56} /> },
-  { name: "Order Concerns", icon: <Package strokeWidth="1" size={56} /> },
-  { name: "My Treatment", icon: <BookOpenText strokeWidth="1" size={56} /> },
-  { name: "Payment & Refund", icon: <TicketSlash strokeWidth="1" size={56} /> },
-  { name: "Reward Coins", icon: <BanknoteArrowDown strokeWidth="1" size={56} /> },
-  { name: "Money back Guarantee", icon: <HandCoins strokeWidth="1" size={56} /> },
-  { name: "General Queries", icon: <CircleHelp strokeWidth="1" size={56} /> },
-];
-
-const accordionData = [
-  [
-    { id: "1", question: "How to use the app?", answer: "Login and follow the tutorial." },
-    { id: "2", question: "Is there a guide?", answer: "Yes, in the Help section." },
-  ],
-  [
-    { id: "3", question: "How to upload a prescription?", answer: "Dashboard → Upload." },
-    { id: "4", question: "Is a prescription mandatory?", answer: "Yes, for controlled meds." },
-  ],
-  [
-    { id: "5", question: "Order delay issue?", answer: "Check order status in My Orders." },
-    { id: "6", question: "Modify my order?", answer: "Contact support ASAP." },
-  ],
-  [
-    { id: "7", question: "Where are my treatment results?", answer: "Check Reports section." },
-    { id: "8", question: "Can I talk to a doctor?", answer: "Yes, via in-app consultation." },
-  ],
-  [
-    { id: "9", question: "How to request a refund?", answer: "Visit Payments → Refund Request." },
-    { id: "10", question: "Accepted payment methods?", answer: "UPI, Cards, Wallets." },
-  ],
+  "Search for questions like 'how to track my order?'",
+  "How can I reset my password?",
+  "What are the payment options?",
+  "How to earn reward coins?",
 ];
 
 export default function Support() {
-  const [selectedIndex, setSelectedIndex] = useState(0); // Default to first
+  const [categories, setCategories] = useState<SupportCategory[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
+  const [selectedCategoryDetails, setSelectedCategoryDetails] =
+    useState<SupportCategoryDetails | null>(null);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingFaqs, setLoadingFaqs] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<SupportSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const { language, setLanguage } = useLanguage();
 
-  const currentAccordionItems = accordionData[selectedIndex];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const response = await getSupportCategories();
+        if (response.success && response.data.length > 0) {
+          setCategories(response.data);
+          // Select the first category by default
+          setSelectedCategoryId(response.data[0]._id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch support categories:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const performSearch = useCallback(
+    debounce(async (query: string) => {
+      if (query.trim().length > 1) {
+        setIsSearching(true);
+        setLoadingFaqs(false); // Stop loading regular FAQs
+        setSelectedCategoryId(null); // Deselect category
+        try {
+          const response = await searchSupport(query);
+          if (response.success) {
+            setSearchResults(response.data);
+          }
+        } catch (error) {
+          console.error("Failed to perform search:", error);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        if (categories.length > 0 && !selectedCategoryId) {
+          setSelectedCategoryId(categories[0]._id);
+        }
+      }
+    }, 500),
+    [categories, selectedCategoryId]
+  );
+
+  useEffect(() => {
+    performSearch(searchTerm);
+  }, [searchTerm, performSearch]);
+
+  useEffect(() => {
+    if (!selectedCategoryId && !isSearching && searchTerm.trim() === "") return;
+    if (!selectedCategoryId) return;
+
+    const fetchCategoryDetails = async () => {
+      try {
+        setLoadingFaqs(true);
+        setSelectedCategoryDetails(null); // Clear previous details
+        const response = await getSupportCategoryById(selectedCategoryId);
+        if (response.success) {
+          setSelectedCategoryDetails(response.data);
+        }
+      } catch (error) {
+        console.error(
+          `Failed to fetch support category details for id ${selectedCategoryId}:`,
+          error
+        );
+      } finally {
+        setLoadingFaqs(false);
+      }
+    };
+
+    fetchCategoryDetails();
+  }, [selectedCategoryId]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    performSearch.flush();
+  };
+
+  const getText = (obj: { en: string; hi: string }) => obj[language] || obj.en;
+
+  const accordionItems = selectedCategoryDetails?.faqs.map((faq) => ({
+    id: faq._id,
+    question: getText(faq.question),
+    answer: getText(faq.answer),
+  }));
 
   return (
     <>
@@ -72,91 +141,125 @@ export default function Support() {
           <h1 className="text-5xl 2xl:text-6xl mb-8 font-semibold">
             Hello, How can we help?
           </h1>
-          <div className="max-w-sm mx-auto">
-            <PlaceholdersAndVanishInput 
+          <div className="max-w-sm mx-auto mb-4">
+            <PlaceholdersAndVanishInput
               placeholders={placeholdersvanish}
-              onChange={(e) => {
-                // Handle input change
-                console.log(e.target.value);
-              }}
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Handle form submission
-                console.log('Form submitted');
-              }}
+              onChange={handleSearchChange}
+              onSubmit={handleSearchSubmit}
             />
           </div>
+          <button
+            onClick={() => setLanguage(language === "en" ? "hi" : "en")}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 transition mb-2"
+            aria-label="Toggle language"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414 1.414m12.728 0l-1.414-1.414M6.05 6.05L4.636 4.636" /></svg>
+            {language === "en" ? "English" : "हिंदी"}
+          </button>
         </div>
       </section>
 
       <section className="overflow-hidden lg:mb-40 mb-20">
-       <div className="container">
-       <Swiper
-          spaceBetween={16}
-          slidesPerView={1.6} // mobile default
-          slidesPerGroup={1}
-          loop={false}
-          autoHeight
-          className="mb-16 !overflow-visible"
-          breakpoints={{
-            640: {
-              slidesPerView: 2,
-            },
-            768: {
-              slidesPerView: 2.4,
-            },
-            1024: {
-              slidesPerView: 3.5,
-            },
-            1280: {
-              slidesPerView: 4.5,
-            },
-          }}
-        >
-          {navItems.map((item, index) => (
-            <SwiperSlide
-              key={index}
-              onClick={() => setSelectedIndex(index)}
-            
-            >
-              <div   className={`flex flex-col text-center !h-full bg-white items-center justify-center group p-4 rounded-lg border ${
-                selectedIndex === index
-                  ? "border-green-600"
-                  : "border-transparent"
-              } hover:border-green-300 transition-colors duration-200`}>
-              <div
-                className={`mb-4 text-center flex justify-center text-gray-700 ${
-                  selectedIndex === index
-                    ? "text-green-800"
-                    : "group-hover:text-green-800"
-                }`}
-              >
-                {item.icon}
-              </div>
-              <span
-                className={`md:text-xl text-md font-medium ${
-                  selectedIndex === index
-                    ? "text-green-800"
-                    : "text-gray-700 group-hover:text-green-800"
-                } `}
-              >
-                {item.name}
-              </span>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        <div>
-          {currentAccordionItems && currentAccordionItems.length > 0 ? (
-            <Accordion items={currentAccordionItems} className="mx-auto mb-8" />
-          ) : (
-            <div className="text-center text-gray-600 py-10">
-              No frequently asked questions available for this category yet. Please check back later!
+        <div className="container">
+          {loadingCategories ? (
+            <div className="flex justify-center items-center h-48">
+              <InlineSpinner />
             </div>
-          )}
+          ) : !isSearching && searchTerm.trim() === "" ? (
+            <Swiper
+              spaceBetween={16}
+              slidesPerView={1.6} // mobile default
+              slidesPerGroup={1}
+              loop={false}
+              autoHeight
+              className="mb-16 !overflow-visible"
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                },
+                768: {
+                  slidesPerView: 2.4,
+                },
+                1024: {
+                  slidesPerView: 3.5,
+                },
+                1280: {
+                  slidesPerView: 4.5,
+                },
+              }}
+            >
+              {categories.map((item) => (
+                <SwiperSlide
+                  key={item._id}
+                  onClick={() => setSelectedCategoryId(item._id)}
+                >
+                  <div
+                    className={`text-center !h-full bg-white group p-4 rounded-lg border ${
+                      selectedCategoryId === item._id
+                        ? "border-green-600"
+                        : "border-transparent"
+                    } hover:border-green-300 transition-colors duration-200 cursor-pointer`}
+                  >
+                    <span
+                      className={`md:text-xl text-md font-medium ${
+                        selectedCategoryId === item._id
+                          ? "text-green-800"
+                          : "text-gray-700 group-hover:text-green-800"
+                      } `}
+                    >
+                      {getText(item.title)}
+                    </span>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          ) : null}
+
+          <div>
+            {isSearching ? (
+              <div className="flex justify-center items-center py-10">
+                <InlineSpinner />
+              </div>
+            ) : searchResults.length > 0 ? (
+              <div>
+                {searchResults.map((result) => (
+                  <div key={result._id} className="mb-8">
+                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+                      {getText(result.title)}
+                    </h2>
+                    {result.matching_faqs.length > 0 ? (
+                      <Accordion
+                        items={result.matching_faqs.map((faq) => ({
+                          id: faq._id,
+                          question: getText(faq.question),
+                          answer: getText(faq.answer),
+                        }))}
+                        className="mx-auto"
+                      />
+                    ) : (
+                      <p className="text-gray-500">
+                        No matching FAQs in this category.
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : loadingFaqs ? (
+              <div className="flex justify-center items-center py-10">
+                <InlineSpinner />
+              </div>
+            ) : accordionItems && accordionItems.length > 0 ? (
+              <Accordion items={accordionItems} className="mx-auto mb-8" />
+            ) : (
+              !isSearching && (
+                <div className="text-center text-gray-600 py-10">
+                  No frequently asked questions available for this category yet.
+                  Please check back later!
+                </div>
+              )
+            )}
+          </div>
         </div>
-       </div>
       </section>
     </>
   );

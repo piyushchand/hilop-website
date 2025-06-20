@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
+
 export async function GET() {
   try {
     // Test the orders API endpoint
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1';
-    
     console.log('Testing orders API endpoint:', `${API_URL}/orders`);
     
     const response = await fetch(`${API_URL}/orders`, {
