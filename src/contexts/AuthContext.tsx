@@ -240,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error: null,
         isLoading: false
       }));
-      router.push('/auth/login');
+      router.push('/'); // Redirect to home page after logout
       toast.success('Logged out successfully');
     }
   };
