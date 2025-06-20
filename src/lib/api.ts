@@ -10,8 +10,8 @@ import {
 } from '@/types/auth';
 import { logger } from '@/utils/logger';
   
-  // Update API base URL to use environment variable or default
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  if (!API_BASE_URL) throw new Error('API URL is not set in environment variables');
   
   class ApiClient {
     private baseURL: string;
@@ -106,6 +106,11 @@ import { logger } from '@/utils/logger';
         method: 'POST',
         body: JSON.stringify(data),
       });
+    }
+  
+    // Add this public method for generic requests
+    public async requestPublic<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+      return this.request<T>(endpoint, options);
     }
   }
   

@@ -4,7 +4,8 @@ import { ProductListApiResponse, ProductApiResponse } from '@/types';
 // NOTE: No need for axios, Next.js extends the global `fetch` API
 // with caching and revalidating capabilities. It's the recommended way.
 
-const API_BASE_URL = 'http://3.110.216.61/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_BASE_URL) throw new Error('API URL is not set in environment variables');
 
 export const getProductList = async (): Promise<ProductListApiResponse> => {
     // We use { cache: 'no-store' } to ensure we always get the latest data.

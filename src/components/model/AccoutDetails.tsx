@@ -6,6 +6,7 @@ import AnimatedInput from "../animationComponents/AnimatedInput";
 import { User } from "@/types/auth";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import imageCompression from 'browser-image-compression';
 
 type AccountDetailsModalProps = {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface FormData {
   email: string;
   mobile_number: string;
   birthdate: string;
+  profile_image?: string;
 }
 
 export default function AccountDetailsModal({
@@ -30,7 +32,10 @@ export default function AccountDetailsModal({
     email: '',
     mobile_number: '',
     birthdate: '',
+    profile_image: '',
   });
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [initialData, setInitialData] = useState<FormData | null>(null);
@@ -60,6 +65,7 @@ export default function AccountDetailsModal({
       email: userData.email || '',
       mobile_number: mobileNumber,
       birthdate: formatBirthdateForInput(userData.birthdate || ''),
+      profile_image: userData.profile_image || '',
     };
   };
 
@@ -70,6 +76,8 @@ export default function AccountDetailsModal({
       setFormData(newFormData);
       setInitialData(newFormData);
       setIsDirty(false);
+      setProfileImageFile(null);
+      setProfileImagePreview(null);
     }
   }, [isOpen, user]);
 
@@ -80,6 +88,8 @@ export default function AccountDetailsModal({
       setFormData(newFormData);
       setInitialData(newFormData);
       setIsDirty(false);
+      setProfileImageFile(null);
+      setProfileImagePreview(null);
     }
   }, [user, isOpen, initialData]);
 
@@ -88,6 +98,8 @@ export default function AccountDetailsModal({
     if (!isOpen) {
       setIsDirty(false);
       setIsLoading(false);
+      setProfileImageFile(null);
+      setProfileImagePreview(null);
     }
   }, [isOpen]);
 
@@ -99,9 +111,83 @@ export default function AccountDetailsModal({
         setFormData(newFormData);
         setInitialData(newFormData);
         setIsDirty(false);
+        setProfileImageFile(null);
+        setProfileImagePreview(null);
       }, 100);
     }
   }, [isOpen, user]);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/heif', 'image/heic'];
+
+      if (!allowedTypes.includes(file.type.toLowerCase())) {
+        toast.error('Please upload a valid image file (JPG, PNG, JPEG, HEIF).');
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        const image: HTMLImageElement = new window.Image();
+        image.src = URL.createObjectURL(file);
+        image.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            toast.error('Failed to process image.');
+            setIsLoading(false);
+            return;
+          }
+
+          const size = Math.min(image.width, image.height);
+          canvas.width = size;
+          canvas.height = size;
+          
+          const x = (image.width - size) / 2;
+          const y = (image.height - size) / 2;
+          
+          ctx.drawImage(image, x, y, size, size, 0, 0, size, size);
+
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              toast.error('Failed to process image.');
+              setIsLoading(false);
+              return;
+            }
+
+            try {
+              const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 128,
+                useWebWorker: true,
+              }
+              const compressedFile = await imageCompression(new File([blob], file.name, { type: blob.type }), options);
+              
+              setProfileImageFile(compressedFile);
+              setProfileImagePreview(URL.createObjectURL(compressedFile));
+              setIsDirty(true);
+            } catch (compressionError) {
+              console.error('Image compression error:', compressionError);
+              toast.error('Failed to compress image. Please try another file.');
+            } finally {
+              setIsLoading(false);
+            }
+          }, file.type);
+        };
+        image.onerror = () => {
+          toast.error('Failed to load image. Please try another file.');
+          setIsLoading(false);
+        };
+
+      } catch (error) {
+        console.error('Image processing error:', error);
+        toast.error('Failed to process image. Please try another file.');
+        setIsLoading(false);
+      }
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -126,7 +212,7 @@ export default function AccountDetailsModal({
       newFormData.birthdate !== initialData.birthdate
     );
     
-    setIsDirty(!!isFormDirty);
+    setIsDirty(!!isFormDirty || !!profileImageFile);
   };
 
   const validateForm = () => {
@@ -221,13 +307,29 @@ export default function AccountDetailsModal({
         birthdate: formatBirthdateForAPI(formData.birthdate),
       };
 
-      const response = await fetch('/api/auth/update-profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      });
+      let response;
+
+      if (profileImageFile) {
+        const body = new FormData();
+        body.append('name', updateData.name);
+        body.append('email', updateData.email);
+        body.append('mobile_number', updateData.mobile_number);
+        body.append('birthdate', updateData.birthdate);
+        body.append('profile_image', profileImageFile);
+
+        response = await fetch('/api/auth/update-profile', {
+          method: 'PUT',
+          body: body,
+        });
+      } else {
+        response = await fetch('/api/auth/update-profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        });
+      }
 
       const result = await response.json();
 
@@ -241,6 +343,8 @@ export default function AccountDetailsModal({
 
       toast.success('Profile updated successfully!');
       setIsDirty(false);
+      setProfileImageFile(null);
+      setProfileImagePreview(null);
       
       // Refresh user data from backend to ensure we have the latest data
       console.log('🔄 Refreshing user data after profile update...');
@@ -257,6 +361,7 @@ export default function AccountDetailsModal({
           email: updateData.email,
           mobile_number: updateData.mobile_number,
           birthdate: updateData.birthdate,
+          // Note: we can't know the new profile_image URL without a refresh
         };
         updateUser(updatedUser);
       }
@@ -285,8 +390,12 @@ export default function AccountDetailsModal({
     if (initialData) {
       setFormData(initialData);
       setIsDirty(false);
+      setProfileImageFile(null);
+      setProfileImagePreview(null);
     }
   };
+
+  const profileImageUrl = profileImagePreview || formData.profile_image || '/images/placeholder.svg';
 
   return (
     <Modal
@@ -307,6 +416,34 @@ export default function AccountDetailsModal({
           Edit Account Details
         </h2>
         <div className="flex flex-col gap-6 overflow-y-auto p-6">
+          <div className="flex items-center gap-4">
+            <Image
+              src={profileImageUrl}
+              width={128}
+              height={128}
+              alt={formData.name ? `${formData.name}'s profile image` : "Profile image"}
+              className="object-cover w-32 h-32 rounded-2xl bg-gray-200"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/images/placeholder.svg';
+              }}
+            />
+            <div>
+              <Button
+                label="Change Image"
+                variant="btn-secondary"
+                onClick={() => document.getElementById('profileImageInput')?.click()}
+              />
+              <input
+                type="file"
+                id="profileImageInput"
+                className="hidden"
+                accept="image/jpeg,image/png,image/heif,image/heic"
+                onChange={handleImageChange}
+              />
+              <p className="text-sm text-gray-500 mt-2">JPG, PNG, JPEG, HEIF. 1MB max.</p>
+            </div>
+          </div>
           <AnimatedInput
             label="Full Name"
             name="name"
