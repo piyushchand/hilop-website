@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_URL = process.env.INTERNAL_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function GET() {
