@@ -1,2 +1,1 @@
-NEXT_PUBLIC_API_URL=/api/proxy
-INTERNAL_API_URL=http://3.110.216.61/api/v1
+NEXT_PUBLIC_API_URL=http://3.110.216.61/api/v1
