@@ -95,7 +95,8 @@ export default function Home() {
     const fetchProducts = async () => {
       try {
         setProductsLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1'}/products?lang=${language}`, { cache: 'no-store' });
+        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?lang=${language}`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }

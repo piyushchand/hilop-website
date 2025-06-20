@@ -247,9 +247,8 @@ export default function ProductPage() {
       try {
         showLoading();
         setError(null);
-        const apiUrl = `${
-          process.env.NEXT_PUBLIC_API_URL || "http://3.110.216.61/api/v1"
-        }/products/${productId}?lang=${language}`;
+        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}?lang=${language}`;
 
         const response = await fetch(apiUrl, {
           method: "GET",
