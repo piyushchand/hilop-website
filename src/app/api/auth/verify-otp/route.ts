@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year in seconds
-if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function POST(request: Request) {
   try {
