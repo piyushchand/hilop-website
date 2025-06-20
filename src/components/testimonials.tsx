@@ -52,10 +52,10 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        // If we have a product ID, fetch reviews for that specific product
-        const url = filteredByProductId 
-          ? `${process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1'}/products/${filteredByProductId}/reviews`
-          : `${process.env.NEXT_PUBLIC_API_URL || 'http://3.110.216.61/api/v1'}/reviews`;
+        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        const url = filteredByProductId
+          ? `${process.env.NEXT_PUBLIC_API_URL}/products/${filteredByProductId}/reviews`
+          : `${process.env.NEXT_PUBLIC_API_URL}/reviews`;
 
         console.log('Fetching reviews from:', url);
         const response = await fetch(url);
