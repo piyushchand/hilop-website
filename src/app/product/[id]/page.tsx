@@ -18,6 +18,7 @@ import Paragraph from "@/components/animationComponents/TextVisble";
 import { Testimonials } from "@/components/testimonials";
 import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
+import { toast } from 'react-hot-toast';
 
 // Define a type for the dynamic content to ensure consistency
 interface ProductDynamicContent {
@@ -282,7 +283,35 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language, showLoading, hideLoading]);
+  }, [params?.id,language]);
+
+  // Add to Cart handler
+  const handleBuyNow = async () => {
+    if (!product) return;
+    try {
+      showLoading();
+      const res = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ product_id: product.id, quantity: 1 }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || 'Item added to cart');
+        // Optionally update cart count in context
+      } else {
+        toast.error(data.message || 'Failed to add to cart');
+      }
+    } catch (err) {
+      toast.error('Failed to add to cart');
+    } finally {
+      hideLoading();
+    }
+  };
 
   if (error || !product) {
     return (
@@ -375,7 +404,7 @@ export default function ProductPage() {
                 label="Buy Now"
                 variant="btn-light"
                 size="xl"
-                link={`/checkout?product=${product.id}`}
+                onClick={handleBuyNow}
               />
             </div>
           </div>
@@ -629,7 +658,7 @@ export default function ProductPage() {
               label="Buy Now"
               variant="btn-light"
               size="xl"
-              link={`/checkout?product=${product.id}`}
+              onClick={handleBuyNow}
             />
           </div>
         </div>

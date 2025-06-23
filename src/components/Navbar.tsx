@@ -28,6 +28,8 @@ const Navbar = () => {
   const { user, logout, isLoading, isInitialized } = useAuth();
   const router = useRouter();
   const { language, setLanguage, isInitialized: languageInitialized } = useLanguage();
+  const [cartCount, setCartCount] = useState<number>(0);
+  const [cartLoading, setCartLoading] = useState(false);
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -61,6 +63,30 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Fetch cart count when user changes or on mount
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      if (!user) {
+        setCartCount(0);
+        return;
+      }
+      setCartLoading(true);
+      try {
+        const res = await fetch('/api/cart/count', {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to fetch cart count');
+        const data = await res.json();
+        setCartCount(data?.data?.count ?? 0);
+      } catch {
+        setCartCount(0);
+      } finally {
+        setCartLoading(false);
+      }
+    };
+    fetchCartCount();
+  }, [user]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
@@ -134,9 +160,15 @@ const Navbar = () => {
                 className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center"
               >
                 <ShoppingCart className="w-5 h-5 text-dark" />
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  2
-                </span>
+                {cartLoading ? (
+                  <span className="absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                    ...
+                  </span>
+                ) : cartCount > 0 ? (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartCount}
+                  </span>
+                ) : null}
               </Link>
             )}
           </div>
