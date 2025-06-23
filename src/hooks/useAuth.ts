@@ -14,10 +14,13 @@ import {
   VerifyLoginResponse
 } from '@/types/auth';
 import { logger } from '@/utils/logger';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export function useAuthOperations() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const clearError = () => setError(null);
 
@@ -100,6 +103,50 @@ export function useAuthOperations() {
     }
   };
 
+  const verifyOTP = async (otp: string, userId: string, type: 'login' | 'register') => {
+    showLoading("Verifying OTP...");
+    clearError();
+
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp, user_id: userId, type }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'OTP verification failed');
+      }
+
+      if (!data.success || !data.data?.token || !data.data?.user) {
+        throw new Error(data.message || 'Invalid OTP verification response');
+      }
+
+      // Try to fetch user data
+      const userFetched = await refreshUserData();
+
+      // Always clear error on success
+      clearError();
+
+      // Show success toast
+      toast.success(type === 'login' ? 'Login successful!' : 'Registration completed!');
+
+      // Redirect to home page
+      router.push('/');
+
+      // If user data could not be fetched, show a warning (not an error)
+      if (!userFetched) {
+        toast.error('Logged in, but failed to load your profile. Please refresh the page.');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'OTP verification failed');
+    } finally {
+      hideLoading();
+    }
+  };
+
   return {
     isLoading,
     error,
@@ -110,5 +157,6 @@ export function useAuthOperations() {
     loginWithMobile,
     verifyLoginOTP,
     verifyToken,
+    verifyOTP,
   };
 }

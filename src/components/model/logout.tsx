@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "../animationComponents/animated-model";
 import Button from "../uiFramework/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 type LogoutModalProps = {
   isOpen: boolean;
@@ -8,6 +9,7 @@ type LogoutModalProps = {
 };
 
 export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
+  const { logout } = useAuth();
   return (
     <Modal
       className="max-w-sm rounded-lg shadow-lg"
@@ -31,8 +33,8 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
           variant="btn-light"
           className="!bg-[#D32F2F] !hover:bg-red-900 text-white px-12"
           size="xl"
-          onClick={() => {
-            // Add your logout logic here
+          onClick={async () => {
+            await logout();
             onClose();
           }}
         />

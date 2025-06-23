@@ -7,11 +7,12 @@ import Button from "@/components/uiFramework/Button";
 import AuthLayout from "../AuthLayout";
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
-const OTP_TIMEOUT = 120; // 2 minutes in seconds
+const OTP_TIMEOUT = 120;
 
 function OtpPageContent() {
-  const { isLoading, error, clearError, verifyOTP } = useAuth();
+  const { isLoading, clearError, refreshUserData } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -19,6 +20,7 @@ function OtpPageContent() {
   const [timer, setTimer] = useState(OTP_TIMEOUT);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const otpType = searchParams.get('type');
   const userId = searchParams.get('userId');
@@ -47,7 +49,7 @@ function OtpPageContent() {
 
   const handleOtpChange = (value: string) => {
     setOtp(value);
-    if (error) clearError();
+    setSuccess('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,9 +66,26 @@ function OtpPageContent() {
     }
   
     try {
-      await verifyOTP(otp, userId, otpType as 'login' | 'register');
-    } catch (error) {
-      console.error('OTP verification error:', error);
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp, user_id: userId, type: otpType }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setSuccess(data.message || '');
+        await refreshUserData();
+        setTimeout(() => {
+          router.push('/');
+        }, 1200);
+      } else {
+        setSuccess('');
+        toast.error(data.message || '');
+      }
+    }
+    catch (error) {
+      setSuccess('');
+      toast.error(error instanceof Error ? error.message : 'Failed to connect to the server');
     }
   };
 
@@ -137,9 +156,9 @@ function OtpPageContent() {
         <h2 className="text-3xl font-semibold mb-2">{getPageTitle()}</h2>
         <p className="font-medium mb-6 text-gray-600">{getPageDescription()}</p>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-600 text-sm">{error}</p>
+        {success && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-green-700 text-sm">{success}</p>
           </div>
         )}
 
@@ -191,6 +210,7 @@ export default function OtpPage() {
         </div>
       </div>
     }>
+      <Toaster position="bottom-right" />
       <OtpPageContent />
     </Suspense>
   );

@@ -131,7 +131,7 @@ const Navbar = () => {
             {user && (
               <Link
                 href="/cart"
-                className="relative rounded-full w-[52px] h-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center"
+                className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center"
               >
                 <ShoppingCart className="w-5 h-5 text-dark" />
                 <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
@@ -168,7 +168,7 @@ const Navbar = () => {
                         className="rounded-full h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600">
+                      <div className="w-full h-full text-xl flex items-center justify-center bg-gray-200 text-gray-600">
                         {user.name.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -215,7 +215,9 @@ const Navbar = () => {
                           onClick={() => {
                             logout();
                             setProfileDropdownOpen(false);
-                            router.push("/auth/login");
+                            setTimeout(() => {
+                              router.push('/');
+                            }, 2000);
                           }}
                         >
                           <LogOut className="mr-3 h-4 w-4" />
@@ -302,7 +304,7 @@ const Navbar = () => {
                         className="rounded-full h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600">
+                      <div className="w-full h-full text-xl flex items-center justify-center bg-gray-200 text-gray-600">
                         {user.name.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -334,7 +336,9 @@ const Navbar = () => {
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
-                    router.push("/auth/login");
+                    setTimeout(() => {
+                      router.push('/');
+                    }, 2000);
                   }}
                 >
                   <LogOut className="w-5 h-5" />
