@@ -63,6 +63,7 @@ export default function Support() {
   }, []);
 
   const performSearch = useCallback(
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     debounce(async (query: string) => {
       if (query.trim().length > 1) {
         setIsSearching(true);
@@ -85,7 +86,7 @@ export default function Support() {
         }
       }
     }, 500),
-    [categories, selectedCategoryId]
+    []
   );
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export default function Support() {
     };
 
     fetchCategoryDetails();
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, isSearching, searchTerm]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

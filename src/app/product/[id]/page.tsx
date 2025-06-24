@@ -283,7 +283,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id,language]);
+  }, [params?.id, language, showLoading, hideLoading]);
 
   // Add to Cart handler
   const handleBuyNow = async () => {
@@ -306,7 +306,7 @@ export default function ProductPage() {
       } else {
         toast.error(data.message || 'Failed to add to cart');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to add to cart');
     } finally {
       hideLoading();
