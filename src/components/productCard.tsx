@@ -35,7 +35,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         alt={getText(product.name)}
                         width={435}
                         height={336}
-                        className="rounded-3xl w-full"
+                        className="rounded-3xl w-full aspect-square"
                     />
                     <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
                         {getText(product.for)}
