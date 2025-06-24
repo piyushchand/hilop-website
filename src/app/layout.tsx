@@ -9,10 +9,9 @@ import AuthDebugger from "@/components/AuthDebugger";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
 });
 export const viewport: Viewport = {
   width: "device-width",
@@ -101,7 +100,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`h-full ${poppins.variable}`}>
+    <html lang="en" className={`h-full ${poppins.className}`}>
       <head>
       
         <link

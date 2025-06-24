@@ -63,7 +63,6 @@ interface CartData {
 }
 
 export default function Cart() {
-  const [checked, setChecked] = useState(false);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
   const [plansLoading, setPlansLoading] = useState(true);
@@ -71,13 +70,15 @@ export default function Cart() {
   const [cart, setCart] = useState<CartData | null>(null);
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState<string | null>(null);
+  const [coinsLoading, setCoinsLoading] = useState(false);
+  const [useCoins, setUseCoins] = useState(false);
 
   useEffect(() => {
     const fetchPlans = async () => {
       setPlansLoading(true);
       setPlansError(null);
       try {
-        const res = await fetch("http://3.110.216.61/api/v1/plans", {
+        const res = await fetch("https://api.hilop.com/api/v1/plans", {
           method: "GET",
           headers: { Accept: "application/json" },
         });
@@ -129,15 +130,25 @@ export default function Cart() {
       if (!prevCart) return prevCart;
       const updatedItems = prevCart.items.map((cartItem) =>
         cartItem.product_id === item.product_id
-          ? { ...cartItem, quantity: newQty, item_total: cartItem.price.final_price * newQty }
+          ? {
+              ...cartItem,
+              quantity: newQty,
+              item_total: cartItem.price.final_price * newQty,
+            }
           : cartItem
       );
       // Calculate new subtotal
-      const newSubtotal = updatedItems.reduce((sum, cartItem) => sum + (cartItem.price.final_price * cartItem.quantity), 0);
+      const newSubtotal = updatedItems.reduce(
+        (sum, cartItem) => sum + cartItem.price.final_price * cartItem.quantity,
+        0
+      );
       // Recalculate discounts and total_price
       const couponDiscount = prevCart.coupon_discount || 0;
       const coinDiscount = prevCart.coin_discount || 0;
-      const totalPrice = Math.max(newSubtotal - couponDiscount - coinDiscount, 0);
+      const totalPrice = Math.max(
+        newSubtotal - couponDiscount - coinDiscount,
+        0
+      );
       return {
         ...prevCart,
         items: updatedItems,
@@ -164,14 +175,25 @@ export default function Cart() {
         if (!prevCart) return prevCart;
         const updatedItems = prevCart.items.map((cartItem) =>
           cartItem.product_id === item.product_id
-            ? { ...cartItem, quantity: item.quantity, item_total: cartItem.price.final_price * item.quantity }
+            ? {
+                ...cartItem,
+                quantity: item.quantity,
+                item_total: cartItem.price.final_price * item.quantity,
+              }
             : cartItem
         );
         // Recalculate subtotal and total_price
-        const newSubtotal = updatedItems.reduce((sum, cartItem) => sum + (cartItem.price.final_price * cartItem.quantity), 0);
+        const newSubtotal = updatedItems.reduce(
+          (sum, cartItem) =>
+            sum + cartItem.price.final_price * cartItem.quantity,
+          0
+        );
         const couponDiscount = prevCart.coupon_discount || 0;
         const coinDiscount = prevCart.coin_discount || 0;
-        const totalPrice = Math.max(newSubtotal - couponDiscount - coinDiscount, 0);
+        const totalPrice = Math.max(
+          newSubtotal - couponDiscount - coinDiscount,
+          0
+        );
         return {
           ...prevCart,
           items: updatedItems,
@@ -205,6 +227,59 @@ export default function Cart() {
       );
     } finally {
       setCartLoading(false);
+    }
+  };
+
+  const handleToggleCoins = async () => {
+    if (!cart) return;
+    setCoinsLoading(true);
+    setCartError(null);
+
+    // Store the previous state in case we need to rollback
+    const previousUseCoins = cart.use_coins;
+
+    // Optimistically update the UI
+    setCart(prev => prev ? {
+      ...prev,
+      use_coins: !prev.use_coins,
+    } : null);
+
+    try {
+      const res = await fetch("/api/cart/coins", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ use_coins: !previousUseCoins }),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok || !data.success) {
+        // Rollback on error
+        setCart(prev => prev ? {
+          ...prev,
+          use_coins: previousUseCoins,
+        } : null);
+        throw new Error(data.message || "Failed to update coins usage");
+      }
+
+      // Refresh cart data to get updated totals
+      await fetchCart();
+    } catch (err) {
+      console.error("Error toggling coins:", err);
+      setCartError(
+        err instanceof Error ? err.message : "Failed to update coins usage"
+      );
+      // Make sure UI is rolled back
+      setCart(prev => prev ? {
+        ...prev,
+        use_coins: previousUseCoins,
+      } : null);
+    } finally {
+      setCoinsLoading(false);
     }
   };
 
@@ -383,11 +458,13 @@ export default function Cart() {
                 </div>
               </div>
               <div
-                onClick={() => setChecked(!checked)}
+                onClick={coinsLoading ? undefined : handleToggleCoins}
                 className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
         ${
-          checked ? "bg-green-50 border-green-500" : "bg-white border-gray-200"
-        } border`}
+          cart?.use_coins
+            ? "bg-green-50 border-green-500"
+            : "bg-white border-gray-200"
+        } border ${coinsLoading ? "opacity-60 pointer-events-none" : ""}`}
               >
                 <Image
                   width={32}
@@ -405,10 +482,8 @@ export default function Cart() {
                 <div className="ml-auto pointer-events-none">
                   <input
                     type="checkbox"
-                    name="subscription"
-                    checked={checked}
-                    onChange={() => setChecked(!checked)}
-                    value="1"
+                    checked={useCoins}
+                    onChange={() => setUseCoins((prev) => !prev)}
                     className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                   />
                 </div>
@@ -423,27 +498,38 @@ export default function Cart() {
               {cart && (
                 <div className="mt-8 bg-white rounded-2xl p-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-gray-600">Total MRP (2 items)</span>
                     <span className="font-medium text-lg">
                       ₹{cart.subtotal}
                     </span>
                   </div>
-                  {cart.coupon_discount > 0 && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Coupon Discount</span>
-                      <span className="text-green-500 text-lg">
-                        -₹{cart.coupon_discount}
-                      </span>
-                    </div>
-                  )}
-                  {cart.coin_discount > 0 && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Coin Discount</span>
-                      <span className="text-green-500 text-lg">
-                        -₹{cart.coin_discount}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Discount from Coins</span>
+                    <span className="text-green-500 text-lg">
+                      -₹{cart.coin_discount ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">
+                      Subscription Discounts
+                    </span>
+                    <span className="text-green-500 text-lg">
+                      {/* -₹{cart.selected_plan ?? 0} */}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Coin Discount</span>
+                    <span className="text-green-500 text-lg">
+                      -₹{cart.coupon_discount ?? 0}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-green-500 text-lg">Free</span>
+                  </div>
                   <div className="flex justify-between text-lg font-medium border-t border-gray-200 pt-2 mt-2 items-center">
                     <span>Total</span>
                     <span>₹{cart.total_price}</span>

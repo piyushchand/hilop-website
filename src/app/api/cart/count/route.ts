@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = 'http://3.110.216.61/api/v1/cart/count';
+const API_URL = 'https://api.hilop.com/api/v1/cart/count';
 
 export async function GET() {
   try {
