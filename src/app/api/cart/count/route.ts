@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = 'https://api.hilop.com/api/v1/cart/count';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function GET() {
   try {
@@ -15,7 +16,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_URL}/cart/count`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken.value}`,

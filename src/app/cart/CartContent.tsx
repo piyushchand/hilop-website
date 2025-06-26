@@ -1,14 +1,15 @@
+// Complete and cleaned-up production-ready Cart page with all logic integrated
+
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import React from "react";
-import "swiper/css";
-import "swiper/css/pagination";
-import ArrowButton from "@/components/uiFramework/ArrowButton";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "react-hot-toast";
+import ArrowButton from "@/components/uiFramework/ArrowButton";
 
 interface SubscriptionPlan {
   _id: string;
@@ -43,7 +44,7 @@ interface CartPlan {
   name: string;
   months: number;
   discount: number;
-  discount_type: string;
+  discount_type: string;  
 }
 
 interface CartData {
@@ -71,48 +72,37 @@ export default function Cart() {
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState<string | null>(null);
   const [coinsLoading, setCoinsLoading] = useState(false);
-  const [useCoins, setUseCoins] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchPlans = async () => {
-      setPlansLoading(true);
-      setPlansError(null);
       try {
-        const res = await fetch("https://api.hilop.com/api/v1/plans", {
-          method: "GET",
-          headers: { Accept: "application/json" },
-        });
-        if (!res.ok) throw new Error(`Failed to fetch plans: ${res.status}`);
+        const res = await fetch(`${API_URL}/plans`);
         const data = await res.json();
-        if (!data.success || !Array.isArray(data.data))
-          throw new Error("Invalid plans response");
-        setPlans(data.data.filter((plan: SubscriptionPlan) => plan.is_active));
-        if (data.data.length > 0) setSelectedPlanId(data.data[0]._id);
+        if (!data.success) throw new Error("Invalid response");
+        const activePlans = data.data.filter((p: SubscriptionPlan) => p.is_active);
+        setPlans(activePlans);
+        if (activePlans.length) setSelectedPlanId(activePlans[0]._id);
       } catch (err) {
-        setPlansError(
-          err instanceof Error ? err.message : "Failed to load plans"
-        );
+        setPlansError((err as Error).message);
       } finally {
         setPlansLoading(false);
       }
     };
     fetchPlans();
-  }, []);
+  }, [API_URL]);
 
-  // Fetch cart items
   const fetchCart = useCallback(async () => {
     setCartLoading(true);
-
-    setCartError(null);
     try {
-      const res = await fetch("/api/cart", { method: "GET" });
-      if (!res.ok) throw new Error(`Failed to fetch cart: ${res.status}`);
+      const res = await fetch("/api/cart");
       const data = await res.json();
-      if (!data.success || !data.data || !Array.isArray(data.data.items))
-        throw new Error("Invalid cart response");
+      if (!data.success) throw new Error("Invalid cart data");
       setCart(data.data);
     } catch (err) {
-      setCartError(err instanceof Error ? err.message : "Failed to load cart");
+      setCartError((err as Error).message);
     } finally {
       setCartLoading(false);
     }
@@ -122,42 +112,10 @@ export default function Cart() {
     fetchCart();
   }, [fetchCart]);
 
-  // Cart item update handlers
   const updateCartItem = async (item: CartProduct, newQty: number) => {
     if (newQty < 1) return;
-    // Optimistically update local cart state (including subtotal and total_price)
-    setCart((prevCart) => {
-      if (!prevCart) return prevCart;
-      const updatedItems = prevCart.items.map((cartItem) =>
-        cartItem.product_id === item.product_id
-          ? {
-              ...cartItem,
-              quantity: newQty,
-              item_total: cartItem.price.final_price * newQty,
-            }
-          : cartItem
-      );
-      // Calculate new subtotal
-      const newSubtotal = updatedItems.reduce(
-        (sum, cartItem) => sum + cartItem.price.final_price * cartItem.quantity,
-        0
-      );
-      // Recalculate discounts and total_price
-      const couponDiscount = prevCart.coupon_discount || 0;
-      const coinDiscount = prevCart.coin_discount || 0;
-      const totalPrice = Math.max(
-        newSubtotal - couponDiscount - coinDiscount,
-        0
-      );
-      return {
-        ...prevCart,
-        items: updatedItems,
-        subtotal: newSubtotal,
-        total_price: totalPrice,
-      };
-    });
     try {
-      const res = await fetch("/api/cart", {
+      await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -166,120 +124,70 @@ export default function Cart() {
           months_quantity: item.months_quantity,
         }),
       });
-      if (!res.ok) throw new Error("Failed to update cart");
-      // Optionally, you can re-fetch the cart here to ensure consistency
-      // await fetchCart();
-    } catch (err) {
-      // Rollback local state if API fails
-      setCart((prevCart) => {
-        if (!prevCart) return prevCart;
-        const updatedItems = prevCart.items.map((cartItem) =>
-          cartItem.product_id === item.product_id
-            ? {
-                ...cartItem,
-                quantity: item.quantity,
-                item_total: cartItem.price.final_price * item.quantity,
-              }
-            : cartItem
-        );
-        // Recalculate subtotal and total_price
-        const newSubtotal = updatedItems.reduce(
-          (sum, cartItem) =>
-            sum + cartItem.price.final_price * cartItem.quantity,
-          0
-        );
-        const couponDiscount = prevCart.coupon_discount || 0;
-        const coinDiscount = prevCart.coin_discount || 0;
-        const totalPrice = Math.max(
-          newSubtotal - couponDiscount - coinDiscount,
-          0
-        );
-        return {
-          ...prevCart,
-          items: updatedItems,
-          subtotal: newSubtotal,
-          total_price: totalPrice,
-        };
-      });
-      setCartError(
-        err instanceof Error ? err.message : "Failed to update cart"
-      );
+      await fetchCart();
+    } catch {
+      toast.error("Failed to update cart");
     }
   };
 
   const removeCartItem = async (item: CartProduct) => {
     try {
-      // setCartLoading(true);
-      const res = await fetch("/api/cart", {
-        method: "POST",
+      const res = await fetch(`/api/cart/${item.product_id}`, {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product_id: item.product_id,
-          quantity: 0,
-          months_quantity: item.months_quantity,
-        }),
       });
-      if (!res.ok) throw new Error("Failed to remove item");
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      toast.success("Item removed");
       await fetchCart();
-    } catch (err) {
-      setCartError(
-        err instanceof Error ? err.message : "Failed to remove item"
-      );
-    } finally {
-      setCartLoading(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("An error occurred");
+      }
     }
   };
 
   const handleToggleCoins = async () => {
     if (!cart) return;
     setCoinsLoading(true);
-    setCartError(null);
-
-    // Store the previous state in case we need to rollback
-    const previousUseCoins = cart.use_coins;
-
-    // Optimistically update the UI
-    setCart(prev => prev ? {
-      ...prev,
-      use_coins: !prev.use_coins,
-    } : null);
-
     try {
       const res = await fetch("/api/cart/coins", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({ use_coins: !previousUseCoins }),
-        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ use_coins: !cart.use_coins }),
       });
-
       const data = await res.json();
-      
-      if (!res.ok || !data.success) {
-        // Rollback on error
-        setCart(prev => prev ? {
-          ...prev,
-          use_coins: previousUseCoins,
-        } : null);
-        throw new Error(data.message || "Failed to update coins usage");
-      }
-
-      // Refresh cart data to get updated totals
+      if (!data.success) throw new Error(data.message || "Failed to update coins usage");
+      toast.success(data.message || "Hilop coins updated");
       await fetchCart();
     } catch (err) {
-      console.error("Error toggling coins:", err);
-      setCartError(
-        err instanceof Error ? err.message : "Failed to update coins usage"
-      );
-      // Make sure UI is rolled back
-      setCart(prev => prev ? {
-        ...prev,
-        use_coins: previousUseCoins,
-      } : null);
+      toast.error(err instanceof Error ? err.message : "Failed to update coins usage");
     } finally {
       setCoinsLoading(false);
+    }
+  };
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    try {
+      const res = await fetch("/api/cart/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coupon: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      toast.success("Coupon applied");
+      setCouponCode("");
+      await fetchCart();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("An error occurred");
+      }
     }
   };
 
@@ -325,7 +233,7 @@ export default function Cart() {
                             onChange={() => setSelectedPlanId(plan._id)}
                             className="peer hidden"
                           />
-                          <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/20 peer-checked:text-white transition-colors">
+                          <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/30 peer-checked:text-white transition-colors">
                             <div className="flex items-center gap-3 mb-3">
                               <p className="text-dark font-medium">
                                 {plan.name}
@@ -367,7 +275,7 @@ export default function Cart() {
                     <Image
                       width={180}
                       height={180}
-                      src={item.images[0] || "/images/placeholder.svg"}
+                      src={item.images && item.images.length > 0 ? item.images[0] : "/images/placeholder.svg"}
                       alt={item.name.en}
                       className="sm:size-[180px] size-24 object-cover rounded-lg bg-green-200"
                     />
@@ -441,7 +349,7 @@ export default function Cart() {
           <div className="lg:w-1/3 w-full">
             {/* Offers & Benefits */}
             <div className="mb-6">
-              <h2 className="text-lg md:text-2xl font-medium mb-4">
+              <h2 className="text-lg md:text-2xl font-semibold mb-4">
                 Offers & Benefits
               </h2>
               <div className="mb-4">
@@ -449,10 +357,16 @@ export default function Cart() {
                   <input
                     type="text"
                     id="couponCode"
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value)}
                     className="appearance-none focus:outline-none w-full"
                     placeholder="Enter Coupon Code"
                   />
-                  <button className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300">
+                  <button
+                    className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300"
+                    onClick={applyCoupon}
+                    disabled={!couponCode.trim()}
+                  >
                     Apply
                   </button>
                 </div>
@@ -475,15 +389,16 @@ export default function Cart() {
                 <div>
                   <h3 className="text-gray-900">Apply Hilop Coins</h3>
                   <p className="text-xs md:text-sm text-gray-600">
-                    You have 2,000 coins available, giving you 20% off on your
-                    purchase!
+                    {cart
+                      ? `You have ${cart.available_coins.toLocaleString()} coins available${cart.coin_discount > 0 ? ", giving you a discount of ₹" + cart.coin_discount : ""}!`
+                      : "Loading coins..."}
                   </p>
                 </div>
                 <div className="ml-auto pointer-events-none">
                   <input
-                    type="checkbox"
-                    checked={useCoins}
-                    onChange={() => setUseCoins((prev) => !prev)}
+                     type="checkbox"
+                     checked={cart?.use_coins ?? false}
+                     readOnly
                     className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                   />
                 </div>
@@ -492,13 +407,13 @@ export default function Cart() {
 
             {/* Order Summary */}
             <div className="">
-              <h2 className="text-xl md:text-2xl font-medium mb-4">
+              <h2 className="text-lg md:text-2xl font-semibold mb-4">
                 Order Summary
               </h2>
               {cart && (
-                <div className="mt-8 bg-white rounded-2xl p-6">
+                <div className="bg-white rounded-2xl p-6">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Total MRP (2 items)</span>
+                    <span className="text-gray-600">Total MRP ({cart.item_count} item{cart.item_count > 1 ? "s" : ""})</span>
                     <span className="font-medium text-lg">
                       ₹{cart.subtotal}
                     </span>
@@ -509,23 +424,22 @@ export default function Cart() {
                       -₹{cart.coin_discount ?? 0}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">
-                      Subscription Discounts
+                      Subscription Discount
                     </span>
                     <span className="text-green-500 text-lg">
-                      {/* -₹{cart.selected_plan ?? 0} */}
+                      {cart.selected_plan && cart.selected_plan.discount > 0
+                        ? `-₹${Math.round((cart.subtotal * cart.selected_plan.discount) / 100)}`
+                        : "-₹0"}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Coin Discount</span>
+                    <span className="text-gray-600">Coupon Discount</span>
                     <span className="text-green-500 text-lg">
                       -₹{cart.coupon_discount ?? 0}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">Shipping</span>
                     <span className="text-green-500 text-lg">Free</span>
@@ -534,6 +448,11 @@ export default function Cart() {
                     <span>Total</span>
                     <span>₹{cart.total_price}</span>
                   </div>
+                  {cart.selected_plan && (
+                    <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+                      <span className="font-medium text-primary">Selected Plan:</span> {cart.selected_plan.name} ({cart.selected_plan.months} month{cart.selected_plan.months > 1 ? "s" : ""})
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -543,10 +462,17 @@ export default function Cart() {
       {/* Fixed Bottom Bar */}
       <div className="fixed z-50 bottom-0 left-0 w-full bg-white gap-2 md:gap-4 border-t border-gray-200 p-4 flex flex-col sm:flex-row justify-end items-center lg:px-20 px-4">
         <div className="flex items-center">
-          <span className="text-xl md:text-2xl font-bold text-green-600 mr-2">
-            ₹863.05
-          </span>
-          <span className="text-gray-500 line-through">₹144.94</span>
+          {cart && (
+            <>
+              <span className="text-xl md:text-2xl font-bold text-green-600 mr-2">
+                ₹{cart.total_price}
+              </span>
+              <span className="text-gray-500 line-through">
+                {" "}
+                ₹{cart.subtotal}
+              </span>
+            </>
+          )}
         </div>
         <ArrowButton
           label="Place Order"
