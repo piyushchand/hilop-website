@@ -63,6 +63,21 @@ interface CartData {
   auto_added_products: unknown;
 }
 
+interface Coupon {
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  discount_amount?: number; // Make it optional to be safe
+}
+
+// Utility function to format numbers properly
+const formatPrice = (price: number): string => {
+  return Number(price.toFixed(2)).toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -73,8 +88,14 @@ export default function Cart() {
   const [cartError, setCartError] = useState<string | null>(null);
   const [coinsLoading, setCoinsLoading] = useState(false);
   const [couponCode, setCouponCode] = useState("");
+  const [planLoading, setPlanLoading] = useState(false);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  // Unified coupon API endpoint
+  const COUPON_API_URL = "/api/coupons";
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -101,6 +122,12 @@ export default function Cart() {
       const data = await res.json();
       if (!data.success) throw new Error("Invalid cart data");
       setCart(data.data);
+      // Update selected plan based on cart data
+      if (data.data.selected_plan) {
+        setSelectedPlanId(data.data.selected_plan.id);
+      }
+      // Set the applied coupon from the cart's data, which is the source of truth
+      setAppliedCoupon(data.data.coupon || null);
     } catch (err) {
       setCartError((err as Error).message);
     } finally {
@@ -111,6 +138,36 @@ export default function Cart() {
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
+
+  const handlePlanSelection = async (planId: string) => {
+    if (planId === selectedPlanId || planLoading) return;
+    
+    setPlanLoading(true);
+    try {
+      const res = await fetch("/api/cart/plan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_id: planId }),
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || "Failed to update plan");
+      }
+      
+      setSelectedPlanId(planId);
+      toast.success("Plan updated successfully");
+      await fetchCart(); // Refresh cart to get updated totals
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update plan");
+      // Revert selection on error
+      if (cart?.selected_plan) {
+        setSelectedPlanId(cart.selected_plan.id);
+      }
+    } finally {
+      setPlanLoading(false);
+    }
+  };
 
   const updateCartItem = async (item: CartProduct, newQty: number) => {
     if (newQty < 1) return;
@@ -169,27 +226,58 @@ export default function Cart() {
     }
   };
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) return;
+  // Apply coupon
+  const applyCoupon = async (codeToApply: string) => {
+    if (!codeToApply.trim() || couponLoading) return;
+    
+    setCouponLoading(true);
     try {
-      const res = await fetch("/api/cart/coupon", {
+      const res = await fetch(COUPON_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ coupon: couponCode.trim() }),
+        body: JSON.stringify({ action: "apply", code: codeToApply.trim() }),
       });
+      
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      toast.success("Coupon applied");
-      setCouponCode("");
-      await fetchCart();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        toast.error(err.message);
-      } else {
-        toast.error("An error occurred");
+      if (!data.success) {
+        throw new Error(data.message || "Failed to apply coupon");
       }
+      
+      setAppliedCoupon(data.data.coupon);
+      setCouponCode(""); // Clear input on success
+      toast.success(data.message || `Coupon ${data.data.coupon.code} applied!`);
+      await fetchCart();
+
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "An error occurred while applying coupon");
+    } finally {
+      setCouponLoading(false);
     }
   };
+
+  // Remove coupon
+  const removeCoupon = async () => {
+    if (!appliedCoupon || couponLoading) return;
+    setCouponLoading(true);
+    try {
+      const res = await fetch(COUPON_API_URL, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Failed to remove coupon");
+      setAppliedCoupon(null);
+      toast.success(data.message || "Coupon removed successfully");
+      await fetchCart();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "An error occurred while removing coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  // Coupon discount from cart
+  const couponDiscount = cart && cart.coupon_discount ? cart.coupon_discount : 0;
 
   return (
     <section className="w-full bg-gray-100 mb-16 lg:mb-40">
@@ -230,14 +318,19 @@ export default function Cart() {
                             name="subscription"
                             value={plan._id}
                             checked={selectedPlanId === plan._id}
-                            onChange={() => setSelectedPlanId(plan._id)}
+                            onChange={() => handlePlanSelection(plan._id)}
                             className="peer hidden"
                           />
-                          <span className="p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/30 peer-checked:text-white transition-colors">
+                          <span className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 peer-checked:bg-primary/30 peer-checked:text-white transition-colors ${planLoading ? 'opacity-60 pointer-events-none' : ''}`}>
                             <div className="flex items-center gap-3 mb-3">
                               <p className="text-dark font-medium">
                                 {plan.name}
                               </p>
+                              {planLoading && selectedPlanId === plan._id && (
+                                <div className="ml-auto">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                </div>
+                              )}
                             </div>
                             <div className="flex gap-3 items-center">
                               {plan.discount > 0 && (
@@ -287,11 +380,11 @@ export default function Cart() {
                         <div className="flex items-center text-sm md:text-base">
                           {item.price.base_price !== item.price.final_price && (
                             <span className="text-gray-500 line-through mr-2">
-                              ₹{item.price.base_price}
+                              ₹{formatPrice(item.price.base_price)}
                             </span>
                           )}
                           <span className="text-lg font-bold text-green-600">
-                            ₹{item.price.final_price}
+                            ₹{formatPrice(item.price.final_price)}
                           </span>
                         </div>
                       </div>
@@ -352,25 +445,54 @@ export default function Cart() {
               <h2 className="text-lg md:text-2xl font-semibold mb-4">
                 Offers & Benefits
               </h2>
-              <div className="mb-4">
-                <div className="flex border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                  <input
-                    type="text"
-                    id="couponCode"
-                    value={couponCode}
-                    onChange={e => setCouponCode(e.target.value)}
-                    className="appearance-none focus:outline-none w-full"
-                    placeholder="Enter Coupon Code"
-                  />
-                  <button
-                    className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300"
-                    onClick={applyCoupon}
-                    disabled={!couponCode.trim()}
-                  >
-                    Apply
-                  </button>
+              
+              {/* Applied Coupon */}
+              {appliedCoupon && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Applied Coupon</h3>
+                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div>
+                      <div className="font-medium text-blue-800">{appliedCoupon.code}</div>
+                      <div className="text-sm text-blue-600">
+                        Discount: ₹{formatPrice(couponDiscount)}
+                      </div>
+                    </div>
+                    <button
+                      onClick={removeCoupon}
+                      disabled={couponLoading}
+                      className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {couponLoading ? "Removing..." : "Remove"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Coupon Input */}
+              {!appliedCoupon && (
+                <div className="mb-4">
+                  <div className="flex border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <input
+                      type="text"
+                      id="couponCode"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value)}
+                      className="appearance-none focus:outline-none w-full"
+                      placeholder="Enter Coupon Code"
+                      disabled={couponLoading}
+                    />
+                    <button
+                      className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300 disabled:opacity-50"
+                      onClick={() => applyCoupon(couponCode)}
+                      disabled={!couponCode.trim() || couponLoading}
+                    >
+                      {couponLoading ? "Applying..." : "Apply"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Hilop Coins */}
               <div
                 onClick={coinsLoading ? undefined : handleToggleCoins}
                 className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
@@ -390,7 +512,7 @@ export default function Cart() {
                   <h3 className="text-gray-900">Apply Hilop Coins</h3>
                   <p className="text-xs md:text-sm text-gray-600">
                     {cart
-                      ? `You have ${cart.available_coins.toLocaleString()} coins available${cart.coin_discount > 0 ? ", giving you a discount of ₹" + cart.coin_discount : ""}!`
+                      ? `You have ${cart.available_coins.toLocaleString()} coins available${cart.coin_discount > 0 ? ", giving you a discount of ₹" + formatPrice(cart.coin_discount) : ""}!`
                       : "Loading coins..."}
                   </p>
                 </div>
@@ -415,13 +537,13 @@ export default function Cart() {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">Total MRP ({cart.item_count} item{cart.item_count > 1 ? "s" : ""})</span>
                     <span className="font-medium text-lg">
-                      ₹{cart.subtotal}
+                      ₹{formatPrice(cart.subtotal)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">Discount from Coins</span>
                     <span className="text-green-500 text-lg">
-                      -₹{cart.coin_discount ?? 0}
+                      -₹{formatPrice(cart.coin_discount ?? 0)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
@@ -430,14 +552,14 @@ export default function Cart() {
                     </span>
                     <span className="text-green-500 text-lg">
                       {cart.selected_plan && cart.selected_plan.discount > 0
-                        ? `-₹${Math.round((cart.subtotal * cart.selected_plan.discount) / 100)}`
-                        : "-₹0"}
+                        ? `-₹${formatPrice(Math.round((cart.subtotal * cart.selected_plan.discount) / 100))}`
+                        : "-₹0.00"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-gray-600">Coupon Discount</span>
                     <span className="text-green-500 text-lg">
-                      -₹{cart.coupon_discount ?? 0}
+                      -₹{formatPrice(couponDiscount)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
@@ -446,7 +568,7 @@ export default function Cart() {
                   </div>
                   <div className="flex justify-between text-lg font-medium border-t border-gray-200 pt-2 mt-2 items-center">
                     <span>Total</span>
-                    <span>₹{cart.total_price}</span>
+                    <span>₹{formatPrice(cart.total_price - couponDiscount)}</span>
                   </div>
                   {cart.selected_plan && (
                     <div className="mt-4 p-3 bg-primary/10 rounded-lg">
@@ -465,11 +587,11 @@ export default function Cart() {
           {cart && (
             <>
               <span className="text-xl md:text-2xl font-bold text-green-600 mr-2">
-                ₹{cart.total_price}
+                ₹{formatPrice(cart.total_price - couponDiscount)}
               </span>
               <span className="text-gray-500 line-through">
                 {" "}
-                ₹{cart.subtotal}
+                ₹{formatPrice(cart.subtotal)}
               </span>
             </>
           )}
