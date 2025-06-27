@@ -30,7 +30,7 @@ export interface Product {
     type?: string; // Optional type field for product categorization
     is_active: boolean;
     prescription: boolean;
-    test_id: string;
+    test_id?: string;
     duration_days: number;
     for: MultilingualText | string; // Can be either multilingual text or a simple string
     description_tags?: string[];

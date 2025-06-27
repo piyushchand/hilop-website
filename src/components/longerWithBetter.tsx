@@ -15,7 +15,7 @@ const testimonials = [
     name: "Purav Jha",
     product: "Sildenafil chews",
     image: "/images/weight-loss/product-main.png", // replace with actual image
-    quotePart1: "My manhood wouldn’t work like it used to.",
+    quotePart1: "My manhood wouldn&apos;t work like it used to.",
     quotePart2:
       "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
   },

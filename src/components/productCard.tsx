@@ -1,9 +1,12 @@
+"use client";
+import { useState } from "react";
 import Image from 'next/image';
 import { Product, MultilingualText } from '@/types';
 import { CardBody, CardContainer, CardItem } from './animationComponents/3DCard';
 import Button from './uiFramework/Button';
 import ArrowButton from './uiFramework/ArrowButton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import TestModal from './model/TestModal';
 
 interface ProductCardProps {
     product: Product;
@@ -12,6 +15,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
     const { language } = useLanguage();
 
     const getText = (field: MultilingualText | string | undefined): string => {
@@ -21,6 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     };
 
     return (
+       <>
         <CardContainer
             containerClassName="h-full col-span-4 sm:col-span-2 md:col-span-1"
             className="btn-arrow-animation h-full rounded-3xl bg-white p-3 lg:p-4 xl:p-6"
@@ -52,20 +57,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                             label="View Details"
                             variant="btn-light"
                             size="xl"
-                            className="w-full"
+                            className="w-full "
                             link={`/product/${product._id}`}
                         />
                         <ArrowButton
                             label="Take the test"
                             theme="primary"
-                            className="w-full"
+                            className="w-full cursor-pointer"
                             size="lg"
-                            href={`/product/${product._id}`}
+                            onClick={() => setIsTestModalOpen(true)}
                         />
                     </div>
                 </CardItem>
             </CardBody>
         </CardContainer>
+        <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} {...(product.test_id ? { testId: product.test_id } : {})} />
+       </>
     );
 };
 
