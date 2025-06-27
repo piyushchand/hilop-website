@@ -301,11 +301,11 @@ const Navbar = () => {
           <div className="flex flex-col gap-4">
             {/* Language Toggle */}
             <button
-              onClick={toggleLanguage}
+               onClick={() => setLanguage(language === "en" ? "hi" : "en")}
               className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
             >
               <Globe className="w-5 h-5" />
-              {language === "en" ? "English" : "हिंदी"}
+              {language === "en" ? "Hindi" : "English"}
             </button>
 
             {/* Cart */}

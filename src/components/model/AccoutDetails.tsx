@@ -40,6 +40,7 @@ export default function AccountDetailsModal({
   const [isDirty, setIsDirty] = useState(false);
   const [initialData, setInitialData] = useState<FormData | null>(null);
   const { updateUser, refreshUserData } = useAuth();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Helper function to format user data for form
   const formatUserDataForForm = (userData: User): FormData => {
@@ -216,50 +217,50 @@ export default function AccountDetailsModal({
   };
 
   const validateForm = () => {
-    const errors: string[] = [];
+    const newErrors: { [key: string]: string } = {};
 
     // Name validation
     if (!formData.name.trim()) {
-      errors.push('Name is required');
+      newErrors.name = 'Name is required';
     } else if (formData.name.length < 2) {
-      errors.push('Name must be at least 2 characters long');
+      newErrors.name = 'Name must be at least 2 characters long';
     } else if (formData.name.length > 50) {
-      errors.push('Name must be less than 50 characters');
+      newErrors.name = 'Name must be less than 50 characters';
     }
 
     // Email validation
     if (!formData.email.trim()) {
-      errors.push('Email is required');
+      newErrors.email = 'Email is required';
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        errors.push('Please enter a valid email address');
+        newErrors.email = 'Please enter a valid email address';
       }
     }
 
     // Mobile number validation
     const mobileNumber = formData.mobile_number.trim();
     if (!mobileNumber) {
-      errors.push('Mobile number is required');
+      newErrors.mobile_number = 'Mobile number is required';
     } else if (mobileNumber.length !== 10) {
-      errors.push('Please enter a valid 10-digit mobile number');
+      newErrors.mobile_number = 'Please enter a valid 10-digit mobile number';
     } else {
       const phoneRegex = /^[6-9]\d{9}$/;
       if (!phoneRegex.test(mobileNumber)) {
-        errors.push('Please enter a valid Indian mobile number starting with 6-9');
+        newErrors.mobile_number = 'Please enter a valid Indian mobile number starting with 6-9';
       }
     }
 
     // Birthdate validation
     if (!formData.birthdate) {
-      errors.push('Date of birth is required');
+      newErrors.birthdate = 'Date of birth is required';
     } else {
       const birthDate = new Date(formData.birthdate);
       const today = new Date();
       
       // Check if date is valid
       if (isNaN(birthDate.getTime())) {
-        errors.push('Please enter a valid date of birth');
+        newErrors.birthdate = 'Please enter a valid date of birth';
       } else {
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
@@ -267,17 +268,20 @@ export default function AccountDetailsModal({
           age--;
         }
         if (age < 18) {
-          errors.push('You must be at least 18 years old');
+          newErrors.birthdate = 'You must be at least 18 years old';
         }
         if (age > 120) {
-          errors.push('Please enter a valid date of birth');
+          newErrors.birthdate = 'Please enter a valid date of birth';
         }
       }
     }
 
-    if (errors.length > 0) {
-      throw new Error(errors.join('\n'));
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return false;
     }
+    return true;
   };
 
   const handleSave = async () => {
@@ -286,9 +290,14 @@ export default function AccountDetailsModal({
       return;
     }
 
+    setErrors({});
+    const isValid = validateForm();
+    if (!isValid) {
+      return;
+    }
+
     try {
       setIsLoading(true);
-      validateForm();
 
       // Convert birthdate back to DD-MM-YYYY format for API
       const formatBirthdateForAPI = (birthdate: string) => {
@@ -444,6 +453,7 @@ export default function AccountDetailsModal({
               <p className="text-sm text-gray-500 mt-2">JPG, PNG, JPEG, HEIF. 1MB max.</p>
             </div>
           </div>
+          <div>
           <AnimatedInput
             label="Full Name"
             name="name"
@@ -452,7 +462,12 @@ export default function AccountDetailsModal({
             onChange={handleInputChange}
             required
           />
+          {errors.name && (
+            <div className="text-red-500 text-sm mt-1">{errors.name}</div>
+          )}
+          </div>
 
+          <div>
           <AnimatedInput 
             label="Email" 
             name="email" 
@@ -461,7 +476,12 @@ export default function AccountDetailsModal({
             onChange={handleInputChange}
             required 
           />
+          {errors.email && (
+            <div className="text-red-500 text-sm mt-1">{errors.email}</div>
+          )}
+          </div>
           
+          <div>
           <AnimatedInput
             label="Mobile number"
             name="mobile_number"
@@ -470,6 +490,10 @@ export default function AccountDetailsModal({
             onChange={handleInputChange}
             required
           />
+          {errors.mobile_number && (
+            <div className="text-red-500 text-sm mt-1">{errors.mobile_number}</div>
+          )}
+          </div>
           
           <AnimatedInput
             label="Date of Birth"

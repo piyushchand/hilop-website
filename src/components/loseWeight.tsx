@@ -50,7 +50,7 @@ const LoseWeight = () => {
                 className="w-full"
                 onClick={() => setIsTestModalOpen(true)}
               />
-               <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
+               <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)}/>
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6 lg:gap-10">
@@ -69,7 +69,7 @@ const LoseWeight = () => {
                 Personalized Natural Weight Loss Plan
               </h4>
               <p className="text-gray-200">
-                Get a customized weight loss plan tailored to your body’s needs,
+                Get a customized weight loss plan tailored to your body&apos;s needs,
                 designed to help you feel happy and confident naturally.
               </p>
             </div>

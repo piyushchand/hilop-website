@@ -1,11 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { MorphingText } from "@/components/animationComponents/MorphingText";
 import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
-import TestModal from "@/components/model/TestModal";
 import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ParallaxText from "@/components/velocityScroll";
@@ -14,7 +12,8 @@ import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Product } from "@/types";
-import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import RotatingText from "@/components/animationComponents/RotatingText";
 
 // Loading component
 const Loading = () => (
@@ -78,34 +77,34 @@ const homepagefaqdata = [
       "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
 ];
-const texts = [
-  "Better Sex",
-  "Weight Loss",
-  "Instant Sex",
-];
 
 export default function Home() {
-  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const { language } = useLanguage();
-  const { isInitialized: useRequireAuthInitialized } = useRequireAuth({ requireAuth: false });
+  const { isInitialized: useRequireAuthInitialized } = useRequireAuth({
+    requireAuth: false,
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setProductsLoading(true);
-        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?lang=${language}`, { cache: 'no-store' });
+        if (!process.env.NEXT_PUBLIC_API_URL)
+          throw new Error("API URL is not set in environment variables");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/products?lang=${language}`,
+          { cache: "no-store" }
+        );
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          throw new Error("Failed to fetch products");
         }
         const result = await response.json();
         if (result.success) {
           setProducts(result.data);
         }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       } finally {
         setProductsLoading(false);
       }
@@ -119,12 +118,19 @@ export default function Home() {
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
-      
         <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
-            <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl mb-6 font-medium">
-            <MorphingText texts={texts} /> <br />
+            <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl font-medium mb-6">
+              <RotatingText
+                texts={["Better Sex", "Weight Loss", "Instant Sex"]}
+                mainClassName="text-dark"
+                staggerFrom={"last"}
+                staggerDuration={0.025}
+                splitLevelClassName="overflow-hidden"
+                transition={{ type: "spring", damping: 60, stiffness: 700 }}
+                rotationInterval={2500}
+              />
               <span className="text-primary">personalized to you</span>
             </h1>
             <h2 className="text-lg md:text-xl text-gray-700">
@@ -150,7 +156,9 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <h3 className="text-lg md:text-xl font-semibold mb-1">{item.title}</h3>
+                  <h3 className="text-lg md:text-xl font-semibold mb-1">
+                    {item.title}
+                  </h3>
                   <p className="text-gray-600">{item.description}</p>
                 </div>
               </div>
@@ -159,14 +167,18 @@ export default function Home() {
         </div>
         <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
           {productsLoading ? (
-            <div className="col-span-full text-center py-8">Loading products...</div>
+            <div className="col-span-full text-center py-8">
+              Loading products...
+            </div>
           ) : products.length === 0 ? (
-            <div className="col-span-full text-center py-8">No products available</div>
+            <div className="col-span-full text-center py-8">
+              No products available
+            </div>
           ) : (
             products.map((product, index) => (
-              <ProductCard 
-                key={product._id} 
-                product={product} 
+              <ProductCard
+                key={product._id}
+                product={product}
                 index={index}
                 totalItems={products.length}
               />
@@ -174,7 +186,6 @@ export default function Home() {
           )}
         </div>
       </section>
-      <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
       <LoseWeight />
       {/* <VelocityScroll>100% Natural Product</VelocityScroll> */}
       <ParallaxText baseVelocity={80}>
