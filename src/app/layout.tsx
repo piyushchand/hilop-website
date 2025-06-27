@@ -1,18 +1,19 @@
-import "./globals.css";
-import { Poppins } from "next/font/google";
-import type { Metadata, Viewport } from "next";
-import ClientLayout from "@/components/ClientLayout";
+import AuthDebugger from "@/components/AuthDebugger";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LoadingProvider } from "@/contexts/LoadingContext";
-import AuthDebugger from "@/components/AuthDebugger";
+import type { Metadata, Viewport } from "next";
+import { Poppins } from "next/font/google";
+import "./globals.css";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
+
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  display: 'swap',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | Hilop",
     default: "Hilop",
   },
-  description: "welness product",
+  description: "Wellness product",
   applicationName: "Hilop",
   referrer: "origin-when-cross-origin",
   keywords: ["HerbaTrim", "VitalVigor", "EverYoung Boost"],
@@ -51,13 +52,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-
   openGraph: {
     title: {
       template: "%s | Hilop",
-      default: "Hilop welness product",
+      default: "Hilop wellness product",
     },
-    description: "welness product",
+    description: "Wellness product",
     images: [
       {
         url: "/image/home-hero.webp",
@@ -71,14 +71,13 @@ export const metadata: Metadata = {
     url: baseUrl,
     locale: "en_US",
   },
-
   twitter: {
     card: "summary_large_image",
     title: {
       template: "%s | Hilop",
-      default: "Hilop welness product",
+      default: "Hilop wellness product",
     },
-    description: "wellness product",
+    description: "Wellness product",
     images: [
       {
         url: "/image/home-hero.webp",
@@ -90,7 +89,6 @@ export const metadata: Metadata = {
     creator: "@hilop",
     site: "@hilop",
   },
-
   metadataBase: new URL(baseUrl),
 };
 
@@ -102,24 +100,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full ${poppins.className}`}>
       <head>
-      
+        {/* Favicons for light and dark themes */}
         <link
-  rel="icon"
-  href="/favicon.svg"
-  type="image/svg+xml"
-  media="(prefers-color-scheme: light)"
-/>
-        <link
-  rel="icon"
-  href="/favicon-dark.svg"
-  type="image/svg+xml"
-   media="(prefers-color-scheme: dark)"
-/>
-<link
-        rel="icon"
-        href="/favicon.svg"
-        type="image/svg+xml"
+          rel="icon"
+          href="/favicon.svg"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: light)"
         />
+        <link
+          rel="icon"
+          href="/favicon-dark.svg"
+          type="image/svg+xml"
+          media="(prefers-color-scheme: dark)"
+        />
+
+        {/* Schema.org JSON-LD */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -127,8 +122,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Hilop",
-              url: "https://Hilop.vercel.app",
-              logo: "https://Hilop.vercel.app/image/hilop-logo-light.svg",
+              url: baseUrl,
+              logo: `${baseUrl}/image/hilop-logo-light.svg`,
               sameAs: [
                 "https://www.instagram.com/hilop/",
                 "https://www.linkedin.com/company/hilop/",
@@ -151,7 +146,7 @@ export default function RootLayout({
         <LanguageProvider>
           <LoadingProvider>
             <AuthProvider>
-              <ClientLayout>{children}</ClientLayout>
+              {children}
               <AuthDebugger />
             </AuthProvider>
           </LoadingProvider>
