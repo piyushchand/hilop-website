@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {  AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { Globe, Undo2, X } from "lucide-react";
@@ -56,8 +56,9 @@ export default function TestModal({ isOpen, onClose, testId }: TestModalProps) {
   const [heightUnit, setHeightUnit] = useState("cm");
   const [weightUnit, setWeightUnit] = useState("kg");
   const [bmi, setBmi] = useState<number | null>(null);
-  useScrollLock(isOpen);
-  function useScrollLock(isLocked: boolean) {
+
+  // Custom hook for scroll lock
+  const useScrollLock = (isLocked: boolean) => {
     useEffect(() => {
       if (isLocked) {
         document.body.style.overflow = "hidden";
@@ -69,11 +70,13 @@ export default function TestModal({ isOpen, onClose, testId }: TestModalProps) {
         document.body.style.overflow = "";
       };
     }, [isLocked]);
-  }
+  };
+
+  useScrollLock(isOpen);
+
   // Reset modal states on open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       setCurrentStep(0);
       setSelectedOption(null);
       setBmi(null);
@@ -96,7 +99,7 @@ export default function TestModal({ isOpen, onClose, testId }: TestModalProps) {
       setQuestions([]);
       setTests([]);
     }
-  }, [isOpen, testId, language]);
+  }, [isOpen, testId]);
 
   const fetchTests = async () => {
     setIsLoading(true);
@@ -190,12 +193,12 @@ export default function TestModal({ isOpen, onClose, testId }: TestModalProps) {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setModalStep(1);
     setSelectedTestId(null);
     setQuestions([]);
     onClose();
-  };
+  }, [onClose]);
 
   // ESC & outside click detection
   useEffect(() => {
@@ -213,13 +216,14 @@ export default function TestModal({ isOpen, onClose, testId }: TestModalProps) {
     };
   
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", esc);
+      document.addEventListener("mousedown", clickOutside);
     }
-  
     return () => {
-      document.body.style.overflow = "";
+      document.removeEventListener("keydown", esc);
+      document.removeEventListener("mousedown", clickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 

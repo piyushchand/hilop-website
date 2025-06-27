@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+interface Plan {
+  _id: string;
+  name: string;
+  months: number;
+  discount: number;
+  discount_type: string;
+  is_active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -35,7 +46,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const plan = planData.data.find((p: any) => p._id === plan_id);
+    const plan = planData.data.find((p: Plan) => p._id === plan_id);
     
     if (!plan || !plan.is_active) {
       return NextResponse.json(
