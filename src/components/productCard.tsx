@@ -13,8 +13,15 @@ interface ProductCardProps {
     index: number;
     totalItems: number;
 }
+const demoImages = [
+    "/images/improving-sexual/improving-sexual-clip.jpg",
+    "/images/instant-boost/instantboost-clip.jpg",
+    "/images/weight-loss/fatloss-clip.jpg",
+  ];
+  
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
+    const fallbackImage = demoImages[index % demoImages.length];
     const [isTestModalOpen, setIsTestModalOpen] = useState(false);
     const { language } = useLanguage();
 
@@ -36,11 +43,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     className="relative mb-5 rounded-3xl overflow-hidden w-full bg-gray-200"
                 >
                     <Image
-                        src={product.images[0] || '/images/placeholder.png'}
+                        // src={product.images[0] || '/images/placeholder.png'}
+                        src={fallbackImage}
                         alt={getText(product.name)}
                         width={435}
                         height={336}
-                        className="rounded-3xl w-full aspect-square"
+                        className="rounded-3xl w-full aspect-square object-cover"
                     />
                     <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
                         {getText(product.for)}
