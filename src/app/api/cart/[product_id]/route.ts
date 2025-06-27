@@ -6,7 +6,7 @@ if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { product_id: string } }
+  context: { params: { product_id: string } }
 ) {
   try {
     const cookieStore = await cookies();
@@ -17,7 +17,7 @@ export async function DELETE(
         { status: 401 }
       );
     }
-    const { product_id } = params;
+    const { product_id } = context.params;
     const backendRes = await fetch(`${API_URL}/cart/${product_id}`, {
       method: 'DELETE',
       headers: {
