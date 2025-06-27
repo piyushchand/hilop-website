@@ -1,12 +1,10 @@
 "use client";
-import { useState } from "react";
 import Image from 'next/image';
 import { Product, MultilingualText } from '@/types';
 import { CardBody, CardContainer, CardItem } from './animationComponents/3DCard';
 import Button from './uiFramework/Button';
 import ArrowButton from './uiFramework/ArrowButton';
 import { useLanguage } from '@/contexts/LanguageContext';
-import TestModal from './model/TestModal';
 
 interface ProductCardProps {
     product: Product;
@@ -22,7 +20,6 @@ const demoImages = [
 
   const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
     const fallbackImage = demoImages[index % demoImages.length];
-    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
     const { language } = useLanguage();
 
     const getText = (field: MultilingualText | string | undefined): string => {
@@ -48,7 +45,7 @@ const demoImages = [
                         alt={getText(product.name)}
                         width={435}
                         height={336}
-                        className="rounded-3xl w-full aspect-square object-cover"
+                        className="rounded-3xl w-full aspect-[4/3] object-cover"
                     />
                     <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
                         {getText(product.for)}
@@ -73,13 +70,12 @@ const demoImages = [
                             theme="primary"
                             className="w-full cursor-pointer"
                             size="lg"
-                            onClick={() => setIsTestModalOpen(true)}
+                            href={product.test_id ? `/consultation?testId=${product.test_id}` : '/consultation'}
                         />
                     </div>
                 </CardItem>
             </CardBody>
         </CardContainer>
-        <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} {...(product.test_id ? { testId: product.test_id } : {})} />
        </>
     );
 };
