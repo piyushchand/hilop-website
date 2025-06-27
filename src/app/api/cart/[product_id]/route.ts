@@ -6,7 +6,7 @@ if (!API_URL) throw new Error('API URL is not set in environment variables');
 
 export async function DELETE(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
     if (!accessToken) {
       return NextResponse.json(
