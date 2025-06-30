@@ -106,7 +106,7 @@ export default function AboutUsContent() {
                         label="Get Started Now"
                         variant="btn-dark"
                         size="xl"
-                        link='/'
+                         link="/consultation"
                       />
               </div>
           </div>

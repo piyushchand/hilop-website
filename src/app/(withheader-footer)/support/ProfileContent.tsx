@@ -30,17 +30,14 @@ const placeholdersvanish = [
 
 export default function Support() {
   const [categories, setCategories] = useState<SupportCategory[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
-  const [selectedCategoryDetails, setSelectedCategoryDetails] =
-    useState<SupportCategoryDetails | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryDetails, setSelectedCategoryDetails] = useState<SupportCategoryDetails | null>(null);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingFaqs, setLoadingFaqs] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<SupportSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -49,7 +46,6 @@ export default function Support() {
         const response = await getSupportCategories();
         if (response.success && response.data.length > 0) {
           setCategories(response.data);
-          // Select the first category by default
           setSelectedCategoryId(response.data[0]._id);
         }
       } catch (error) {
@@ -66,8 +62,8 @@ export default function Support() {
     debounce(async (query: string) => {
       if (query.trim().length > 1) {
         setIsSearching(true);
-        setLoadingFaqs(false); // Stop loading regular FAQs
-        setSelectedCategoryId(null); // Deselect category
+        setLoadingFaqs(false);
+        setSelectedCategoryId(null);
         try {
           const response = await searchSupport(query);
           if (response.success) {
@@ -85,7 +81,7 @@ export default function Support() {
         }
       }
     }, 500),
-    [categories, selectedCategoryId, searchSupport]
+    [categories, selectedCategoryId]
   );
 
   useEffect(() => {
@@ -93,22 +89,18 @@ export default function Support() {
   }, [searchTerm, performSearch]);
 
   useEffect(() => {
-    if (!selectedCategoryId && !isSearching && searchTerm.trim() === "") return;
-    if (!selectedCategoryId) return;
+    if (!selectedCategoryId || isSearching || searchTerm.trim() !== "") return;
 
     const fetchCategoryDetails = async () => {
       try {
         setLoadingFaqs(true);
-        setSelectedCategoryDetails(null); // Clear previous details
+        setSelectedCategoryDetails(null);
         const response = await getSupportCategoryById(selectedCategoryId);
         if (response.success) {
           setSelectedCategoryDetails(response.data);
         }
       } catch (error) {
-        console.error(
-          `Failed to fetch support category details for id ${selectedCategoryId}:`,
-          error
-        );
+        console.error(`Failed to fetch support category details for id ${selectedCategoryId}:`, error);
       } finally {
         setLoadingFaqs(false);
       }
@@ -126,7 +118,7 @@ export default function Support() {
     performSearch.flush();
   };
 
-  const getText = (obj: { en: string; hi: string }) => obj[language] || obj.en;
+  const getText = (obj: { en: string; hi: string }) => obj?.[language] || obj?.en || "";
 
   const accordionItems = selectedCategoryDetails?.faqs.map((faq) => ({
     id: faq._id,
@@ -148,14 +140,6 @@ export default function Support() {
               onSubmit={handleSearchSubmit}
             />
           </div>
-          <button
-            onClick={() => setLanguage(language === "en" ? "hi" : "en")}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 transition mb-2"
-            aria-label="Toggle language"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.05 17.95l-1.414 1.414m12.728 0l-1.414-1.414M6.05 6.05L4.636 4.636" /></svg>
-            {language === "en" ? "English" : "हिंदी"}
-          </button>
         </div>
       </section>
 
@@ -168,24 +152,16 @@ export default function Support() {
           ) : !isSearching && searchTerm.trim() === "" ? (
             <Swiper
               spaceBetween={16}
-              slidesPerView={1.6} // mobile default
+              slidesPerView={1.6}
               slidesPerGroup={1}
               loop={false}
               autoHeight
               className="mb-16 !overflow-visible"
               breakpoints={{
-                640: {
-                  slidesPerView: 2,
-                },
-                768: {
-                  slidesPerView: 2.4,
-                },
-                1024: {
-                  slidesPerView: 3.5,
-                },
-                1280: {
-                  slidesPerView: 4.5,
-                },
+                640: { slidesPerView: 2 },
+                768: { slidesPerView: 2.4 },
+                1024: { slidesPerView: 3.5 },
+                1280: { slidesPerView: 4.5 },
               }}
             >
               {categories.map((item) => (
@@ -205,7 +181,7 @@ export default function Support() {
                         selectedCategoryId === item._id
                           ? "text-green-800"
                           : "text-gray-700 group-hover:text-green-800"
-                      } `}
+                      }`}
                     >
                       {getText(item.title)}
                     </span>
