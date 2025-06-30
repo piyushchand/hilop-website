@@ -114,7 +114,7 @@ const LongerWithBetter = () => {
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                    link="/consultation?testId=682f074c076fa37f15f16b34"
+link="/consultation?testId=682f074c076fa37f15f16b34"
                 />
                 <Button
                   label="Buy Now"
