@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { User } from "@/types/auth";
 import { useLoading } from "./LoadingContext";
-import { auth } from "@/lib/firebase";
+import { getFirebaseInstances } from "@/lib/firebase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Types
@@ -283,6 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    const { auth } = getFirebaseInstances();
     showLoading("Signing in with Google...");
     clearError();
     try {
