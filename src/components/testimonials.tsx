@@ -1,8 +1,9 @@
-import { cn } from '@/lib/utils';
-import Paragraph from './animationComponents/TextVisble';
-import { Marquee } from './animationComponents/Marquee';
-import { BadgeCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+"use client";
+import { cn } from "@/lib/utils";
+import Paragraph from "./animationComponents/TextVisble";
+import { Marquee } from "./animationComponents/Marquee";
+import { BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Review {
   _id: string;
@@ -14,7 +15,6 @@ interface Review {
   description: string;
 }
 
-
 interface TestimonialsProps {
   filteredByProductId?: string;
 }
@@ -25,13 +25,13 @@ interface ReviewCardProps {
 
 const ReviewCard = ({ review }: ReviewCardProps) => {
   // Add null checks and fallbacks
-  const userName = review?.user?.name || 'Anonymous Customer';
-  const description = review?.description || 'No review content available';
-  
+  const userName = review?.user?.name || "Anonymous Customer";
+  const description = review?.description || "No review content available";
+
   return (
     <div
       className={cn(
-        'relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center'
+        "relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center"
       )}
     >
       <span className=" inline-block mb-10 text-gray-700">{userName}</span>
@@ -52,42 +52,44 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        if (!process.env.NEXT_PUBLIC_API_URL)
+          throw new Error("API URL is not set in environment variables");
         const url = filteredByProductId
           ? `${process.env.NEXT_PUBLIC_API_URL}/products/${filteredByProductId}/reviews`
           : `${process.env.NEXT_PUBLIC_API_URL}/reviews`;
 
-        console.log('Fetching reviews from:', url);
+        console.log("Fetching reviews from:", url);
         const response = await fetch(url);
-        
+
         if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
+          throw new Error("Failed to fetch reviews");
         }
 
         const result = await response.json();
-        console.log('Reviews API Response:', result);
+        console.log("Reviews API Response:", result);
 
         if (result.success) {
           // If we're fetching product-specific reviews, the data structure might be different
-          const reviewsData = filteredByProductId 
-            ? (result.data?.reviews || [])
+          const reviewsData = filteredByProductId
+            ? result.data?.reviews || []
             : result.data;
 
-          console.log('Processed Reviews:', reviewsData);
-          
+          console.log("Processed Reviews:", reviewsData);
+
           // Filter out invalid reviews and ensure they have required properties
-          const validReviews = reviewsData.filter((review: Review) => 
-            review && 
-            review._id && 
-            review.description && 
-            typeof review.description === 'string' &&
-            review.description.trim().length > 0
+          const validReviews = reviewsData.filter(
+            (review: Review) =>
+              review &&
+              review._id &&
+              review.description &&
+              typeof review.description === "string" &&
+              review.description.trim().length > 0
           );
-          
+
           setReviews(validReviews);
         }
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error("Error fetching reviews:", error);
       } finally {
         setLoading(false);
       }

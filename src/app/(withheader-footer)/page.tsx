@@ -186,12 +186,11 @@ export default function Home() {
           )}
         </div>
       </section>
-      <LoseWeight />
-      {/* <VelocityScroll>100% Natural Product</VelocityScroll> */}
+      <LongerWithBetter />
       <ParallaxText baseVelocity={80}>
         ✅ 100% money back guarantee
       </ParallaxText>
-      <LongerWithBetter />
+      <LoseWeight />
       <Testimonials />
       <WhyChoose />
       <OurProcess />
