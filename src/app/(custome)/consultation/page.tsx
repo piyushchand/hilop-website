@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/uiFramework/Button";
 import Link from "next/link";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 interface Test {
   _id: string;
   title_en: string;
@@ -44,11 +45,11 @@ function AssessmentPageContent() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [heightUnit, setHeightUnit] = useState("cm");
   const [weightUnit, setWeightUnit] = useState("kg");
+  
   const [bmi, setBmi] = useState<number | null>(null);
 
   const queryTestId = searchParams.get("testId");
@@ -88,7 +89,9 @@ function AssessmentPageContent() {
     };
 
     fetchQuestions();
+    
   }, [selectedTestId, modalStep]);
+  
 
   const fetchTests = async () => {
     setIsLoading(true);
@@ -122,10 +125,26 @@ function AssessmentPageContent() {
     setSelectedOption(null);
   };
 
-  const handleOptionClick = (answerId: string) => {
-    setSelectedOption(answerId);
-    setTimeout(() => proceedToNextStep(), 200);
-  };
+const handleOptionClick = async (answerId: string) => {
+  setSelectedOption(answerId);
+  setTimeout(() => proceedToNextStep(), 200);
+   const res = await fetch(`${API_URL}/test-results/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWNjMTQ2MzUxZjc5ZTBkNjE5MTI0NSIsImlhdCI6MTc1MTI4MTMzMiwiZXhwIjoxNzUzODczMzMyfQ.lHmWx40HGFUg30EqOXgkcS4qe9EcN1ti0t4b8c1hZ0w'
+        },
+        body: JSON.stringify({
+          test_id: '682474c65b9ab999150472e9',
+          question_id: '682474c65b9ab999150472ea',
+          answer_id: '682474c65b9ab999150472ec'
+        })
+      });
+  const data = await res.json();
+  console.log("Answer submitted:", data);
+};
+
+
 
   const calculateBmi = () => {
     const h = parseFloat(height);
