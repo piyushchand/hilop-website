@@ -38,7 +38,7 @@ const LoseWeight = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/product/fat-loss"
+                link="/product/682314a91b521615a7e89618"
               />
               <Button
                 label="Take the test"

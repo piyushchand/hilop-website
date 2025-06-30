@@ -58,7 +58,7 @@ export default function HowItWorkContent() {
       </div>
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
           <Image
-            src="/images/fat-loss.jpg"
+            src="/images/about-us/our-mission.jpg"
             alt="why Choose herbal fat loss"
             width={740}
             height={766}

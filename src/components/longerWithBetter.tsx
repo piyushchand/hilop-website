@@ -86,14 +86,14 @@ const LongerWithBetter = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/product/fat-loss"
+                link="/product/68246cfc5b9ab999150472e5"
               />
               <Button
                 label="Take the test"
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                onClick={() => setIsTestModalOpen(true)}
+                link="/product/68246cfc5b9ab999150472e5"
               />
             </div>
           </div>
@@ -107,20 +107,20 @@ const LongerWithBetter = () => {
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-                Have Longer, Better Sex with Rx + Climax Control
+              Natural For Improve Testosterone, Stamina & Energy
               </h3>
               <div className="flex gap-4">
                 <Button
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  onClick={() => setIsTestModalOpen(true)}
+                  link="/consultation?testId=682f074c076fa37f15f16b34"
                 />
                 <Button
                   label="Buy Now"
                   variant="btn-light"
                   size="xl"
-                  link="/"
+               link="/product/68246cfc5b9ab999150472e5"
                 />
               </div>
             </div>
@@ -133,20 +133,20 @@ const LongerWithBetter = () => {
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-                Have Longer, Better Sex with Rx + Climax Control
+              Last Longer Herbal Sexual Enhancer Powder
               </h3>
               <div className="flex gap-4">
                 <Button
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  onClick={() => setIsTestModalOpen(true)}
+                  link="/consultation?testId=682f0b48076fa37f15f16b83"
                 />
                 <Button
                   label="Buy Now"
                   variant="btn-light"
                   size="xl"
-                  link="/"
+                 link="/product/68246b005b9ab999150472e2"
                 />
               </div>
             </div>
