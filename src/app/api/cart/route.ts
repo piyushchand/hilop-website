@@ -53,15 +53,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const res = await fetch(`${API_URL}/cart`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        Authorization: `Bearer ${accessToken.value}`,
-      },
-      body: JSON.stringify(body),
-    });
+
+const res = await fetch(`${API_URL}/cart`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    Authorization: `Bearer ${accessToken.value}`,
+  },
+  credentials: 'include',
+  body: JSON.stringify(body),
+});
     const text = await res.text();
     let data;
     try {

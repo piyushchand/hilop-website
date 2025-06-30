@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setCartCount } from "../store/cartSlice";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,9 +29,14 @@ const Navbar = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout, isLoading, isInitialized } = useAuth();
   const router = useRouter();
-  const { language, setLanguage, isInitialized: languageInitialized } = useLanguage();
-  const [cartCount, setCartCount] = useState<number>(0);
-  const [cartLoading, setCartLoading] = useState(false);
+  const {
+    language,
+    setLanguage,
+    isInitialized: languageInitialized,
+  } = useLanguage();
+  const cartCount = useAppSelector((state) => state.cart.count);
+  const dispatch = useAppDispatch();
+  const [cartLoading, setCartLoading] = useState<boolean>(false);
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -38,10 +45,10 @@ const Navbar = () => {
 
   // Lock body scroll when mobile menu open
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       document.body.classList.toggle("overflow-hidden", mobileMenuOpen);
       return () => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           document.body.classList.remove("overflow-hidden");
         }
       };
@@ -50,7 +57,7 @@ const Navbar = () => {
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -64,29 +71,28 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch cart count when user changes or on mount
   useEffect(() => {
     const fetchCartCount = async () => {
       if (!user) {
-        setCartCount(0);
+        dispatch(setCartCount(0));
         return;
       }
+
       setCartLoading(true);
       try {
-        const res = await fetch('/api/cart/count', {
-          credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to fetch cart count');
+        const res = await fetch("/api/cart/count", { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch cart count");
         const data = await res.json();
-        setCartCount(data?.data?.count ?? 0);
+        dispatch(setCartCount(data?.data?.count ?? 0));
       } catch {
-        setCartCount(0);
+        dispatch(setCartCount(0));
       } finally {
         setCartLoading(false);
       }
     };
+
     fetchCartCount();
-  }, [user]);
+  }, [user, dispatch]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
@@ -98,7 +104,13 @@ const Navbar = () => {
       <header className="sticky top-0 w-full border-b border-gray-200 bg-white z-50">
         <div className="container py-3 flex items-center justify-between">
           <Link href="/">
-            <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} priority />
+            <Image
+              src="/logo.svg"
+              alt="Hilop logo"
+              width={100}
+              height={40}
+              priority
+            />
           </Link>
           <div className="flex items-center gap-4">
             <div className="h-[52px] w-[120px] bg-gray-200 rounded-full animate-pulse"></div>
@@ -113,7 +125,13 @@ const Navbar = () => {
       <div className="container py-3 flex items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <Image src="/logo.svg" alt="Hilop logo" width={100} height={40} priority />
+          <Image
+            src="/logo.svg"
+            alt="Hilop logo"
+            width={100}
+            height={40}
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -157,7 +175,7 @@ const Navbar = () => {
             {user && (
               <Link
                 href="/cart"
-                className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center"
+                className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center "
               >
                 <ShoppingCart className="w-5 h-5 text-dark" />
                 {cartLoading ? (
@@ -183,12 +201,17 @@ const Navbar = () => {
             <>
               {!user ? (
                 <div className="hidden md:flex gap-4">
-                  <ArrowButton label="Login" theme="light" size="lg" href="/auth/login" />
+                  <ArrowButton
+                    label="Login"
+                    theme="light"
+                    size="lg"
+                    href="/auth/login"
+                  />
                 </div>
               ) : (
                 <div className="relative" ref={profileRef}>
                   <button
-                    className="md:size-[54px] size-[46px] rounded-full bg-dark overflow-hidden focus:outline-none border border-gray-800 focus:border-green-800"
+                    className="md:size-[54px] size-[46px] rounded-full bg-dark overflow-hidden focus:outline-none border border-gray-800 focus:border-green-800 cursor-pointer"
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   >
                     {user.profile_image ? (
@@ -225,30 +248,46 @@ const Navbar = () => {
                             </p>
                           )}
                         </div>
-                        <Link href="/profile" className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100" onClick={() => setProfileDropdownOpen(false)}>
+                        <Link
+                          href="/profile"
+                          className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
                           <User className="mr-3 h-4 w-4" />
                           Profile
                         </Link>
-                        <Link href="/my-order" className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100" onClick={() => setProfileDropdownOpen(false)}>
+                        <Link
+                          href="/my-order"
+                          className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
                           <History className="mr-3 h-4 w-4" />
                           Orders
                         </Link>
-                        <Link href="/cart" className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100" onClick={() => setProfileDropdownOpen(false)}>
+                        <Link
+                          href="/cart"
+                          className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
                           <ShoppingBag className="mr-3 h-4 w-4" />
                           Buy Again
                         </Link>
-                        <Link href="/support" className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100" onClick={() => setProfileDropdownOpen(false)}>
+                        <Link
+                          href="/support"
+                          className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
                           <MessageCircleQuestion className="mr-3 h-4 w-4" />
                           Support
                         </Link>
                         <div className="border-t border-gray-300"></div>
                         <button
-                          className="flex items-center w-full text-left px-5 py-2 text-sm text-red-600 hover:bg-red-50"
+                          className="flex items-center w-full text-left px-5 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
                           onClick={() => {
                             logout();
                             setProfileDropdownOpen(false);
                             setTimeout(() => {
-                              router.push('/');
+                              router.push("/");
                             }, 2000);
                           }}
                         >
@@ -264,7 +303,10 @@ const Navbar = () => {
           )}
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden flex items-center" onClick={() => setMobileMenuOpen(true)}>
+          <button
+            className="md:hidden flex items-center"
+            onClick={() => setMobileMenuOpen(true)}
+          >
             <Menu className="w-6 h-6 text-green-800" />
           </button>
         </div>
@@ -287,13 +329,25 @@ const Navbar = () => {
 
         <div className="p-4">
           <nav className="flex flex-col gap-4 text-lg font-medium text-gray-700 mb-8">
-            <Link href="/about-us" className="hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/about-us"
+              className="hover:text-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               About us
             </Link>
-            <Link href="/how-it-works" className="hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/how-it-works"
+              className="hover:text-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               How it works
             </Link>
-            <Link href="/blog" className="hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/blog"
+              className="hover:text-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Blog
             </Link>
           </nav>
@@ -301,7 +355,7 @@ const Navbar = () => {
           <div className="flex flex-col gap-4">
             {/* Language Toggle */}
             <button
-               onClick={() => setLanguage(language === "en" ? "hi" : "en")}
+              onClick={() => setLanguage(language === "en" ? "hi" : "en")}
               className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
             >
               <Globe className="w-5 h-5" />
@@ -322,7 +376,12 @@ const Navbar = () => {
 
             {/* Login/Profile */}
             {!user ? (
-              <ArrowButton label="Login" theme="light" size="lg" href="/auth/login" />
+              <ArrowButton
+                label="Login"
+                theme="light"
+                size="lg"
+                href="/auth/login"
+              />
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -346,20 +405,36 @@ const Navbar = () => {
                     <p className="text-sm text-gray-600">{user.email}</p>
                   </div>
                 </div>
-                
-                <Link href="/profile" className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <User className="w-5 h-5" />
                   Profile
                 </Link>
-                <Link href="/my-order" className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/my-order"
+                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <History className="w-5 h-5" />
                   Orders
                 </Link>
-                <Link href="/cart" className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/cart"
+                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <ShoppingBag className="w-5 h-5" />
                   Buy Again
                 </Link>
-                <Link href="/support" className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/support"
+                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <MessageCircleQuestion className="w-5 h-5" />
                   Support
                 </Link>
@@ -369,7 +444,7 @@ const Navbar = () => {
                     logout();
                     setMobileMenuOpen(false);
                     setTimeout(() => {
-                      router.push('/');
+                      router.push("/");
                     }, 2000);
                   }}
                 >

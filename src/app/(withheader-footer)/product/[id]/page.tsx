@@ -19,6 +19,7 @@ import { Testimonials } from "@/components/testimonials";
 import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 import { toast } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 // Define a type for the dynamic content to ensure consistency
 interface ProductDynamicContent {
@@ -34,7 +35,7 @@ interface ProductDynamicContent {
 // Consolidated Dynamic content mapping based on product name
 const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
   Slimvibe: {
-    customImage: "/images/weight-loss/why-choose.jpg",
+    customImage: "/images/weight-loss/why-choose.jpg", 
     whyChooseTitle: "Our Herbal Fat Loss Formula?",
     benefitTags: [
       "Individuals looking to support their weight loss goals naturally.",
@@ -231,6 +232,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
   
   const handleThumbsSwiper = (swiper: SwiperType) => {
     // Add custom class to swiper-wrapper
@@ -286,30 +288,35 @@ export default function ProductPage() {
   }, [params?.id, language, showLoading, hideLoading]);
 
   // Add to Cart handler
-  const handleBuyNow = async () => {
-    if (!product) return;
+  const handleAddToCart = async () => {
+    const productId = product && (typeof (product as Product & { _id?: string })._id === 'string' ? (product as Product & { _id?: string })._id : product.id);
+    if (!productId) {
+      toast.error('Product not found.');
+      return;
+    }
+    setAddToCartLoading(true);
     try {
-      showLoading();
-      const res = await fetch('/api/cart', {
+      const response = await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ product_id: product.id, quantity: 1 }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, quantity: 1 }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        toast.success(data.message || 'Item added to cart');
-        // Optionally update cart count in context
+      const data = await response.json();
+      if (response.status === 401) {
+        toast.error('Please log in to add items to your cart.');
+        // Optionally redirect: window.location.href = '/auth/login';
+        return;
+      }
+      if (data.success) {
+        toast.success(data.message || 'Added to cart!');
+        // Optionally: update cart count in navbar/global state
       } else {
-        toast.error(data.message || 'Failed to add to cart');
+        toast.error(data.message || 'Failed to add to cart.');
       }
     } catch {
-      toast.error('Failed to add to cart');
+      toast.error('An unexpected error occurred.');
     } finally {
-      hideLoading();
+      setAddToCartLoading(false);
     }
   };
 
@@ -331,6 +338,7 @@ export default function ProductPage() {
   }
 
   const dynamicProductContent = getProductContent(product.name);
+  const productId = product && (typeof (product as Product & { _id?: string })._id === 'string' ? (product as Product & { _id?: string })._id : product.id);
 
   const whyChooseUs = Array.isArray(product.why_choose_us)
     ? product.why_choose_us
@@ -398,13 +406,13 @@ export default function ProductPage() {
                 label="Get Started Now"
                 variant="btn-dark"
                 size="xl"
-                link={`/checkout?product=${product.id}`}
               />
               <Button
-                label="Buy Now"
+                label={addToCartLoading ? "Adding..." : "Buy Now"}
                 variant="btn-light"
                 size="xl"
-                onClick={handleBuyNow}
+                onClick={handleAddToCart}
+                disabled={addToCartLoading}
               />
             </div>
           </div>
@@ -483,7 +491,6 @@ export default function ProductPage() {
               label="Get Started today"
               variant="btn-dark"
               size="xl"
-              link={`/checkout?product=${product.id}`}
             />
           </div>
         </div>
@@ -579,7 +586,6 @@ export default function ProductPage() {
                 label="Get Started today"
                 variant="btn-dark"
                 size="xl"
-                link={`/checkout?product=${product.id}`}
               />
 
               <Swiper
@@ -652,13 +658,11 @@ export default function ProductPage() {
               label="Get Started Now"
               variant="btn-dark"
               size="xl"
-              link={`/checkout?product=${product.id}`}
             />
             <Button
               label="Buy Now"
               variant="btn-light"
               size="xl"
-              onClick={handleBuyNow}
             />
           </div>
         </div>
@@ -702,8 +706,9 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <Testimonials filteredByProductId={product.id} />
+      <Testimonials filteredByProductId={productId} />
       <FaqAccordion items={faqItems} className="mx-auto" />
+      <Toaster position="bottom-right" />
     </>
   );
 }
