@@ -1,5 +1,3 @@
-// Complete and cleaned-up production-ready Cart page with all logic integrated
-
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";

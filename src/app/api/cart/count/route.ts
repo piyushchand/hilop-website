@@ -1,3 +1,4 @@
+// app/api/cart/count/route.ts
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
@@ -11,7 +12,11 @@ export async function GET() {
 
     if (!accessToken) {
       return NextResponse.json(
-        { success: false, message: 'No authentication token found', error: 'unauthorized' },
+        {
+          success: false,
+          message: 'No authentication token found',
+          error: 'unauthorized',
+        },
         { status: 401 }
       );
     }
@@ -19,16 +24,32 @@ export async function GET() {
     const response = await fetch(`${API_URL}/cart/count`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken.value}`,
-        'Accept': 'application/json',
+        Authorization: `Bearer ${accessToken.value}`,
+        Accept: 'application/json',
       },
     });
 
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Failed to fetch cart count',
+          error: 'api_error',
+        },
+        { status: response.status }
+      );
+    }
+
     const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    return NextResponse.json(data, { status: 200 });
+
   } catch {
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch cart count', error: 'server_error' },
+      {
+        success: false,
+        message: 'Server error while fetching cart count',
+        error: 'server_error',
+      },
       { status: 500 }
     );
   }

@@ -8,7 +8,8 @@ const protectedRoutes = [
   '/cart',
   '/prescription',
   '/hilop-coins',
-  '/book-call'
+  '/book-call',
+  '/consultation'
 ];
 
 // Define auth routes that should redirect if user is already authenticated

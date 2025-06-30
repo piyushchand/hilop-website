@@ -5,6 +5,7 @@ import { LoadingProvider } from "@/contexts/LoadingContext";
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import ReduxProvider from '../store/ReduxProvider';
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://hilop.com";
 
@@ -143,14 +144,16 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <LanguageProvider>
-          <LoadingProvider>
-            <AuthProvider>
-              {children}
-              <AuthDebugger />
-            </AuthProvider>
-          </LoadingProvider>
-        </LanguageProvider>
+        <ReduxProvider>
+          <LanguageProvider>
+            <LoadingProvider>
+              <AuthProvider>
+                {children}
+                <AuthDebugger />
+              </AuthProvider>
+            </LoadingProvider>
+          </LanguageProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

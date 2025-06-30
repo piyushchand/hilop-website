@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setCartCount } from '../store/cartSlice';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,8 +30,9 @@ const Navbar = () => {
   const { user, logout, isLoading, isInitialized } = useAuth();
   const router = useRouter();
   const { language, setLanguage, isInitialized: languageInitialized } = useLanguage();
-  const [cartCount, setCartCount] = useState<number>(0);
-  const [cartLoading, setCartLoading] = useState(false);
+  const cartCount = useAppSelector((state) => state.cart.count);
+  const dispatch = useAppDispatch();
+  const [cartLoading, setCartLoading] = useState<boolean>(false);
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -64,29 +67,28 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch cart count when user changes or on mount
   useEffect(() => {
     const fetchCartCount = async () => {
       if (!user) {
-        setCartCount(0);
+        dispatch(setCartCount(0));
         return;
       }
+  
       setCartLoading(true);
       try {
-        const res = await fetch('/api/cart/count', {
-          credentials: 'include',
-        });
+        const res = await fetch('/api/cart/count', { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch cart count');
         const data = await res.json();
-        setCartCount(data?.data?.count ?? 0);
+        dispatch(setCartCount(data?.data?.count ?? 0));
       } catch {
-        setCartCount(0);
+        dispatch(setCartCount(0));
       } finally {
         setCartLoading(false);
       }
     };
+  
     fetchCartCount();
-  }, [user]);
+  }, [user, dispatch]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
