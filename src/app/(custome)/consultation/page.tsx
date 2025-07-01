@@ -10,7 +10,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/uiFramework/Button";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 interface Test {
   _id: string;
   title_en: string;
@@ -51,6 +50,8 @@ function AssessmentPageContent() {
   const [weightUnit, setWeightUnit] = useState("kg");
   
   const [bmi, setBmi] = useState<number | null>(null);
+  const [testStarted, setTestStarted] = useState(false);
+  const [testResultId, setTestResultId] = useState<string | null>(null);
 
   const queryTestId = searchParams.get("testId");
 
@@ -125,26 +126,52 @@ function AssessmentPageContent() {
     setSelectedOption(null);
   };
 
-const handleOptionClick = async (answerId: string) => {
-  setSelectedOption(answerId);
-  setTimeout(() => proceedToNextStep(), 200);
-   const res = await fetch(`${API_URL}/test-results/start`, {
+  const handleOptionClick = async (answerId: string) => {
+    setSelectedOption(answerId);
+    if (!testStarted) {
+      const res = await fetch('/api/consultation/start', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWNjMTQ2MzUxZjc5ZTBkNjE5MTI0NSIsImlhdCI6MTc1MTI4MTMzMiwiZXhwIjoxNzUzODczMzMyfQ.lHmWx40HGFUg30EqOXgkcS4qe9EcN1ti0t4b8c1hZ0w'
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
-          test_id: '682474c65b9ab999150472e9',
-          question_id: '682474c65b9ab999150472ea',
-          answer_id: '682474c65b9ab999150472ec'
-        })
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
       });
-  const data = await res.json();
-  console.log("Answer submitted:", data);
-};
-
-
+      const data = await res.json();
+      if (data.success && data.data && data.data._id) {
+        setTestResultId(data.data._id);
+        setTestStarted(true);
+      }
+      setTimeout(() => proceedToNextStep(), 200);
+    } else {
+      const isLastQuestion = currentStep === questions.length - 1;
+      const res = await fetch('/api/consultation/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          test_result_id: testResultId,
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
+      });
+      await res.json();
+      if (isLastQuestion && testResultId) {
+        await fetch(`/api/consultation/complete/${testResultId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({}),
+        });
+        window.location.href = '/cart';
+      } else {
+        setTimeout(() => proceedToNextStep(), 200);
+      }
+    }
+  };
 
   const calculateBmi = () => {
     const h = parseFloat(height);

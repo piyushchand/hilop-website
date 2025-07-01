@@ -6,9 +6,9 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
-
+console.log('Access Token:', accessToken);
     if (!accessToken) {
       return NextResponse.json(
         { success: false, message: 'Authentication token not found.' },

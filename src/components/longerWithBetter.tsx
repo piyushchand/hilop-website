@@ -10,6 +10,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import TestModal from "./model/TestModal";
+
 const testimonials = [
   {
     name: "Purav Jha",
@@ -36,6 +37,7 @@ const testimonials = [
       "I prefer herbal options, and this one actually works. No side effects, only results.",
   },
 ];
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -51,7 +53,15 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const LongerWithBetter = () => {
+// Add props to the component
+interface LongerWithBetterProps {
+  productId1?: string;
+  testId1?: string;
+  productId2?: string;
+  testId2?: string;
+}
+
+const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWithBetterProps) => {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   return (
@@ -93,7 +103,7 @@ const LongerWithBetter = () => {
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                link="/product/68246cfc5b9ab999150472e5"
+                link="/consultation"
               />
             </div>
           </div>
@@ -114,13 +124,14 @@ const LongerWithBetter = () => {
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-link="/consultation?testId=682f074c076fa37f15f16b34"
+                  link={testId1 ? `/consultation?testId=${testId1}` : ""}
                 />
                 <Button
                   label="Buy Now"
                   variant="btn-light"
                   size="xl"
-               link="/product/68246cfc5b9ab999150472e5"
+                  link={`/product/${productId1}`}
+                  // link={productId1 ? `/product/${productId1}` : "/product/68246cfc5b9ab999150472e5"}
                 />
               </div>
             </div>
@@ -140,13 +151,13 @@ link="/consultation?testId=682f074c076fa37f15f16b34"
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  link="/consultation?testId=682f0b48076fa37f15f16b83"
+                  link={`/consultation?testId=${testId2}`}
                 />
                 <Button
                   label="Buy Now"
                   variant="btn-light"
                   size="xl"
-                 link="/product/68246b005b9ab999150472e2"
+                  link={productId2 ? `/product/${productId2}` : "#"}
                 />
               </div>
             </div>

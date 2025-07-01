@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function POST(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const body = await request.json();
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken');
-
-    if (!accessToken) {
-      return NextResponse.json(
-        { success: false, message: 'Authentication token not found.' },
-        { status: 401 }
-      );
-    }
-
-    const response = await fetch(`${API_URL}/test-results/start`, {
-      method: 'POST',
+    const response = await fetch(`${API_URL}/tests/${params.id}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken.value}`,
       },
-      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -42,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('Submission error:', error);
+    console.error('Test fetch error:', error);
     return NextResponse.json(
       {
         success: false,

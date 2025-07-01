@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const body = await request.json();
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
+    const { id } = params;
 
     if (!accessToken) {
       return NextResponse.json(
@@ -16,17 +14,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${API_URL}/test-results/start`, {
-      method: 'POST',
+    const response = await fetch(`https://api.hilop.com/api/v1/test-results/${id}/complete`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${accessToken.value}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({}), // Send empty JSON body
     });
 
     const data = await response.json();
+
+    console.log(data,'data');
+    
 
     if (!response.ok) {
       return NextResponse.json(

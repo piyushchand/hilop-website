@@ -406,6 +406,7 @@ export default function ProductPage() {
                 label="Get Started Now"
                 variant="btn-dark"
                 size="xl"
+                link={`/product/${productId}`}
               />
               <Button
                 label={addToCartLoading ? "Adding..." : "Buy Now"}
@@ -491,6 +492,7 @@ export default function ProductPage() {
               label="Get Started today"
               variant="btn-dark"
               size="xl"
+              link={`/product/${productId}`}
             />
           </div>
         </div>
@@ -586,6 +588,7 @@ export default function ProductPage() {
                 label="Get Started today"
                 variant="btn-dark"
                 size="xl"
+                link={`/product/${productId}`}
               />
 
               <Swiper
@@ -658,6 +661,7 @@ export default function ProductPage() {
               label="Get Started Now"
               variant="btn-dark"
               size="xl"
+              link={`/product/${productId}`}
             />
             <Button
               label="Buy Now"

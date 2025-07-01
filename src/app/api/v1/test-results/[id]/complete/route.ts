@@ -3,11 +3,14 @@ import { cookies } from 'next/headers';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export async function POST(request: NextRequest) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const body = await request.json();
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
+    const { id: testResultId } = await params;
 
     if (!accessToken) {
       return NextResponse.json(
@@ -16,14 +19,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${API_URL}/test-results/start`, {
-      method: 'POST',
+    const response = await fetch(`${API_URL}/api/v1/test-results/${testResultId}/complete`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${accessToken.value}`,
       },
-      body: JSON.stringify(body),
     });
 
     const data = await response.json();
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error('Submission error:', error);
+    console.error('Test completion error:', error);
     return NextResponse.json(
       {
         success: false,
