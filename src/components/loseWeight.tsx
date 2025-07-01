@@ -4,7 +4,12 @@ import { motion } from "framer-motion";
 import Paragraph from "./animationComponents/TextVisble";
 import Button from "./uiFramework/Button";
 
-const LoseWeight = () => {
+type LoseWeightProps = {
+  testId?: string;
+  productId?: string;
+};
+
+const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
   return (
     <>
       <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
@@ -38,14 +43,14 @@ const LoseWeight = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/product/682314a91b521615a7e89618"
+                link={productId ? `/product/${productId}` : "#"}
               />
               <Button
                 label="Take the test"
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                link="/consultation"
+                link={`/consultation?testId=${testId}`}
               />
             </div>
           </div>
