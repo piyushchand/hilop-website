@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = [
   '/profile',
   '/my-order',
-  '/cart',
+  // '/cart',
   '/prescription',
   '/hilop-coins',
   '/book-call',

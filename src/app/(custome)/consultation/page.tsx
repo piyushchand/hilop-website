@@ -129,6 +129,7 @@ function AssessmentPageContent() {
   const handleOptionClick = async (answerId: string) => {
     setSelectedOption(answerId);
     if (!testStarted) {
+      // First answer: start the test
       const res = await fetch('/api/consultation/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -146,6 +147,7 @@ function AssessmentPageContent() {
       }
       setTimeout(() => proceedToNextStep(), 200);
     } else {
+      // Subsequent answers: submit answer
       const isLastQuestion = currentStep === questions.length - 1;
       const res = await fetch('/api/consultation/answer', {
         method: 'POST',
@@ -170,6 +172,7 @@ function AssessmentPageContent() {
       } else {
         setTimeout(() => proceedToNextStep(), 200);
       }
+      setTimeout(() => proceedToNextStep(), 200);
     }
   };
 

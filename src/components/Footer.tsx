@@ -2,23 +2,59 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Twitter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Product } from "@/types";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   const hilopLinks = [
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
     { href: "/contact", label: "Contact Us" },
-    { href: "/blogs", label: "Blogs" },
+    // { href: "/blogs", label: "Blogs" },
     { href: "/support", label: "Help & Support" },
   ];
 
-  const productLinks = [
-    { href: "/product/fat-loss", label: "Herbal Fat Loss Formula" },
-    { href: "/product/enhancer", label: "Sexual Enhancer" },
-    { href: "/product/wellness", label: "Sexual Wellness Formula" },
-  ];
+  // Fetch products for dynamic footer links
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setProductsLoading(true);
+        if (!process.env.NEXT_PUBLIC_API_URL) {
+          console.warn("API URL is not set in environment variables");
+          return;
+        }
+        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/products?lang=en`,
+          { cache: "no-store" }
+        );
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          setProducts(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching products for footer:", error);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const productLinks = products.map(product => ({
+    href: `/product/${product._id}`,
+    label: product.name
+  }));
   return (
     <footer className="pb-4 pt-20 bg-white relative">
       <Image
@@ -82,19 +118,29 @@ const Footer = () => {
 
             <div>
               <p className="mb-4 text-base uppercase text-dark font-medium">
-                Our Products
+                Product
               </p>
-              {productLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
-                    index !== productLinks.length - 1 ? "mb-4" : ""
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {productsLoading ? (
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ) : productLinks.length > 0 ? (
+                productLinks.map((link, index) => (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
+                      index !== productLinks.length - 1 ? "mb-4" : ""
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No products available</p>
+              )}
             </div>
 
             <div>
