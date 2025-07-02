@@ -95,8 +95,12 @@ export default function Home() {
   // --- Dynamic testId for LoseWeight ---
   const DEFAULT_TEST_ID = "682474c65b9ab999150472e9";
 
-  const product1 = products.find(p => p.name.toLowerCase().includes("testosterone") || p.name.toLowerCase().includes("stamina"));
-  const product2 = products.find(p => p.name.toLowerCase().includes("longer") || p.name.toLowerCase().includes("enhancer"));
+  let product1 = products.find(p => p.name.toLowerCase().includes("testosterone") || p.name.toLowerCase().includes("stamina"));
+  let product2 = products.find(p => p.name.toLowerCase().includes("longer") || p.name.toLowerCase().includes("enhancer"));
+
+  // Fallback logic if not found
+  if (!product1 && products.length > 0) product1 = products[0];
+  if ((!product2 || product2._id === product1?._id) && products.length > 1) product2 = products[1];
 
   const [testId1, setTestId1] = useState<string | null>(null);
   const [testId2, setTestId2] = useState<string | null>(null);

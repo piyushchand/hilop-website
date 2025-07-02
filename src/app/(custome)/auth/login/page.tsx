@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
-  const { login, isLoading, error, clearError, signInWithGoogle } = useAuth();
+  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook } = useAuth();
   const [mobileNumber, setMobileNumber] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,6 +21,9 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     await signInWithGoogle();
+  };
+  const handleFacebookLogin = async () => {
+    await signInWithFacebook();
   };
 
   const validatePhoneNumber = (phone: string) => {
@@ -122,6 +125,7 @@ export default function LoginPage() {
               type="button"
               className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
+              onClick={handleFacebookLogin}
             >
               <Image
                 src="/images/icon/facebook.svg"

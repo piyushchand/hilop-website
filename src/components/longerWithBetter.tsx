@@ -91,20 +91,24 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
             <div className="grid sm:grid-cols-2 gap-4 -mt-[52px]">
-              <Button
-                label="Get Started"
-                variant="btn-dark"
-                size="xl"
-                className="w-full"
-                link="/product/68246cfc5b9ab999150472e5"
-              />
-              <Button
-                label="Take the test"
-                variant="btn-light"
-                size="xl"
-                className="w-full"
-                link="/consultation"
-              />
+              {productId1 && (
+                <Button
+                  label="Get Started"
+                  variant="btn-dark"
+                  size="xl"
+                  className="w-full"
+                  link={`/product/${productId1}`}
+                />
+              )}
+              {testId2 && (
+                <Button
+                  label="Take the test"
+                  variant="btn-light"
+                  size="xl"
+                  className="w-full"
+                  link={`/consultation?testId=${testId2}`}
+                />
+              )}
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
@@ -120,19 +124,22 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
               Natural For Improve Testosterone, Stamina & Energy
               </h3>
               <div className="flex gap-4">
-                <Button
-                  label="Get Started"
-                  variant="btn-dark"
-                  size="xl"
-                  link={testId1 ? `/consultation?testId=${testId1}` : ""}
-                />
-                <Button
-                  label="Buy Now"
-                  variant="btn-light"
-                  size="xl"
-                  link={`/product/${productId1}`}
-                  // link={productId1 ? `/product/${productId1}` : "/product/68246cfc5b9ab999150472e5"}
-                />
+                {testId1 && (
+                  <Button
+                    label="Get Started"
+                    variant="btn-dark"
+                    size="xl"
+                    link={`/consultation?testId=${testId1}`}
+                  />
+                )}
+                {productId1 && (
+                  <Button
+                    label="Buy Now"
+                    variant="btn-light"
+                    size="xl"
+                    link={`/product/${productId1}`}
+                  />
+                )}
               </div>
             </div>
             <div className="bg-dark-rackley p-6 lg:p-10 rounded-3xl">
@@ -147,18 +154,22 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
               Last Longer Herbal Sexual Enhancer Powder
               </h3>
               <div className="flex gap-4">
-                <Button
-                  label="Get Started"
-                  variant="btn-dark"
-                  size="xl"
-                  link={`/consultation?testId=${testId2}`}
-                />
-                <Button
-                  label="Buy Now"
-                  variant="btn-light"
-                  size="xl"
-                  link={productId2 ? `/product/${productId2}` : "#"}
-                />
+                {testId2 && (
+                  <Button
+                    label="Get Started"
+                    variant="btn-dark"
+                    size="xl"
+                    link={`/consultation?testId=${testId2}`}
+                  />
+                )}
+                {productId2 && (
+                  <Button
+                    label="Buy Now"
+                    variant="btn-light"
+                    size="xl"
+                    link={`/product/${productId2}`}
+                  />
+                )}
               </div>
             </div>
             <motion.div

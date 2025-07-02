@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -7,21 +7,21 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken');
-console.log('Access Token:', accessToken);
+    const accessToken = cookieStore.get("accessToken");
+    console.log("Access Token:", accessToken);
     if (!accessToken) {
       return NextResponse.json(
-        { success: false, message: 'Authentication token not found.' },
+        { success: false, message: "Authentication token not found." },
         { status: 401 }
       );
     }
 
     const response = await fetch(`${API_URL}/api/v1/test-results/start`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken.value}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken.value}`,
       },
       body: JSON.stringify(body),
     });
@@ -32,7 +32,7 @@ console.log('Access Token:', accessToken);
       return NextResponse.json(
         {
           success: false,
-          message: data.message || 'API request failed',
+          message: data.message || "API request failed",
           error: data.error || null,
         },
         { status: response.status }
@@ -40,16 +40,15 @@ console.log('Access Token:', accessToken);
     }
 
     return NextResponse.json(data);
-
   } catch (error) {
-    console.error('Submission error:', error);
+    console.error("Submission error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to connect to the server',
-        error: 'connection_error',
+        message: "Failed to connect to the server",
+        error: "connection_error",
       },
       { status: 500 }
     );
   }
-} 
+}
