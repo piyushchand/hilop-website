@@ -8,6 +8,9 @@ import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
+import Button from "@/components/uiFramework/Button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getText } from "@/utils/getText";
 
 interface SubscriptionPlan {
   _id: string;
@@ -18,6 +21,7 @@ interface SubscriptionPlan {
   is_active: boolean;
   createdAt: string;
   updatedAt: string;
+  image?: string;
 }
 
 interface CartProduct {
@@ -42,7 +46,7 @@ interface CartPlan {
   name: string;
   months: number;
   discount: number;
-  discount_type: string;  
+  discount_type: string;
 }
 
 interface CartData {
@@ -68,11 +72,20 @@ interface Coupon {
   discount_amount?: number; // Make it optional to be safe
 }
 
+interface PurchasedProduct {
+  _id: string;
+  name: { en: string; hi: string };
+  image: string;
+  orderId?: string;
+  orderDate?: string;
+  quantity?: number;
+}
+
 // Utility function to format numbers properly
 const formatPrice = (price: number): string => {
-  return Number(price.toFixed(2)).toLocaleString('en-IN', {
+  return Number(price.toFixed(2)).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   });
 };
 
@@ -90,10 +103,15 @@ export default function Cart() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [couponErrorMessage, setCouponErrorMessage] = useState("");
+  const [purchasedProducts, setPurchasedProducts] = useState<
+    PurchasedProduct[]
+  >([]);
+  const [purchasedLoading, setPurchasedLoading] = useState(true);
+  const [addNowLoading, setAddNowLoading] = useState<{ [key: string]: boolean }>({});
+  const { language } = useLanguage();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  // Unified coupon API endpoint
   const COUPON_API_URL = "/api/coupons";
 
   useEffect(() => {
@@ -102,7 +120,9 @@ export default function Cart() {
         const res = await fetch(`${API_URL}/plans`);
         const data = await res.json();
         if (!data.success) throw new Error("Invalid response");
-        const activePlans = data.data.filter((p: SubscriptionPlan) => p.is_active);
+        const activePlans = data.data.filter(
+          (p: SubscriptionPlan) => p.is_active
+        );
         setPlans(activePlans);
       } catch (err) {
         setPlansError((err as Error).message);
@@ -118,14 +138,13 @@ export default function Cart() {
     try {
       const res = await fetch("/api/cart");
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         setCartLoading(false);
         return;
       }
       const data = await res.json();
       if (!data.success) throw new Error("Invalid cart data");
-      setCart(prev => {
-        // If backend returns a selected_plan, use it. Otherwise, keep the optimistic one.
+      setCart((prev) => {
         if (data.data.selected_plan) {
           setSelectedPlanId(data.data.selected_plan.id);
           return { ...data.data };
@@ -149,7 +168,7 @@ export default function Cart() {
 
   const handlePlanSelection = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
-    
+
     setPlanLoading(true);
     try {
       const res = await fetch("/api/cart/plan", {
@@ -158,26 +177,36 @@ export default function Cart() {
         body: JSON.stringify({ plan_id: planId }),
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         setPlanLoading(false);
         return;
       }
       const data = await res.json();
-      
+
       if (!data.success) {
         throw new Error(data.message || "Failed to update plan");
       }
       setSelectedPlanId(planId);
-      // Optimistically update cart.selected_plan for instant UI feedback
-      setCart((prev) => prev ? { ...prev, selected_plan: plans.find(p => p._id === planId) ? {
-        id: planId,
-        name: plans.find(p => p._id === planId)?.name || '',
-        months: plans.find(p => p._id === planId)?.months || 0,
-        discount: plans.find(p => p._id === planId)?.discount || 0,
-        discount_type: plans.find(p => p._id === planId)?.discount_type || '',
-      } : null } : prev);
+      setCart((prev) =>
+        prev
+          ? {
+              ...prev,
+              selected_plan: plans.find((p) => p._id === planId)
+                ? {
+                    id: planId,
+                    name: plans.find((p) => p._id === planId)?.name || "",
+                    months: plans.find((p) => p._id === planId)?.months || 0,
+                    discount:
+                      plans.find((p) => p._id === planId)?.discount || 0,
+                    discount_type:
+                      plans.find((p) => p._id === planId)?.discount_type || "",
+                  }
+                : null,
+            }
+          : prev
+      );
       toast.success("Plan updated successfully");
-      await fetchCart(); // Refresh cart to get updated totals
+      await fetchCart();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update plan");
       // Revert selection on error
@@ -201,7 +230,7 @@ export default function Cart() {
         }),
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         return;
       }
       await fetchCart();
@@ -217,19 +246,15 @@ export default function Cart() {
         headers: { "Content-Type": "application/json" },
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         return;
       }
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       toast.success("Item removed");
       await fetchCart();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        toast.error(err.message);
-      } else {
-        toast.error("An error occurred");
-      }
+    } catch {
+      toast.error("An error occurred");
     }
   };
 
@@ -243,16 +268,19 @@ export default function Cart() {
         body: JSON.stringify({ use_coins: !cart.use_coins }),
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         setCoinsLoading(false);
         return;
       }
       const data = await res.json();
-      if (!data.success) throw new Error(data.message || "Failed to update coins usage");
+      if (!data.success)
+        throw new Error(data.message || "Failed to update coins usage");
       toast.success(data.message || "Hilop coins updated");
       await fetchCart();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update coins usage");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update coins usage"
+      );
     } finally {
       setCoinsLoading(false);
     }
@@ -261,7 +289,7 @@ export default function Cart() {
   // Apply coupon
   const applyCoupon = async (codeToApply: string) => {
     if (!codeToApply.trim() || couponLoading) return;
-    
+
     setCouponLoading(true);
     try {
       const res = await fetch(COUPON_API_URL, {
@@ -270,11 +298,11 @@ export default function Cart() {
         body: JSON.stringify({ action: "apply", code: codeToApply.trim() }),
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         setCouponLoading(false);
         return;
       }
-      
+
       const data = await res.json();
       if (!data.success) {
         setCouponErrorMessage(data.message || "");
@@ -285,7 +313,6 @@ export default function Cart() {
       toast.success(data.message);
       setCouponErrorMessage("");
       await fetchCart();
-
     } catch (err: unknown) {
       setCouponErrorMessage("");
       if (err instanceof Error) {
@@ -308,7 +335,7 @@ export default function Cart() {
         headers: { "Content-Type": "application/json" },
       });
       if (res.status === 401) {
-        toast.error('Please log in first');
+        toast.error("Please log in first");
         setCouponLoading(false);
         return;
       }
@@ -331,15 +358,76 @@ export default function Cart() {
   };
 
   // Coupon discount from cart
-  const couponDiscount = cart && cart.coupon_discount ? cart.coupon_discount : 0;
+  const couponDiscount =
+    cart && cart.coupon_discount ? cart.coupon_discount : 0;
   // Subscription discount calculation
-  const subscriptionDiscount = cart && cart.selected_plan && cart.selected_plan.discount > 0
-    ? Math.round((cart.subtotal * cart.selected_plan.discount) / 100)
-    : 0;
+  const subscriptionDiscount =
+    cart && cart.selected_plan && cart.selected_plan.discount > 0
+      ? Math.round((cart.subtotal * cart.selected_plan.discount) / 100)
+      : 0;
   // Final total calculation
   const finalTotal = cart
-    ? cart.subtotal - (cart.coin_discount ?? 0) - subscriptionDiscount - couponDiscount
+    ? cart.subtotal -
+      (cart.coin_discount ?? 0) -
+      subscriptionDiscount -
+      couponDiscount
     : 0;
+
+  // Fetch purchased products from new API
+  useEffect(() => {
+    const fetchPurchasedProducts = async () => {
+      setPurchasedLoading(true);
+      try {
+        const res = await fetch("/api/cart/purchased-products");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          setPurchasedProducts(data.data);
+        } else {
+          setPurchasedProducts([]);
+        }
+      } catch {
+        setPurchasedProducts([]);
+      } finally {
+        setPurchasedLoading(false);
+      }
+    };
+    fetchPurchasedProducts();
+  }, []);
+
+  // Add to cart handler for purchased products
+  const handleAddPurchasedProductToCart = async (productId: string) => {
+    setAddNowLoading((prev) => ({ ...prev, [productId]: true }));
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, quantity: 1 }),
+      });
+      const data = await response.json();
+      if (response.status === 401) {
+        toast.error("Please log in to add items to your cart.");
+        return;
+      }
+      if (data.success) {
+        toast.success(data.message || "Added to cart!");
+        await fetchCart();
+      } else {
+        toast.error(data.message || "Failed to add to cart.");
+      }
+    } catch {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setAddNowLoading((prev) => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  // Helper: Get product IDs currently in cart
+  const cartProductIds = cart?.items.map((item) => item.product_id) || [];
+
+  // Filter purchased products to only show those not in cart
+  const buyAgainProducts = purchasedProducts.filter(
+    (p) => !cartProductIds.includes(p._id)
+  );
 
   return (
     <>
@@ -363,7 +451,9 @@ export default function Cart() {
                   ) : plansError ? (
                     <div className="text-red-600 py-4">{plansError}</div>
                   ) : plans.length === 0 ? (
-                    <div className="text-gray-500 py-4">No plans available.</div>
+                    <div className="text-gray-500 py-4">
+                      No plans available.
+                    </div>
                   ) : (
                     <Swiper
                       spaceBetween={16}
@@ -385,7 +475,13 @@ export default function Cart() {
                               onChange={() => handlePlanSelection(plan._id)}
                               className="peer sr-only"
                             />
-                            <span className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 transition-colors ${planLoading ? 'opacity-60 pointer-events-none' : ''} hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}>
+                            <span
+                              className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 transition-colors ${
+                                planLoading
+                                  ? "opacity-60 pointer-events-none"
+                                  : ""
+                              } hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}
+                            >
                               <div className="flex items-center gap-3 mb-3">
                                 <p className="text-dark font-medium">
                                   {plan.name}
@@ -403,7 +499,8 @@ export default function Cart() {
                                   </span>
                                 )}
                                 <span className="text-primary font-medium">
-                                  {plan.months} Month{plan.months > 1 ? "s" : ""}
+                                  {plan.months} Month
+                                  {plan.months > 1 ? "s" : ""}
                                 </span>
                               </div>
                             </span>
@@ -432,7 +529,11 @@ export default function Cart() {
                       <Image
                         width={180}
                         height={180}
-                        src={item.images && item.images.length > 0 ? item.images[0] : "/images/placeholder.svg"}
+                        src={
+                          item.images && item.images.length > 0
+                            ? item.images[0]
+                            : "/images/placeholder.svg"
+                        }
                         alt={item.name.en}
                         className="sm:size-[180px] size-24 object-cover rounded-lg bg-green-200"
                       />
@@ -442,7 +543,8 @@ export default function Cart() {
                             {item.name.en}
                           </h3>
                           <div className="flex items-center text-sm md:text-base">
-                            {item.price.base_price !== item.price.final_price && (
+                            {item.price.base_price !==
+                              item.price.final_price && (
                               <span className="text-gray-500 line-through mr-2">
                                 ₹{formatPrice(item.price.base_price)}
                               </span>
@@ -473,7 +575,9 @@ export default function Cart() {
                             <motion.button
                               whileHover={{ scale: 1.2 }}
                               className="px-3 py-1 text-gray-600 "
-                              onClick={() => updateCartItem(item, item.quantity - 1)}
+                              onClick={() =>
+                                updateCartItem(item, item.quantity - 1)
+                              }
                               disabled={cartLoading || item.quantity <= 1}
                             >
                               -
@@ -484,7 +588,9 @@ export default function Cart() {
                             <motion.button
                               whileHover={{ scale: 1.2 }}
                               className="px-3 py-1 text-gray-600 "
-                              onClick={() => updateCartItem(item, item.quantity + 1)}
+                              onClick={() =>
+                                updateCartItem(item, item.quantity + 1)
+                              }
                               disabled={cartLoading}
                             >
                               +
@@ -496,6 +602,48 @@ export default function Cart() {
                   ))
                 )}
               </div>
+
+              {/* Buy Again Section */}
+              {purchasedLoading ? (
+                <div className="text-gray-500 py-4">
+                  Loading purchased products...
+                </div>
+              ) : buyAgainProducts.length > 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 mt-8">
+                  <h3 className="text-base font-semibold mb-4 pb-2 border-b border-gray-200">
+                   Buy Again
+                  </h3>
+                  <div className="flex flex-col gap-4">
+                    {buyAgainProducts.map((item, idx) => (
+                      <div
+                        key={item._id + "-" + idx}
+                        className="flex items-center gap-6 border-b last:border-0 border-gray-200 pb-3 last:pb-0"
+                      >
+                        <Image
+                          src={item.image}
+                          alt={getText(item.name, language)}
+                          width={128}
+                          height={128}
+                          className="w-32 h-32 object-cover rounded-lg bg-gray-200"
+                        />
+                        <div className="flex-1">
+                          <p className="text-lg font-semibold text-green-900 mb-1">
+                            {getText(item.name, language)}
+                          </p>
+                        </div>
+                        <Button
+                          label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
+                          variant="btn-dark"
+                          size="lg"
+                          className="min-w-[120px]"
+                          onClick={() => handleAddPurchasedProductToCart(item._id)}
+                          disabled={!!addNowLoading[item._id]}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             {/* Right Section */}
@@ -505,14 +653,18 @@ export default function Cart() {
                 <h2 className="text-lg md:text-2xl font-semibold mb-4">
                   Offers & Benefits
                 </h2>
-                
+
                 {/* Applied Coupon */}
                 {appliedCoupon && (
                   <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">Applied Coupon</h3>
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">
+                      Applied Coupon
+                    </h3>
                     <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <div>
-                        <div className="font-medium text-blue-800">{appliedCoupon.code}</div>
+                        <div className="font-medium text-blue-800">
+                          {appliedCoupon.code}
+                        </div>
                         <div className="text-sm text-blue-600">
                           Discount: ₹{formatPrice(couponDiscount)}
                         </div>
@@ -536,7 +688,7 @@ export default function Cart() {
                         type="text"
                         id="couponCode"
                         value={couponCode}
-                        onChange={e => {
+                        onChange={(e) => {
                           setCouponCode(e.target.value);
                           setCouponErrorMessage("");
                         }}
@@ -553,7 +705,9 @@ export default function Cart() {
                       </button>
                     </div>
                     {couponErrorMessage && (
-                      <div className="text-red-600 text-sm mt-2">{couponErrorMessage}</div>
+                      <div className="text-red-600 text-sm mt-2">
+                        {couponErrorMessage}
+                      </div>
                     )}
                   </div>
                 )}
@@ -578,15 +732,20 @@ export default function Cart() {
                     <h3 className="text-gray-900">Apply Hilop Coins</h3>
                     <p className="text-xs md:text-sm text-gray-600">
                       {cart
-                        ? `You have ${cart.available_coins.toLocaleString()} coins available${cart.coin_discount > 0 ? ", giving you a discount of ₹" + formatPrice(cart.coin_discount) : ""}!`
+                        ? `You have ${cart.available_coins.toLocaleString()} coins available${
+                            cart.coin_discount > 0
+                              ? ", giving you a discount of ₹" +
+                                formatPrice(cart.coin_discount)
+                              : ""
+                          }!`
                         : "Loading coins..."}
                     </p>
                   </div>
                   <div className="ml-auto pointer-events-none">
                     <input
-                       type="checkbox"
-                       checked={cart?.use_coins ?? false}
-                       readOnly
+                      type="checkbox"
+                      checked={cart?.use_coins ?? false}
+                      readOnly
                       className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                     />
                   </div>
@@ -601,7 +760,10 @@ export default function Cart() {
                 {cart && (
                   <div className="bg-white rounded-2xl p-6">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Total MRP ({cart.item_count} item{cart.item_count > 1 ? "s" : ""})</span>
+                      <span className="text-gray-600">
+                        Total MRP ({cart.item_count} item
+                        {cart.item_count > 1 ? "s" : ""})
+                      </span>
                       <span className="font-medium text-lg">
                         ₹{formatPrice(cart.subtotal)}
                       </span>
@@ -613,7 +775,9 @@ export default function Cart() {
                       </span>
                     </div>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Subscription Discount</span>
+                      <span className="text-gray-600">
+                        Subscription Discount
+                      </span>
                       <span className="text-green-500 text-lg">
                         -₹{formatPrice(subscriptionDiscount)}
                       </span>
@@ -634,7 +798,11 @@ export default function Cart() {
                     </div>
                     {cart.selected_plan && (
                       <div className="mt-4 p-3 bg-primary/10 rounded-lg">
-                        <span className="font-medium text-primary">Selected Plan:</span> {cart.selected_plan.name} ({cart.selected_plan.months} month{cart.selected_plan.months > 1 ? "s" : ""})
+                        <span className="font-medium text-primary">
+                          Selected Plan:
+                        </span>{" "}
+                        {cart.selected_plan.name} ({cart.selected_plan.months}{" "}
+                        month{cart.selected_plan.months > 1 ? "s" : ""})
                       </div>
                     )}
                   </div>

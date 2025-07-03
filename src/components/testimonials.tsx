@@ -24,10 +24,8 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ review }: ReviewCardProps) => {
-  // Add null checks and fallbacks
   const userName = review?.user?.name || "Anonymous Customer";
   const description = review?.description || "No review content available";
-
   return (
     <div
       className={cn(
@@ -55,46 +53,37 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
         if (!process.env.NEXT_PUBLIC_API_URL)
           throw new Error("API URL is not set in environment variables");
         const url = filteredByProductId
-          ? `${process.env.NEXT_PUBLIC_API_URL}/products/${filteredByProductId}/reviews`
+          ? `${process.env.NEXT_PUBLIC_API_URL}/reviews?product=${filteredByProductId}`
           : `${process.env.NEXT_PUBLIC_API_URL}/reviews`;
 
-        console.log("Fetching reviews from:", url);
         const response = await fetch(url);
+        const result = await response.json();
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch reviews");
+        if (!result.success) throw new Error(result.message || "API error");
+
+        let reviewsData: Review[] = [];
+        if (Array.isArray(result.data)) {
+          reviewsData = result.data;
+        } else if (result.data && Array.isArray(result.data.reviews)) {
+          reviewsData = result.data.reviews;
         }
 
-        const result = await response.json();
-        console.log("Reviews API Response:", result);
-
-        if (result.success) {
-          // If we're fetching product-specific reviews, the data structure might be different
-          const reviewsData = filteredByProductId
-            ? result.data?.reviews || []
-            : result.data;
-
-          console.log("Processed Reviews:", reviewsData);
-
-          // Filter out invalid reviews and ensure they have required properties
-          const validReviews = reviewsData.filter(
-            (review: Review) =>
+        setReviews(
+          reviewsData.filter(
+            (review) =>
               review &&
               review._id &&
-              review.description &&
               typeof review.description === "string" &&
               review.description.trim().length > 0
-          );
-
-          setReviews(validReviews);
-        }
+          )
+        );
       } catch (error) {
         console.error("Error fetching reviews:", error);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchReviews();
   }, [filteredByProductId]);
 
@@ -126,7 +115,6 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
           highlightedWord="Results"
         />
       </div>
-
       <div className="relative mb-16 flex w-full flex-col items-center justify-center overflow-hidden lg:mb-40">
         <Marquee pauseOnHover className="[--duration:30s]">
           {reviews.map((review) => (
