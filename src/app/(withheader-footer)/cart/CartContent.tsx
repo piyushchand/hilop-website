@@ -484,7 +484,7 @@ export default function Cart() {
                             >
                               <div className="flex items-center gap-3 mb-3">
                                 <p className="text-dark font-medium">
-                                  {plan.name}
+                                  {getText(plan.name, language)}
                                 </p>
                                 {planLoading && selectedPlanId === plan._id && (
                                   <div className="ml-auto">
@@ -801,8 +801,7 @@ export default function Cart() {
                         <span className="font-medium text-primary">
                           Selected Plan:
                         </span>{" "}
-                        {cart.selected_plan.name} ({cart.selected_plan.months}{" "}
-                        month{cart.selected_plan.months > 1 ? "s" : ""})
+                        {getText(cart.selected_plan.name, language)} ({cart.selected_plan.months} month{cart.selected_plan.months > 1 ? "s" : ""})
                       </div>
                     )}
                   </div>

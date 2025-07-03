@@ -14,6 +14,7 @@ import {
   PrescriptionListItem, 
   PrescriptionDetail 
 } from "@/services/prescriptionService";
+import { getText } from "@/utils/getText";
 
 export default function MyPrescription() {
   const { user } = useAuth();
@@ -146,9 +147,9 @@ export default function MyPrescription() {
             <div className="flex sm:flex-row sm:justify-between flex-col gap-6">
               <div>
                 <h2 className="text-lg sm:text-2xl font-medium mb-1">
-                  {selectedPrescription.doctor.name}
+                  {getText(selectedPrescription.doctor.name, language)}
                 </h2>
-                <p className="text-gray-700">{selectedPrescription.doctor.degree}</p>
+                <p className="text-gray-700">{getText(selectedPrescription.doctor.degree, language)}</p>
               </div>
               <div className="sm:text-end">
                 <h2 className="text-lg sm:text-2xl font-medium mb-1">Reg. No</h2>
@@ -243,7 +244,7 @@ export default function MyPrescription() {
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div>
                         <h3 className="text-lg font-medium mb-1">
-                          {selectedPrescription.patient.name}
+                          {getText(selectedPrescription.patient.name, language)}
                         </h3>
                         <p className="text-gray-600">
                           {selectedPrescription.patient.age} years old
@@ -265,7 +266,7 @@ export default function MyPrescription() {
                         key={idx}
                         className="bg-gray-100 p-5 rounded-2xl border border-gray-200"
                       >
-                        <h4 className="text-xl font-medium mb-3">{medication.name}</h4>
+                        <h4 className="text-xl font-medium mb-3">{getText(medication.name, language)}</h4>
                         <div className="mb-3">
                           <p className="text-gray-700 mb-2 font-medium">
                             <span className="text-dark">Instruction:</span>
@@ -299,8 +300,8 @@ export default function MyPrescription() {
                         />
                       )}
                       <div>
-                        <p className="text-black font-medium">{selectedPrescription.doctor.name}</p>
-                        <p className="text-gray-600 font-medium">{selectedPrescription.doctor.degree}</p>
+                        <p className="text-black font-medium">{getText(selectedPrescription.doctor.name, language)}</p>
+                        <p className="text-gray-600 font-medium">{getText(selectedPrescription.doctor.degree, language)}</p>
                         <p className="text-gray-600 font-medium">
                           Reg. No: <span className="text-black">{selectedPrescription.doctor.registration_number}</span>
                         </p>
