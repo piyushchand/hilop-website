@@ -18,8 +18,8 @@ import Paragraph from "@/components/animationComponents/TextVisble";
 import { Testimonials } from "@/components/testimonials";
 import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
-import { toast } from 'react-hot-toast';
-import { Toaster } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 // Define a type for the dynamic content to ensure consistency
 interface ProductDynamicContent {
@@ -35,7 +35,7 @@ interface ProductDynamicContent {
 // Consolidated Dynamic content mapping based on product name
 const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
   Slimvibe: {
-    customImage: "/images/weight-loss/why-choose.jpg", 
+    customImage: "/images/weight-loss/why-choose.jpg",
     whyChooseTitle: "Our Herbal Fat Loss Formula?",
     benefitTags: [
       "Individuals looking to support their weight loss goals naturally.",
@@ -233,10 +233,10 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
-  
+
   const handleThumbsSwiper = (swiper: SwiperType) => {
     // Add custom class to swiper-wrapper
-    swiper.wrapperEl.classList.add('justify-center');
+    swiper.wrapperEl.classList.add("justify-center");
   };
 
   useEffect(() => {
@@ -250,7 +250,8 @@ export default function ProductPage() {
       try {
         showLoading();
         setError(null);
-        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        if (!process.env.NEXT_PUBLIC_API_URL)
+          throw new Error("API URL is not set in environment variables");
         const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}?lang=${language}`;
 
         const response = await fetch(apiUrl, {
@@ -285,36 +286,40 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language, showLoading, hideLoading]);
+  }, [params?.id, language]);
 
   // Add to Cart handler
   const handleAddToCart = async () => {
-    const productId = product && (typeof (product as Product & { _id?: string })._id === 'string' ? (product as Product & { _id?: string })._id : product.id);
+    const productId =
+      product &&
+      (typeof (product as Product & { _id?: string })._id === "string"
+        ? (product as Product & { _id?: string })._id
+        : product.id);
     if (!productId) {
-      toast.error('Product not found.');
+      toast.error("Product not found.");
       return;
     }
     setAddToCartLoading(true);
     try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product_id: productId, quantity: 1 }),
       });
       const data = await response.json();
       if (response.status === 401) {
-        toast.error('Please log in to add items to your cart.');
+        toast.error("Please log in to add items to your cart.");
         // Optionally redirect: window.location.href = '/auth/login';
         return;
       }
       if (data.success) {
-        toast.success(data.message || 'Added to cart!');
+        toast.success(data.message || "Added to cart!");
         // Optionally: update cart count in navbar/global state
       } else {
-        toast.error(data.message || 'Failed to add to cart.');
+        toast.error(data.message || "Failed to add to cart.");
       }
     } catch {
-      toast.error('An unexpected error occurred.');
+      toast.error("An unexpected error occurred.");
     } finally {
       setAddToCartLoading(false);
     }
@@ -338,7 +343,11 @@ export default function ProductPage() {
   }
 
   const dynamicProductContent = getProductContent(product.name);
-  const productId = product && (typeof (product as Product & { _id?: string })._id === 'string' ? (product as Product & { _id?: string })._id : product.id);
+  const productId =
+    product &&
+    (typeof (product as Product & { _id?: string })._id === "string"
+      ? (product as Product & { _id?: string })._id
+      : product.id);
 
   const whyChooseUs = Array.isArray(product.why_choose_us)
     ? product.why_choose_us
@@ -406,6 +415,7 @@ export default function ProductPage() {
                 label="Get Started Now"
                 variant="btn-dark"
                 size="xl"
+                link={`/product/${productId}`}
               />
               <Button
                 label={addToCartLoading ? "Adding..." : "Buy Now"}
@@ -482,7 +492,7 @@ export default function ProductPage() {
             />
           </div>
           <div>
-          <h2 className="md:text-3xl lg:text-5xl text-2xl font-semibold mb-8">
+            <h2 className="md:text-3xl lg:text-5xl text-2xl font-semibold mb-8">
               <span className="text-green-800">Why Choose</span>{" "}
               {dynamicProductContent.whyChooseTitle}
             </h2>
@@ -491,6 +501,7 @@ export default function ProductPage() {
               label="Get Started today"
               variant="btn-dark"
               size="xl"
+              link={`/product/${productId}`}
             />
           </div>
         </div>
@@ -586,6 +597,7 @@ export default function ProductPage() {
                 label="Get Started today"
                 variant="btn-dark"
                 size="xl"
+                link={`/product/${productId}`}
               />
 
               <Swiper
@@ -649,7 +661,7 @@ export default function ProductPage() {
             className="mb-6 lg:mb-10"
           />
           <div className="space-y-3 mb-6 lg:mb-10">
-          {dynamicProductContent.benefitTags.map((item, index) => (
+            {dynamicProductContent.benefitTags.map((item, index) => (
               <Checkmark key={index} text={item} />
             ))}
           </div>
@@ -658,12 +670,9 @@ export default function ProductPage() {
               label="Get Started Now"
               variant="btn-dark"
               size="xl"
+              link={`/product/${productId}`}
             />
-            <Button
-              label="Buy Now"
-              variant="btn-light"
-              size="xl"
-            />
+            <Button label="Buy Now" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>
@@ -675,7 +684,7 @@ export default function ProductPage() {
             highlightedWord="Use"
           />
           <p className="text-base md:text-lg lg:text-2xl">
-          {getText(dynamicProductContent.howToUseDescription, language)}
+            {getText(dynamicProductContent.howToUseDescription, language)}
           </p>
         </div>
       </section>
@@ -690,7 +699,7 @@ export default function ProductPage() {
               highlightedWord="Choose Us?"
             />
             <p className="text-base md:text-lg lg:text-2xl text-gray-600">
-            {getText(
+              {getText(
                 dynamicProductContent.whyChooseUsSectionDescription,
                 language
               )}

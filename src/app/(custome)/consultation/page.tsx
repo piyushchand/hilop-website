@@ -44,12 +44,14 @@ function AssessmentPageContent() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [heightUnit, setHeightUnit] = useState("cm");
   const [weightUnit, setWeightUnit] = useState("kg");
+  
   const [bmi, setBmi] = useState<number | null>(null);
+  const [testStarted, setTestStarted] = useState(false);
+  const [testResultId, setTestResultId] = useState<string | null>(null);
 
   const queryTestId = searchParams.get("testId");
 
@@ -88,7 +90,9 @@ function AssessmentPageContent() {
     };
 
     fetchQuestions();
+    
   }, [selectedTestId, modalStep]);
+  
 
   const fetchTests = async () => {
     setIsLoading(true);
@@ -122,9 +126,54 @@ function AssessmentPageContent() {
     setSelectedOption(null);
   };
 
-  const handleOptionClick = (answerId: string) => {
+  const handleOptionClick = async (answerId: string) => {
     setSelectedOption(answerId);
-    setTimeout(() => proceedToNextStep(), 200);
+    if (!testStarted) {
+      // First answer: start the test
+      const res = await fetch('/api/consultation/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data && data.data._id) {
+        setTestResultId(data.data._id);
+        setTestStarted(true);
+      }
+      setTimeout(() => proceedToNextStep(), 200);
+    } else {
+      // Subsequent answers: submit answer
+      const isLastQuestion = currentStep === questions.length - 1;
+      const res = await fetch('/api/consultation/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          test_result_id: testResultId,
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
+      });
+      await res.json();
+      if (isLastQuestion && testResultId) {
+        await fetch(`/api/consultation/complete/${testResultId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({}),
+        });
+        window.location.href = '/cart';
+      } else {
+        setTimeout(() => proceedToNextStep(), 200);
+      }
+      setTimeout(() => proceedToNextStep(), 200);
+    }
   };
 
   const calculateBmi = () => {

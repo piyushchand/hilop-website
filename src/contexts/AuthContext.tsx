@@ -12,7 +12,7 @@ import { toast } from "react-hot-toast";
 import { User } from "@/types/auth";
 import { useLoading } from "./LoadingContext";
 import { getFirebaseInstances } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 
 // Types
 export interface AuthState {
@@ -25,6 +25,7 @@ export interface AuthState {
 interface AuthContextType extends AuthState {
   login: (mobileNumber: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   verifyOTP: (
     otp: string,
@@ -341,6 +342,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithFacebook = async () => {
+    const { auth } = getFirebaseInstances();
+    showLoading("Signing in with Facebook...");
+    clearError();
+    try {
+      const facebookProvider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, facebookProvider);
+      const idToken = await result.user.getIdToken();
+
+      const response = await fetch("/api/auth/firebase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (
+          data.message &&
+          data.message.includes("Please provide a mobile number")
+        ) {
+          const { displayName, email } = result.user;
+          router.push(
+            `/auth/complete-profile?name=${encodeURIComponent(
+              displayName || ""
+            )}&email=${encodeURIComponent(email || "")}`
+          );
+        } else {
+          throw new Error(data.message || "Facebook Sign-In failed");
+        }
+        return;
+      }
+
+      const userFetched = await refreshUserData();
+      if (userFetched) {
+        toast.success("Signed in with Facebook successfully!");
+        router.push("/");
+      } else {
+        throw new Error("Failed to fetch user data after Facebook Sign-In");
+      }
+    } catch (error) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "auth/popup-closed-by-user"
+      ) {
+        setError("Facebook Sign-In was cancelled.");
+      } else {
+        setError(
+          error instanceof Error ? error.message : "Facebook Sign-In failed"
+        );
+      }
+    } finally {
+      hideLoading();
+    }
+  };
+
   const value = {
     ...state,
     login,
@@ -352,6 +412,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     updateUser,
     refreshUserData,
     signInWithGoogle,
+    signInWithFacebook,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

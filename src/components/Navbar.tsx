@@ -172,23 +172,21 @@ const Navbar = () => {
               </div>
             </button>
 
-            {user && (
-              <Link
-                href="/cart"
-                className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center "
-              >
-                <ShoppingCart className="w-5 h-5 text-dark" />
-                {cartLoading ? (
-                  <span className="absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
-                    ...
-                  </span>
-                ) : cartCount > 0 ? (
-                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {cartCount}
-                  </span>
-                ) : null}
-              </Link>
-            )}
+            <Link
+              href="/cart"
+              className="relative rounded-full size-[52px] hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center "
+            >
+              <ShoppingCart className="w-5 h-5 text-dark" />
+              {user && (cartLoading ? (
+                <span className="absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
+                  ...
+                </span>
+              ) : cartCount > 0 ? (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartCount}
+                </span>
+              ) : null)}
+            </Link>
           </div>
 
           {/* Login/Profile */}
@@ -363,16 +361,14 @@ const Navbar = () => {
             </button>
 
             {/* Cart */}
-            {user && (
-              <Link
-                href="/cart"
-                className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Cart
-              </Link>
-            )}
+            <Link
+              href="/cart"
+              className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              Cart
+            </Link>
 
             {/* Login/Profile */}
             {!user ? (
