@@ -22,9 +22,9 @@ function OtpPageContent() {
   const [isResending, setIsResending] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const otpType = searchParams.get('type');
-  const userId = searchParams.get('userId');
-  const mobileNumber = searchParams.get('mobile');
+  const otpType = searchParams?.get('type');
+  const userId = searchParams?.get('userId');
+  const mobileNumber = searchParams?.get('mobile');
 
   useEffect(() => {
     if (!otpType || !userId || !mobileNumber) {

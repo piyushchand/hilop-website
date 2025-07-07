@@ -13,7 +13,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getText } from "@/utils/getText";
 
 // Add Razorpay type declaration for TypeScript
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare global {
   interface Window {
     Razorpay: unknown;

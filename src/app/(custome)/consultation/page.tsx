@@ -53,7 +53,7 @@ function AssessmentPageContent() {
   const [testStarted, setTestStarted] = useState(false);
   const [testResultId, setTestResultId] = useState<string | null>(null);
 
-  const queryTestId = searchParams.get("testId");
+  const queryTestId = searchParams?.get("testId");
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
