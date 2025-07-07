@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hilopapp",
+      "sha256_cert_fingerprints": [
+        "AC:65:70:FF:76:FC:F3:FA:27:09:DB:58:86:ED:D8:8E:8B:DC:3C:D7:D2:35:2F:30:93:15:A4:F8:C7:14:48:85"
+      ]
+    }
+  }
+]
