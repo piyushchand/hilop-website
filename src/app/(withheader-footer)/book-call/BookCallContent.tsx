@@ -1,12 +1,132 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import AnimatedInput from "@/components/animationComponents/AnimatedInput";
-import AnimatedTextarea from "@/components/animationComponents/AnimatedTextarea";
-import ArrowButton from "@/components/uiFramework/ArrowButton";
-import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
+import ArrowButton from "@/components/uiFramework/ArrowButton";
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// Custom Calendar Component
+const daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
+
+interface CalendarProps {
+  selected: Date | null;
+  onChange: (date: Date) => void;
+  className?: string;
+}
+
+const CustomCalendar: React.FC<CalendarProps> = ({ selected, onChange, className }) => {
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(selected ? selected.getMonth() : today.getMonth());
+  const [currentYear, setCurrentYear] = useState(selected ? selected.getFullYear() : today.getFullYear());
+
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+
+  // Build calendar grid
+  const calendarDays: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) calendarDays.push(null);
+  for (let d = 1; d <= daysInMonth; d++) calendarDays.push(d);
+  while (calendarDays.length % 7 !== 0) calendarDays.push(null);
+
+  const isSameDay = (d: number) => {
+    if (!selected) return false;
+    return (
+      selected.getDate() === d &&
+      selected.getMonth() === currentMonth &&
+      selected.getFullYear() === currentYear
+    );
+  };
+
+  const isToday = (d: number) => {
+    return (
+      today.getDate() === d &&
+      today.getMonth() === currentMonth &&
+      today.getFullYear() === currentYear
+    );
+  };
+
+  const isPast = (d: number) => {
+    if (!d) return true;
+    const date = new Date(currentYear, currentMonth, d);
+    return date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  };
+
+  return (
+    <div className={`rounded-2xl bg-[#f6f6f6] p-2 sm:p-4 w-full min-w-0 mx-auto shadow-sm mb-6 ${className || ''}`}>
+      <div className="flex items-center justify-between mb-2 w-full min-w-0">
+        <span className="font-semibold text-gray-800 text-base sm:text-lg">{months[currentMonth]}</span>
+        <div className="flex gap-2">
+          <button
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+            onClick={() => {
+              if (currentMonth === 0) {
+                setCurrentMonth(11);
+                setCurrentYear(currentYear - 1);
+              } else {
+                setCurrentMonth(currentMonth - 1);
+              }
+            }}
+            aria-label="Previous Month"
+          >
+            <span className="text-lg">&lt;</span>
+          </button>
+          <button
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 hover:bg-gray-100"
+            onClick={() => {
+              if (currentMonth === 11) {
+                setCurrentMonth(0);
+                setCurrentYear(currentYear + 1);
+              } else {
+                setCurrentMonth(currentMonth + 1);
+              }
+            }}
+            aria-label="Next Month"
+          >
+            <span className="text-lg">&gt;</span>
+          </button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-xs sm:text-sm text-gray-400 mb-1 w-full min-w-0">
+        {daysShort.map((d) => (
+          <div key={d} className="text-center font-medium w-full">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1 w-full min-w-0">
+        {calendarDays.map((d, i) => (
+          <button
+            key={i}
+            disabled={!d || isPast(d)}
+            className={`w-full min-w-0 aspect-square rounded-full flex items-center justify-center transition-all
+              text-xs sm:text-base px-0 sm:px-1
+              ${d && isSameDay(d) ? 'bg-[#e8f7e2] text-green-600 font-bold border-2 border-green-400' :
+                d && !isPast(d) ? 'bg-white text-gray-800 border border-gray-200 hover:bg-green-50' :
+                'bg-transparent text-gray-300'}
+              ${isToday(d || 0) && !isSameDay(d || 0) ? 'border border-green-400' : ''}
+              ${!d || isPast(d) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+            `}
+            onClick={() => d && !isPast(d) && onChange(new Date(currentYear, currentMonth, d))}
+            type="button"
+          >
+            {d ? d : ''}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const stats = [
   { text: "Personalized health guidance" },
@@ -27,6 +147,8 @@ export default function BookCall() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string>('');
 
   // Fetch user profile data
   useEffect(() => {
@@ -64,25 +186,16 @@ export default function BookCall() {
     fetchUserProfile();
   }, []);
 
-  const handleServiceToggle = (service: string) => {
-    setServices((prevServices) =>
-      prevServices.includes(service)
-        ? prevServices.filter((s) => s !== service)
-        : [...prevServices, service]
-    );
-  };
-
-  const handleInputChange = (name: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const handleSubmit = async () => {
     try {
+      if (!selectedDate || !selectedTime) {
+        alert('Please select a date and time slot.');
+        return;
+      }
       const appointmentData = {
         ...formData,
+        preferredDate: selectedDate.toISOString().split('T')[0],
+        preferredTime: selectedTime,
         services: services,
         submittedAt: new Date().toISOString()
       };
@@ -102,6 +215,8 @@ export default function BookCall() {
         additionalNotes: ''
       });
       setServices([]);
+      setSelectedDate(null);
+      setSelectedTime('');
     } catch (error) {
       console.error('Error submitting appointment:', error);
       alert('Failed to submit appointment. Please try again.');
@@ -135,7 +250,7 @@ export default function BookCall() {
             </h2>
             <div className="flex-col flex gap-2 mb-8">
               {stats.map((item, index) => (
-                <div key={index} className="flex items-start gap-2">
+                <div key={`stat-${index}`} className="flex items-start gap-2">
                   <Image
                     src="/images/icon/list.svg"
                     alt="About hero image"
@@ -155,8 +270,7 @@ export default function BookCall() {
               conversation will be 100% private and confidential.
             </p>
           </div>
-          <div className="p-6 bg-white rounded-3xl">
-            <h2 className="sm:text-2xl text-lg mb-6">Appointment Form</h2>
+         
             
             {error && (
               <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -170,86 +284,54 @@ export default function BookCall() {
                 <span className="ml-2 text-gray-600">Loading your profile...</span>
               </div>
             ) : (
-              <div className="flex flex-col gap-6">
-                <AnimatedInput
-                  label="Full Name"
-                  name="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  required
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                />
-
-                <AnimatedInput
-                  label="Mobile number"
-                  name="mobileNumber"
-                  type="tel"
-                  value={formData.mobileNumber}
-                  required
-                  onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
-                />
-                <AnimatedInput
-                  label="Preferred Date to Call"
-                  name="preferredDate"
-                  type="date"
-                  value={formData.preferredDate}
-                  required
-                  onChange={(e) => handleInputChange('preferredDate', e.target.value)}
-                />
-              
-                <AnimatedInput
-                  label="Preferred Time to Call"
-                  name="preferredTime"
-                  type="time"
-                  value={formData.preferredTime}
-                  required
-                  onChange={(e) => handleInputChange('preferredTime', e.target.value)}
-                />
-                  <div className="col-span-2 lg:col-span-2">
-                      <fieldset>
-                        <legend className="mb-3 block text-sm text-gray-600">
-                        Choose Your Concern
-                        </legend>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            'Fat Loss',
-                            'Instant Boost',
-                            'Sexual Wellness',
-                          ].map((service) => (
-                            <Button
-                              key={service}
-                              label={service}
-                              onClick={() => handleServiceToggle(service)}
-                              variant={
-                                services.includes(service)
-                                  ? 'btn-dark'
-                                  : 'btn-gray'
-                              }
-                              size="lg"
-                            />
-                          ))}
-                        </div>
-                      </fieldset>
-                    </div>
-                  <AnimatedTextarea
-                  label="Additional Notes"
-                  name="additionalNotes"
-                  rows={3}
-                  value={formData.additionalNotes}
-                  required
-                  onChange={(e) => handleInputChange('additionalNotes', e.target.value)}
-                />
-                <div className="ms-auto">
-                <ArrowButton
-                          label="Book Now"
-                          theme="dark"
-                          size="lg"
-                          onClick={handleSubmit}
-                        />
+              <div className="w-full min-w-0 max-w-full sm:max-w-[388px] ms-auto bg-white rounded-3xl md:p-6 p-4">
+                <CustomCalendar selected={selectedDate} onChange={setSelectedDate} className="w-full min-w-0 max-w-full" />
+                <div className="w-full mb-6">
+                  <label className="block text-gray-700 mb-2 font-medium">Select Time</label>
+                  <Swiper
+                    spaceBetween={12}
+                    slidesPerView={3}
+                    slidesPerGroup={1} 
+                    centeredSlides={false}
+                    loop={false}
+                    breakpoints={{
+                      640: { slidesPerView: 3 },
+                      768: { slidesPerView: 3 },
+                    }}
+                    className="pb-2"
+                  >
+                    {[
+                      '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM' ,
+                      '12:00 PM','12:30 PM',
+                      
+                    ].map((slot, idx) => (
+                      <SwiperSlide key={`slot-${slot.replace(/\s/g, '')}-${idx}`} className="!w-auto">
+                        <button
+                          type="button"
+                          className={`rounded-xl text-xs sm:text-sm font-medium border transition-all min-w-[40px] whitespace-nowrap px-4 py-2 sm:px-6 sm:py-3
+                            ${selectedTime === slot
+                              ? 'bg-[#e8f7e2] text-green-600 border-green-400 shadow font-semibold'
+                              : 'bg-[#f6f6f6] text-gray-700 border-gray-200 hover:bg-green-50'}
+                            `}
+                          onClick={() => setSelectedTime(slot)}
+                        >
+                          {slot}
+                        </button>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
                 </div>
+                <div className="w-full flex justify-end">
+                <ArrowButton
+                  label="Book Now"
+                  theme="dark"
+                  size="lg"
+                  onClick={handleSubmit}
+                />
+              </div>
               </div>
             )}
-          </div>
+          
         </div>
       </section>
     </>

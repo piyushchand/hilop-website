@@ -99,12 +99,12 @@ const formatPrice = (price: number): string => {
 // Utility to load Razorpay script
 function loadRazorpayScript() {
   return new Promise((resolve) => {
-    if (typeof window !== 'undefined' && window.Razorpay) {
+    if (typeof window !== "undefined" && window.Razorpay) {
       resolve(true);
       return;
     }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
@@ -129,7 +129,9 @@ export default function Cart() {
     PurchasedProduct[]
   >([]);
   const [purchasedLoading, setPurchasedLoading] = useState(true);
-  const [addNowLoading, setAddNowLoading] = useState<{ [key: string]: boolean }>({});
+  const [addNowLoading, setAddNowLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { language } = useLanguage();
 
@@ -157,7 +159,7 @@ export default function Cart() {
       }
     };
     fetchPlans();
-  }, [API_URL]);
+  }, [API_URL, cart?.items?.length]);
 
   const fetchCart = useCallback(async () => {
     setCartLoading(true);
@@ -196,6 +198,12 @@ export default function Cart() {
     if (planId === selectedPlanId || planLoading) return;
 
     setPlanLoading(true);
+    // Store previous cart items' quantities and months_quantity
+    const prevCartItems = cart?.items.map(item => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      months_quantity: item.months_quantity,
+    })) || [];
     try {
       const res = await fetch("/api/cart/plan", {
         method: "PUT",
@@ -232,7 +240,20 @@ export default function Cart() {
           : prev
       );
       toast.success("Plan updated successfully");
+      // Re-fetch cart and forcibly reset quantities if changed
       await fetchCart();
+      // Defensive: If backend changed quantities, reset them
+      setCart((prev) => {
+        if (!prev) return prev;
+        const newItems = prev.items.map(item => {
+          const prevItem = prevCartItems.find(i => i.product_id === item.product_id);
+          if (prevItem && (item.quantity !== prevItem.quantity || item.months_quantity !== prevItem.months_quantity)) {
+            return { ...item, quantity: prevItem.quantity, months_quantity: prevItem.months_quantity };
+          }
+          return item;
+        });
+        return { ...prev, items: newItems };
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update plan");
       // Revert selection on error
@@ -279,6 +300,19 @@ export default function Cart() {
       if (!data.success) throw new Error(data.message);
       toast.success("Item removed");
       await fetchCart();
+      // After removing, if cart is empty or plan is not valid, remove selected plan
+      setCart((prev) => {
+        if (!prev) return prev;
+        const hasItems = prev.items && prev.items.length > 0;
+        // If no items, remove selected_plan
+        if (!hasItems) {
+          setSelectedPlanId("");
+          return { ...prev, selected_plan: null };
+        }
+        // Optionally: If plan is not valid for remaining items, also remove it
+        // (You can add more logic here if needed)
+        return prev;
+      });
     } catch {
       toast.error("An error occurred");
     }
@@ -472,7 +506,7 @@ export default function Cart() {
       });
 
       console.log("Addresses response status:", addressesResponse.status);
-      
+
       if (addressesResponse.status === 401) {
         toast.error("Please log in first");
         setCheckoutLoading(false);
@@ -481,40 +515,58 @@ export default function Cart() {
 
       const addressesData = await addressesResponse.json();
       console.log("Addresses data:", addressesData);
-      
-      if (!addressesData.success || !addressesData.data || addressesData.data.length === 0) {
+
+      if (
+        !addressesData.success ||
+        !addressesData.data ||
+        addressesData.data.length === 0
+      ) {
         toast.error("Please add a shipping address first");
         setCheckoutLoading(false);
         return;
       }
 
       // Find default address or use the first one
-      const selectedAddress = addressesData.data.find((addr: { is_default?: boolean }) => addr.is_default) || addressesData.data[0];
+      const selectedAddress =
+        addressesData.data.find(
+          (addr: { is_default?: boolean }) => addr.is_default
+        ) || addressesData.data[0];
       console.log("Selected address:", selectedAddress);
-      
+
       // Call the Next.js API route that handles authentication
       console.log("Selected address ID:", selectedAddress._id);
-      
-      const addressResponse = await fetch(`/api/v1/addresses/${selectedAddress._id}`, {
-        method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        credentials: "include",
-      });
+
+      const addressResponse = await fetch(
+        `/api/v1/addresses/${selectedAddress._id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
       console.log("Address response status:", addressResponse.status);
-      console.log("Address response headers:", Object.fromEntries(addressResponse.headers.entries()));
-      
+      console.log(
+        "Address response headers:",
+        Object.fromEntries(addressResponse.headers.entries())
+      );
+
       const addressData = await addressResponse.json();
       console.log("Address API Response:", addressData);
-      
+
       if (addressResponse.ok) {
-        toast.success(`Address retrieved successfully! ID: ${selectedAddress._id}`);
-        console.log("API URL called:", `/api/v1/addresses/${selectedAddress._id}`);
+        toast.success(
+          `Address retrieved successfully! ID: ${selectedAddress._id}`
+        );
+        console.log(
+          "API URL called:",
+          `/api/v1/addresses/${selectedAddress._id}`
+        );
         console.log("Address ID:", selectedAddress._id);
-        
+
         // Show all the data in console
         console.log("=== ADDRESS DATA ===");
         const address = addressData.data || addressData;
@@ -529,10 +581,10 @@ export default function Cart() {
         console.log("Landmark:", address.landmark);
         console.log("Is Default:", address.is_default);
         console.log("===================");
-        
+
         // Now call the Razorpay payment API
         console.log("Calling Razorpay payment API...");
-        
+
         // Validate address ID
         if (!address._id) {
           toast.error("Invalid address ID");
@@ -543,34 +595,40 @@ export default function Cart() {
         // Send both shipping_address_id and total_amount as required by backend
         const paymentRequestData = {
           shipping_address_id: address._id,
-          total_amount: finalTotal // Make sure finalTotal is the correct payable amount
+          total_amount: finalTotal, // Make sure finalTotal is the correct payable amount
         };
-        
+
         console.log("Payment request data:", paymentRequestData);
         console.log("Shipping Address ID being sent:", address._id);
-        
+
         const paymentResponse = await fetch("/api/payment/create-order", {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            Accept: "application/json",
           },
           credentials: "include",
           body: JSON.stringify(paymentRequestData),
         });
 
         console.log("Payment response status:", paymentResponse.status);
-        
+
         const paymentData = await paymentResponse.json();
         console.log("Payment API Response:", paymentData);
-        
+
         if (paymentResponse.ok && paymentData.success) {
           toast.success("Payment order created successfully!");
           const paymentInfo = paymentData.data || paymentData;
           // Support both possible backend response shapes
-          const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
-          const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === 'number' ? paymentInfo.total_amount * 100 : undefined);
-          const razorpayKey = paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+          const razorpayOrderId =
+            paymentInfo.razorpay_order_id || paymentInfo.order_id;
+          const amountPaise =
+            paymentInfo.amount ||
+            (typeof paymentInfo.total_amount === "number"
+              ? paymentInfo.total_amount * 100
+              : undefined);
+          const razorpayKey =
+            paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
           const currency = paymentInfo.currency || "INR";
 
           console.log("=== PAYMENT DATA ===");
@@ -583,15 +641,19 @@ export default function Cart() {
 
           // Defensive: Check for required fields from backend or fallback
           if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-            toast.error("Payment gateway error: Missing order details. Please try again or contact support.");
+            toast.error(
+              "Payment gateway error: Missing order details. Please try again or contact support."
+            );
             setCheckoutLoading(false);
             return;
           }
 
           // Ensure Razorpay script is loaded before using window.Razorpay
           const scriptLoaded = await loadRazorpayScript();
-          if (!scriptLoaded || typeof window.Razorpay !== 'function') {
-            toast.error("Failed to load Razorpay payment gateway. Please try again.");
+          if (!scriptLoaded || typeof window.Razorpay !== "function") {
+            toast.error(
+              "Failed to load Razorpay payment gateway. Please try again."
+            );
             setCheckoutLoading(false);
             return;
           }
@@ -604,7 +666,11 @@ export default function Cart() {
             name: "Hilop",
             description: "Order Payment",
             order_id: razorpayOrderId,
-            handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+            handler: async function (response: {
+              razorpay_payment_id: string;
+              razorpay_order_id: string;
+              razorpay_signature: string;
+            }) {
               // Call backend to verify payment
               try {
                 const verifyRes = await fetch("/api/payment/verify", {
@@ -617,17 +683,22 @@ export default function Cart() {
                     test_mode: true,
                   }),
                 });
-                console.log(verifyRes)
+                console.log(verifyRes);
                 const verifyData = await verifyRes.json();
                 if (verifyData.success) {
                   // On successful payment verification, redirect to My Orders
                   window.location.href = "/my-order";
                 } else {
                   // Do NOT clear cart if payment verification fails
-                  toast.error(verifyData.message || "Payment verification failed. Please contact support.");
+                  toast.error(
+                    verifyData.message ||
+                      "Payment verification failed. Please contact support."
+                  );
                 }
               } catch {
-                toast.error("Payment verification failed. Please contact support.");
+                toast.error(
+                  "Payment verification failed. Please contact support."
+                );
               }
             },
             prefill: {},
@@ -645,12 +716,18 @@ export default function Cart() {
         } else {
           console.error("Payment API Error Status:", paymentResponse.status);
           console.error("Payment API Error Response:", paymentData);
-          toast.error(paymentData.message || `Failed to create payment order (${paymentResponse.status})`);
+          toast.error(
+            paymentData.message ||
+              `Failed to create payment order (${paymentResponse.status})`
+          );
         }
       } else {
         console.error("API Error Status:", addressResponse.status);
         console.error("API Error Response:", addressData);
-        toast.error(addressData.message || `Failed to get address (${addressResponse.status})`);
+        toast.error(
+          addressData.message ||
+            `Failed to get address (${addressResponse.status})`
+        );
       }
     } catch (error) {
       console.error("Address fetch error:", error);
@@ -661,7 +738,12 @@ export default function Cart() {
   };
 
   // Determine if only BoldRise is in the cart
-  const isOnlyBoldRise = cart && cart.items.length === 1 && cart.items[0].name && (cart.items[0].name.en?.toLowerCase() === 'boldrise' || cart.items[0].name.hi?.toLowerCase() === 'boldrise');
+  const isOnlyBoldRise =
+    cart &&
+    cart.items.length === 1 &&
+    cart.items[0].name &&
+    (cart.items[0].name.en?.toLowerCase() === "boldrise" ||
+      cart.items[0].name.hi?.toLowerCase() === "boldrise");
 
   return (
     <>
@@ -670,9 +752,9 @@ export default function Cart() {
         <div className="container lg:pt-20 pt-10 relative">
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Left Section */}
-            <div className="lg:w-2/3 w-full">
+            <div className={`w-full ${cart && cart.items.length > 0 ? 'lg:w-2/3' : ''}`}> 
               {/* Choose Your Subscription Plan */}
-              {!isOnlyBoldRise && (
+              {!isOnlyBoldRise && cart && cart.items.length > 0 && (
                 <div className="bg-white p-6 rounded-3xl mb-6 overflow-hidden">
                   <h2 className="text-lg md:text-2xl font-semibold mb-2">
                     Choose Your Subscription Plan
@@ -721,11 +803,12 @@ export default function Cart() {
                                   <p className="text-dark font-medium">
                                     {getText(plan.name, language)}
                                   </p>
-                                  {planLoading && selectedPlanId === plan._id && (
-                                    <div className="ml-auto">
-                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                                    </div>
-                                  )}
+                                  {planLoading &&
+                                    selectedPlanId === plan._id && (
+                                      <div className="ml-auto">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                      </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-3 items-center">
                                   {plan.discount > 0 && (
@@ -748,14 +831,73 @@ export default function Cart() {
                 </div>
               )}
 
-              {/* Product List */}
               <div>
                 {cartLoading ? (
                   <div className="text-gray-500 py-4">Loading cart...</div>
                 ) : cartError ? (
                   <div className="text-red-600 py-4">{cartError}</div>
                 ) : !cart || cart.items.length === 0 ? (
-                  <div className="text-gray-500 py-4">Your cart is empty.</div>
+                  <div className="flex flex-col items-center justify-center w-full min-h-[300px]">
+                    <span className="text-2xl md:text-3xl font-bold text-[#111] text-center w-full">
+                      Your cart is empty.
+                    </span>
+                    {/* Buy Again section should be directly below, no gap */}
+                    {purchasedLoading ? (
+                      <div className="text-gray-500 py-4 text-center w-full">
+                        Loading purchased products...
+                      </div>
+                    ) : buyAgainProducts.length > 0 ? (
+                      <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-6 w-full max-w-xl mx-auto">
+                        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200 text-center">
+                          Buy Again
+                        </h3>
+                        <div className="flex flex-col gap-3 sm:gap-4 w-full">
+                          {buyAgainProducts.map((item, idx) => (
+                            <div
+                              key={item._id + "-" + idx}
+                              className="flex flex-row items-center gap-3 sm:gap-4 md:gap-6 border-b last:border-0 border-gray-200 pb-3 sm:pb-4 last:pb-0 w-full"
+                            >
+                              <Image
+                                src={item.image}
+                                alt={getText(item.name, language)}
+                                width={80}
+                                height={80}
+                                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p
+                                  className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                                  title={getText(item.name, language)}
+                                >
+                                  {getText(item.name, language)}
+                                </p>
+                                {item.orderDate && (
+                                  <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                                    Last ordered:{" "}
+                                    {new Date(item.orderDate).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex-shrink-0 ml-2">
+                                <Button
+                                  label={
+                                    addNowLoading[item._id]
+                                      ? "Adding..."
+                                      : "+ Add Now"
+                                  }
+                                  variant="btn-dark"
+                                  size="sm"
+                                  className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
+                                  onClick={() => handleAddPurchasedProductToCart(item._id)}
+                                  disabled={!!addNowLoading[item._id]}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 ) : (
                   cart.items.map((item) => (
                     <div
@@ -765,6 +907,7 @@ export default function Cart() {
                       <Image
                         width={180}
                         height={180}
+                        // Always show placeholder if no product image is available
                         src={
                           item.images && item.images.length > 0
                             ? item.images[0]
@@ -839,218 +982,236 @@ export default function Cart() {
                 )}
               </div>
 
-              {/* Buy Again Section */}
-              {purchasedLoading ? (
-                <div className="text-gray-500 py-4 text-center">
-                  Loading purchased products...
-                </div>
-              ) : buyAgainProducts.length > 0 ? (
-                <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-4 sm:mt-6 md:mt-8">
-                  <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200">
-                   Buy Again
-                  </h3>
-                  <div className="flex flex-col gap-3 sm:gap-4">
-                    {buyAgainProducts.map((item, idx) => (
+              {/* Buy Again Section (only show if cart is NOT empty) */}
+              {cart && cart.items.length > 0 && !cartLoading && !cartError && (
+                purchasedLoading ? (
+                  <div className="text-gray-500 py-4 text-center">
+                    Loading purchased products...
+                  </div>
+                ) : buyAgainProducts.length > 0 ? (
+                  <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-4 sm:mt-6 md:mt-8 max-w-xl mx-auto">
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200 text-center">
+                      Buy Again
+                    </h3>
+                    <div className="flex flex-col gap-3 sm:gap-4">
+                      {buyAgainProducts.map((item, idx) => (
+                        <div
+                          key={item._id + "-" + idx}
+                          className="flex flex-row items-center gap-3 sm:gap-4 md:gap-6 border-b last:border-0 border-gray-200 pb-3 sm:pb-4 last:pb-0"
+                        >
+                          <Image
+                            src={item.image}
+                            alt={getText(item.name, language)}
+                            width={80}
+                            height={80}
+                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                              title={getText(item.name, language)}
+                            >
+                              {getText(item.name, language)}
+                            </p>
+                            {item.orderDate && (
+                              <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                                Last ordered:{" "}
+                                {new Date(item.orderDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex-shrink-0 ml-2">
+                            <Button
+                              label={
+                                addNowLoading[item._id]
+                                  ? "Adding..."
+                                  : "+ Add Now"
+                              }
+                              variant="btn-dark"
+                              size="sm"
+                              className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
+                              onClick={() => handleAddPurchasedProductToCart(item._id)}
+                              disabled={!!addNowLoading[item._id]}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null
+              )}
+            </div>
+
+            {/* Right Section: Only show if cart has items */}
+            {cart && cart.items.length > 0 && (
+              <div className="lg:w-1/3 w-full">
+                {/* Offers & Benefits */}
+                {cart && cart.items.length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-lg md:text-2xl font-semibold mb-4">
+                      Offers & Benefits
+                    </h2>
+
+                    {/* Applied Coupon */}
+                    {appliedCoupon && (
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">
+                          Applied Coupon
+                        </h3>
+                        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div>
+                            <div className="font-medium text-blue-800">
+                              {appliedCoupon.code}
+                            </div>
+                            <div className="text-sm text-blue-600">
+                              Discount: ₹{formatPrice(couponDiscount)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={removeCoupon}
+                            disabled={couponLoading}
+                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {couponLoading ? "Removing..." : "Remove"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Coupon Input */}
+                    {!appliedCoupon && (
+                      <div className="mb-4">
+                        <div className="flex border border-gray-200 bg-white rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                          <input
+                            type="text"
+                            id="couponCode"
+                            value={couponCode}
+                            onChange={(e) => {
+                              setCouponCode(e.target.value);
+                              setCouponErrorMessage("");
+                            }}
+                            className="appearance-none focus:outline-none w-full"
+                            placeholder="Enter Coupon Code"
+                            disabled={couponLoading}
+                          />
+                          <button
+                            className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300 disabled:opacity-50"
+                            onClick={() => applyCoupon(couponCode)}
+                            disabled={!couponCode.trim() || couponLoading}
+                          >
+                            {couponLoading ? "Applying..." : "Apply"}
+                          </button>
+                        </div>
+                        {couponErrorMessage && (
+                          <div className="text-red-600 text-sm mt-2">
+                            {couponErrorMessage}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Hilop Coins - Only show when user has coins */}
+                    {cart && cart.available_coins > 0 && (
                       <div
-                        key={item._id + "-" + idx}
-                        className="flex flex-row items-center gap-3 sm:gap-4 md:gap-6 border-b last:border-0 border-gray-200 pb-3 sm:pb-4 last:pb-0"
+                        onClick={coinsLoading ? undefined : handleToggleCoins}
+                        className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
+            ${
+              cart?.use_coins
+                ? "bg-green-50 border-green-500"
+                : "bg-white border-gray-200"
+            } border ${coinsLoading ? "opacity-60 pointer-events-none" : ""}`}
                       >
                         <Image
-                          src={item.image}
-                          alt={getText(item.name, language)}
-                          width={80}
-                          height={80}
-                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
+                          width={32}
+                          height={32}
+                          src="/images/icon/hilop-coin.svg"
+                          alt="Hilop Coins"
                         />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate" title={getText(item.name, language)}>
-                            {getText(item.name, language)}
+                        <div>
+                          <h3 className="text-gray-900">Apply Hilop Coins</h3>
+                          <p className="text-xs md:text-sm text-gray-600">
+                            {cart
+                              ? `You have ${cart.available_coins.toLocaleString()} coins available${
+                                  cart.coin_discount > 0
+                                    ? ", giving you a discount of ₹" +
+                                      formatPrice(cart.coin_discount)
+                                    : ""
+                                }!`
+                              : "Loading coins..."}
                           </p>
-                          {item.orderDate && (
-                            <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                              Last ordered: {new Date(item.orderDate).toLocaleDateString()}
-                            </p>
-                          )}
                         </div>
-                        <div className="flex-shrink-0 ml-2">
-                          <Button
-                            label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
-                            variant="btn-dark"
-                            size="sm"
-                            className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
-                            onClick={() => handleAddPurchasedProductToCart(item._id)}
-                            disabled={!!addNowLoading[item._id]}
+                        <div className="ml-auto pointer-events-none">
+                          <input
+                            type="checkbox"
+                            checked={cart?.use_coins ?? false}
+                            readOnly
+                            className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
                           />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            {/* Right Section */}
-            <div className="lg:w-1/3 w-full">
-              {/* Offers & Benefits */}
-              <div className="mb-6">
-                <h2 className="text-lg md:text-2xl font-semibold mb-4">
-                  Offers & Benefits
-                </h2>
-
-                {/* Applied Coupon */}
-                {appliedCoupon && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-2">
-                      Applied Coupon
-                    </h3>
-                    <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div>
-                        <div className="font-medium text-blue-800">
-                          {appliedCoupon.code}
-                        </div>
-                        <div className="text-sm text-blue-600">
-                          Discount: ₹{formatPrice(couponDiscount)}
-                        </div>
-                      </div>
-                      <button
-                        onClick={removeCoupon}
-                        disabled={couponLoading}
-                        className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
-                      >
-                        {couponLoading ? "Removing..." : "Remove"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Coupon Input */}
-                {!appliedCoupon && (
-                  <div className="mb-4">
-                    <div className="flex border border-gray-200 bg-white rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                      <input
-                        type="text"
-                        id="couponCode"
-                        value={couponCode}
-                        onChange={(e) => {
-                          setCouponCode(e.target.value);
-                          setCouponErrorMessage("");
-                        }}
-                        className="appearance-none focus:outline-none w-full"
-                        placeholder="Enter Coupon Code"
-                        disabled={couponLoading}
-                      />
-                      <button
-                        className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300 disabled:opacity-50"
-                        onClick={() => applyCoupon(couponCode)}
-                        disabled={!couponCode.trim() || couponLoading}
-                      >
-                        {couponLoading ? "Applying..." : "Apply"}
-                      </button>
-                    </div>
-                    {couponErrorMessage && (
-                      <div className="text-red-600 text-sm mt-2">
-                        {couponErrorMessage}
-                      </div>
                     )}
                   </div>
                 )}
 
-                {/* Hilop Coins */}
-                <div
-                  onClick={coinsLoading ? undefined : handleToggleCoins}
-                  className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
-          ${
-            cart?.use_coins
-              ? "bg-green-50 border-green-500"
-              : "bg-white border-gray-200"
-          } border ${coinsLoading ? "opacity-60 pointer-events-none" : ""}`}
-                >
-                  <Image
-                    width={32}
-                    height={32}
-                    src="/images/icon/hilop-coin.svg"
-                    alt="Hilop Coins"
-                  />
-                  <div>
-                    <h3 className="text-gray-900">Apply Hilop Coins</h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      {cart
-                        ? `You have ${cart.available_coins.toLocaleString()} coins available${
-                            cart.coin_discount > 0
-                              ? ", giving you a discount of ₹" +
-                                formatPrice(cart.coin_discount)
-                              : ""
-                          }!`
-                        : "Loading coins..."}
-                    </p>
-                  </div>
-                  <div className="ml-auto pointer-events-none">
-                    <input
-                      type="checkbox"
-                      checked={cart?.use_coins ?? false}
-                      readOnly
-                      className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="">
-                <h2 className="text-lg md:text-2xl font-semibold mb-4">
-                  Order Summary
-                </h2>
-                {cart && (
-                  <div className="bg-white rounded-2xl p-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">
-                        Total MRP ({cart.item_count} item
-                        {cart.item_count > 1 ? "s" : ""})
-                      </span>
-                      <span className="font-medium text-lg">
-                        ₹{formatPrice(cart.subtotal)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Discount from Coins</span>
-                      <span className="text-green-500 text-lg">
-                        -₹{formatPrice(cart.coin_discount ?? 0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">
-                        Subscription Discount
-                      </span>
-                      <span className="text-green-500 text-lg">
-                        -₹{formatPrice(subscriptionDiscount)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Coupon Discount</span>
-                      <span className="text-green-500 text-lg">
-                        -₹{formatPrice(couponDiscount)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Shipping</span>
-                      <span className="text-green-500 text-lg">Free</span>
-                    </div>
-                    <div className="flex justify-between text-lg font-medium border-t border-gray-200 pt-2 mt-2 items-center">
-                      <span>Total</span>
-                      <span>₹{formatPrice(finalTotal)}</span>
-                    </div>
-                    {cart.selected_plan && (
-                      <div className="mt-4 p-3 bg-primary/10 rounded-lg">
-                        <span className="font-medium text-primary">
-                          Selected Plan:
-                        </span>{" "}
-                        {getText(cart.selected_plan.name, language)} ({cart.selected_plan.months} month{cart.selected_plan.months > 1 ? "s" : ""})
+                {/* Order Summary */}
+                {cart && cart.items.length > 0 && (
+                  <div className="">
+                    <h2 className="text-lg md:text-2xl font-semibold mb-4">
+                      Order Summary
+                    </h2>
+                    <div className="bg-white rounded-2xl p-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">
+                          Total MRP ({cart.item_count} item
+                          {cart.item_count > 1 ? "s" : ""})
+                        </span>
+                        <span className="font-medium text-lg">
+                          ₹{formatPrice(cart.subtotal)}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Discount from Coins</span>
+                        <span className="text-green-500 text-lg">
+                          -₹{formatPrice(cart.coin_discount ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">
+                          Subscription Discount
+                        </span>
+                        <span className="text-green-500 text-lg">
+                          -₹{formatPrice(subscriptionDiscount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Coupon Discount</span>
+                        <span className="text-green-500 text-lg">
+                          -₹{formatPrice(couponDiscount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600">Shipping</span>
+                        <span className="text-green-500 text-lg">Free</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-medium border-t border-gray-200 pt-2 mt-2 items-center">
+                        <span>Total</span>
+                        <span>₹{formatPrice(finalTotal)}</span>
+                      </div>
+                      {cart.selected_plan && (
+                        <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+                          <span className="font-medium text-primary">
+                            Selected Plan:
+                          </span>{" "}
+                          {getText(cart.selected_plan.name, language)} (
+                          {cart.selected_plan.months} month
+                          {cart.selected_plan.months > 1 ? "s" : ""})
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

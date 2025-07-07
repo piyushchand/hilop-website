@@ -170,7 +170,7 @@ export default function Home() {
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
-        <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
+        <div className="grid md:grid-cols-[auto_316px] items-center mt-8 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
             <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl font-medium mb-6">

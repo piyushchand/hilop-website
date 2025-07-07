@@ -169,7 +169,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           <button
             type="button"
             onClick={handleIconClick}
-            className="text-red-600 hover:text-red-800"
+            className=" hover:text-red-800"
           >
             {type === "date" ? (
               <CalendarRange size={20} color="currentColor" />

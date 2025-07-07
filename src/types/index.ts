@@ -50,3 +50,14 @@ export interface ProductApiResponse {
     success: boolean;
     data: Product;
 }
+
+// Treatment Plan type for /treatment-plans/user API
+export interface TreatmentPlan {
+  _id: string;
+  name: string;
+  image?: string;
+  dosage: string;
+  total_doses: number;
+  completed_doses: number;
+  instructions: string;
+}

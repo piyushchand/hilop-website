@@ -1,5 +1,5 @@
 // src/services/apiService.ts
-import { ProductListApiResponse, ProductApiResponse } from '@/types';
+import { ProductListApiResponse, ProductApiResponse, TreatmentPlan } from '@/types';
 
 // NOTE: No need for axios, Next.js extends the global `fetch` API
 // with caching and revalidating capabilities. It's the recommended way.
@@ -32,4 +32,17 @@ export const getProductById = async (productId: string): Promise<ProductApiRespo
     }
 
     return res.json();
+};
+
+export const getUserTreatmentPlans = async (): Promise<TreatmentPlan[]> => {
+  const res = await fetch('/api/treatment-plans/user', {
+    method: 'GET',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to fetch treatment plans');
+  }
+  const data = await res.json();
+  return data.data || [];
 };
