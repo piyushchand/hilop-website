@@ -60,8 +60,8 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   const handleIconClick = () => {
     if (inputRef.current) {
       inputRef.current.focus();
-      if (type === "date" && typeof (inputRef.current as any).showPicker === 'function') {
-        (inputRef.current as any).showPicker();
+      if (type === "date" && typeof (inputRef.current as HTMLInputElement).showPicker === 'function') {
+        (inputRef.current as HTMLInputElement).showPicker();
       }
     }
   };

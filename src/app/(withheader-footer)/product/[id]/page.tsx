@@ -256,7 +256,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language]);
+  }, [params?.id, language, showLoading, hideLoading]);
 
   // Add to Cart handler
   const handleAddToCart = async () => {
