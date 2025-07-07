@@ -3,7 +3,7 @@
 import {
   Globe,
   ShoppingCart,
-  Menu,
+  // Menu,
   X,
   User,
   LogOut,
@@ -134,18 +134,7 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex gap-8 text-sm font-medium text-gray-700">
-          <Link href="/about-us" className="hover:text-black">
-            About us
-          </Link>
-          <Link href="/how-it-works" className="hover:text-black">
-            How it works
-          </Link>
-          <Link href="/blog" className="hover:text-black">
-            Blog
-          </Link>
-        </nav>
+       
 
         {/* Right Side Desktop */}
         <div className="flex items-center gap-4">
@@ -238,12 +227,22 @@ const Navbar = () => {
                         className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-gray-300 z-50 overflow-hidden"
                       >
                         <div className="p-4 border-b border-gray-200">
+                          
                           <h3 className="font-medium text-dark">{user.name}</h3>
                           <p className="text-sm text-gray-600">{user.email}</p>
                           {user.hilop_coins && (
-                            <p className="text-sm text-green-800 mt-1">
-                              {user.hilop_coins.toLocaleString()} Hilop Coins
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Image
+                                src="/images/icon/hilop-coin.svg"
+                                alt="Hilop Coins"
+                                width={16}
+                                height={16}
+                                className="flex-shrink-0"
+                              />
+                              <p className="text-sm text-green-800">
+                                {user.hilop_coins.toLocaleString()} Hilop Coins
+                              </p>
+                            </div>
                           )}
                         </div>
                         <Link
@@ -268,7 +267,7 @@ const Navbar = () => {
                           onClick={() => setProfileDropdownOpen(false)}
                         >
                           <ShoppingBag className="mr-3 h-4 w-4" />
-                          Buy Again
+                          Cart
                         </Link>
                         <Link
                           href="/support"
@@ -300,13 +299,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden flex items-center"
-            onClick={() => setMobileMenuOpen(true)}
-          >
-            <Menu className="w-6 h-6 text-green-800" />
-          </button>
+       
         </div>
       </div>
 
@@ -325,132 +318,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        <div className="p-4">
-          <nav className="flex flex-col gap-4 text-lg font-medium text-gray-700 mb-8">
-            <Link
-              href="/about-us"
-              className="hover:text-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About us
-            </Link>
-            <Link
-              href="/how-it-works"
-              className="hover:text-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              How it works
-            </Link>
-            <Link
-              href="/blog"
-              className="hover:text-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Blog
-            </Link>
-          </nav>
-
-          <div className="flex flex-col gap-4">
-            {/* Language Toggle */}
-            <button
-              onClick={() => setLanguage(language === "en" ? "hi" : "en")}
-              className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
-            >
-              <Globe className="w-5 h-5" />
-              {language === "en" ? "Hindi" : "English"}
-            </button>
-
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="flex items-center gap-2 text-lg font-medium text-gray-700 hover:text-black"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              Cart
-            </Link>
-
-            {/* Login/Profile */}
-            {!user ? (
-              <ArrowButton
-                label="Login"
-                theme="light"
-                size="lg"
-                href="/auth/login"
-              />
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="size-[46px] rounded-full bg-dark overflow-hidden">
-                    {user.profile_image ? (
-                      <Image
-                        src={user.profile_image}
-                        alt={`${user.name}'s profile`}
-                        width={46}
-                        height={46}
-                        className="rounded-full h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full text-xl flex items-center justify-center bg-gray-200 text-gray-600">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-dark">{user.name}</h3>
-                    <p className="text-sm text-gray-600">{user.email}</p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <User className="w-5 h-5" />
-                  Profile
-                </Link>
-                <Link
-                  href="/my-order"
-                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <History className="w-5 h-5" />
-                  Orders
-                </Link>
-                <Link
-                  href="/cart"
-                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Buy Again
-                </Link>
-                <Link
-                  href="/support"
-                  className="flex items-center gap-3 p-3 text-lg font-medium text-gray-700 hover:text-black"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <MessageCircleQuestion className="w-5 h-5" />
-                  Support
-                </Link>
-                <button
-                  className="flex items-center gap-3 p-3 text-lg font-medium text-red-600 hover:text-red-700 w-full text-left"
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                    setTimeout(() => {
-                      router.push("/");
-                    }, 2000);
-                  }}
-                >
-                  <LogOut className="w-5 h-5" />
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+      
       </div>
     </header>
   );

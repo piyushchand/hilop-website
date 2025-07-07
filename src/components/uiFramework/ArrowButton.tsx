@@ -11,6 +11,7 @@ interface ArrowButtonProps {
   href?: string;
   onClick?: () => void;
   className?: string;
+  disabled?: boolean;
 }
 
 const SIZE_CLASSES = {
@@ -45,6 +46,7 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({
   href,
   onClick,
   className = '',
+  disabled = false,
 }) => {
   const [arrowSize, setArrowSize] = useState(DEFAULT_ARROW_SIZE[size]);
 
@@ -119,7 +121,11 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({
   }
 
   return (
-    <button onClick={onClick} className={`w-fit h-fit ${className}`}>
+    <button 
+      onClick={onClick} 
+      className={`w-fit h-fit ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      disabled={disabled}
+    >
       {buttonContent}
     </button>
   );

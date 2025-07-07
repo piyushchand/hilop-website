@@ -504,7 +504,7 @@ export default function AccountDetailsModal({
             required
           />
         </div>
-        <div className="flex justify-center gap-4 p-6 border-t border-gray-200 mt-auto">
+        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 mt-auto text-red-500">
           <Button
             label="Reset"
             variant="btn-secondary"
@@ -512,13 +512,7 @@ export default function AccountDetailsModal({
             onClick={handleReset}
             disabled={isLoading || !isDirty}
           />
-          <Button
-            label="Cancel"
-            variant="btn-secondary"
-            size="xl"
-            onClick={handleCancel}
-            disabled={isLoading}
-          />
+          
           <Button
             label={isLoading ? "Saving..." : "Save Changes"}
             variant="btn-dark"

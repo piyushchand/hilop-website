@@ -20,6 +20,7 @@ import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import type { Product as ProductType } from '@/types/index';
 
 // Define a type for the dynamic content to ensure consistency
 interface ProductDynamicContent {
@@ -132,15 +133,6 @@ const getProductContent = (productName: string): ProductDynamicContent => {
   return PRODUCT_DYNAMIC_CONTENT[normalizedName] || defaultContent;
 };
 
-interface ProductPrice {
-  current_price?: number;
-  final_price?: number;
-  original_price?: number;
-  base_price?: number;
-  discount?: number;
-  discount_type?: "fixed" | "percentage";
-}
-
 interface WhyChooseUsItem {
   title?: string;
   description?: string;
@@ -161,35 +153,13 @@ interface KeyIngredient {
   description: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  images: string[];
-  pricing: ProductPrice;
-  price?: ProductPrice;
-  for?: { en: string; hi: string };
-  label?: { en: string; hi: string };
-  how_it_works?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
-  how_to_use?: { en: string; hi: string }; // This will now be overridden by dynamic content if available
-  description?: { en: string; hi: string };
-  description_tags?: string[];
+// Extend ProductType locally to add missing optional properties if needed
+interface ProductWithExtras extends ProductType {
   why_choose_us?: (string | WhyChooseUsItem)[];
   faqs?: (string | FaqAccordionItem)[];
   key_ingredients?: KeyIngredient[];
-  reviews: {
-    total_count: number;
-    average_rating: number;
-    reviews: Array<{
-      _id: string;
-      user: {
-        name: string;
-      };
-      product: string;
-      rating: number;
-      description: string;
-    }>;
-  };
-  custom_image?: string;
+  description?: { en: string; hi: string };
+  how_it_works?: { en: string; hi: string };
 }
 
 const howItWorks = [
@@ -229,7 +199,7 @@ export default function ProductPage() {
   const params = useParams();
   const { language } = useLanguage();
   const { showLoading, hideLoading } = useLoading();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductWithExtras | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
@@ -292,9 +262,9 @@ export default function ProductPage() {
   const handleAddToCart = async () => {
     const productId =
       product &&
-      (typeof (product as Product & { _id?: string })._id === "string"
-        ? (product as Product & { _id?: string })._id
-        : product.id);
+      (typeof (product as ProductWithExtras & { _id?: string })._id === "string"
+        ? (product as ProductWithExtras & { _id?: string })._id
+        : product._id);
     if (!productId) {
       toast.error("Product not found.");
       return;
@@ -325,12 +295,12 @@ export default function ProductPage() {
     }
   };
 
-  if (error || !product) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8 h-screen flex justify-center items-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">
-            {error || "Product not found"}
+            {error}
           </h1>
           <Button
             link="/"
@@ -341,17 +311,20 @@ export default function ProductPage() {
       </div>
     );
   }
+  if (!product) {
+    return null;
+  }
 
   const dynamicProductContent = getProductContent(product.name);
   const productId =
     product &&
-    (typeof (product as Product & { _id?: string })._id === "string"
-      ? (product as Product & { _id?: string })._id
-      : product.id);
+    (typeof (product as ProductWithExtras & { _id?: string })._id === "string"
+      ? (product as ProductWithExtras & { _id?: string })._id
+      : product._id);
 
-  const whyChooseUs = Array.isArray(product.why_choose_us)
+  const whyChooseUs = Array.isArray(product?.why_choose_us)
     ? product.why_choose_us
-        .map((item: string | WhyChooseUsItem) => {
+        .map((item: string | WhyChooseUsItem): { question: string; answer: string } => {
           if (typeof item === "string") {
             return { question: item, answer: item };
           }
@@ -363,9 +336,9 @@ export default function ProductPage() {
         .filter((item) => item.question && item.answer)
     : [];
 
-  const faqItems = Array.isArray(product.faqs)
+  const faqItems = Array.isArray(product?.faqs)
     ? product.faqs
-        .map((item: string | FaqAccordionItem, index: number) => {
+        .map((item: string | FaqAccordionItem, index: number): { id: string; question: string; answer: string } => {
           if (typeof item === "string") {
             return {
               id: `faq-${index}`,
@@ -398,7 +371,7 @@ export default function ProductPage() {
               {getText(product.label || "", language)}
             </h2>
             <p className="mb-3 text-gray-700">
-              {getText(product.description || "", language)}
+              {getText(product.label || "", language)}
             </p>
             <div className="flex md:flex-row flex-col gap-4 p-6 bg-white rounded-2xl justify-between mb-6">
               {(product.description_tags || []).map(
@@ -413,13 +386,13 @@ export default function ProductPage() {
             <div className="flex gap-4">
               <Button
                 label="Get Started Now"
-                variant="btn-dark"
+                variant="btn-primary"
                 size="xl"
-                link={`/product/${productId}`}
+                link={product.test_id ? `/consultation?testId=${product.test_id}` : '/consultation'}
               />
               <Button
                 label={addToCartLoading ? "Adding..." : "Buy Now"}
-                variant="btn-light"
+                variant="btn-dark"
                 size="xl"
                 onClick={handleAddToCart}
                 disabled={addToCartLoading}
@@ -498,8 +471,8 @@ export default function ProductPage() {
             </h2>
             <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
-              label="Get Started today"
-              variant="btn-dark"
+              label="Get Started Now"
+              variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
             />
@@ -537,7 +510,7 @@ export default function ProductPage() {
               1024: { slidesPerView: 3, spaceBetween: 24 },
             }}
           >
-            {(product.key_ingredients || []).map((item, idx) => (
+            {(product?.key_ingredients || []).map((item: KeyIngredient, idx: number) => (
               <SwiperSlide key={idx} className="!h-full">
                 <div className="relative p-6 md:p-10 rounded-2xl bg-white h-full">
                   <div className="relative text-center">
@@ -558,7 +531,7 @@ export default function ProductPage() {
             ))}
           </Swiper>
 
-          {(product.key_ingredients || []).length > 3 && (
+          {(product?.key_ingredients || []).length > 3 && (
             <div className="mt-8 flex items-center justify-between z-50">
               <div className="process-scrollbar-custom h-2 w-1/2 rounded-full bg-gray-200">
                 <div className="swiper-scrollbar-drag rounded-full h-full !bg-primary"></div>
@@ -594,8 +567,8 @@ export default function ProductPage() {
                 {getText(product.how_it_works || "", language)}
               </p>
               <Button
-                label="Get Started today"
-                variant="btn-dark"
+                label="Get Started Now"
+                variant="btn-primary"
                 size="xl"
                 link={`/product/${productId}`}
               />
@@ -668,7 +641,7 @@ export default function ProductPage() {
           <div className="flex gap-4">
             <Button
               label="Get Started Now"
-              variant="btn-dark"
+              variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
             />

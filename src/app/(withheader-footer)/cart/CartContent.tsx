@@ -12,6 +12,14 @@ import Button from "@/components/uiFramework/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getText } from "@/utils/getText";
 
+// Add Razorpay type declaration for TypeScript
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare global {
+  interface Window {
+    Razorpay: unknown;
+  }
+}
+
 interface SubscriptionPlan {
   _id: string;
   name: string;
@@ -89,6 +97,21 @@ const formatPrice = (price: number): string => {
   });
 };
 
+// Utility to load Razorpay script
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -108,11 +131,15 @@ export default function Cart() {
   >([]);
   const [purchasedLoading, setPurchasedLoading] = useState(true);
   const [addNowLoading, setAddNowLoading] = useState<{ [key: string]: boolean }>({});
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { language } = useLanguage();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const COUPON_API_URL = "/api/coupons";
+
+  // Debug: Log Razorpay Key to verify environment variable is set
+  console.log("Razorpay Key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -429,6 +456,214 @@ export default function Cart() {
     (p) => !cartProductIds.includes(p._id)
   );
 
+  // Handle checkout
+  const handleCheckout = async () => {
+    if (!cart || cart.items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      // First, get the user's addresses to find the default or first address
+      const addressesResponse = await fetch("/api/v1/addresses", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      console.log("Addresses response status:", addressesResponse.status);
+      
+      if (addressesResponse.status === 401) {
+        toast.error("Please log in first");
+        setCheckoutLoading(false);
+        return;
+      }
+
+      const addressesData = await addressesResponse.json();
+      console.log("Addresses data:", addressesData);
+      
+      if (!addressesData.success || !addressesData.data || addressesData.data.length === 0) {
+        toast.error("Please add a shipping address first");
+        setCheckoutLoading(false);
+        return;
+      }
+
+      // Find default address or use the first one
+      const selectedAddress = addressesData.data.find((addr: { is_default?: boolean }) => addr.is_default) || addressesData.data[0];
+      console.log("Selected address:", selectedAddress);
+      
+      // Call the Next.js API route that handles authentication
+      console.log("Selected address ID:", selectedAddress._id);
+      
+      const addressResponse = await fetch(`/api/v1/addresses/${selectedAddress._id}`, {
+        method: "GET",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        credentials: "include",
+      });
+
+      console.log("Address response status:", addressResponse.status);
+      console.log("Address response headers:", Object.fromEntries(addressResponse.headers.entries()));
+      
+      const addressData = await addressResponse.json();
+      console.log("Address API Response:", addressData);
+      
+      if (addressResponse.ok) {
+        toast.success(`Address retrieved successfully! ID: ${selectedAddress._id}`);
+        console.log("API URL called:", `/api/v1/addresses/${selectedAddress._id}`);
+        console.log("Address ID:", selectedAddress._id);
+        
+        // Show all the data in console
+        console.log("=== ADDRESS DATA ===");
+        const address = addressData.data || addressData;
+        console.log("ID:", address._id);
+        console.log("Name:", address.name);
+        console.log("Address:", address.address);
+        console.log("Phone:", address.phone_number);
+        console.log("City:", address.city);
+        console.log("State:", address.state);
+        console.log("Country:", address.country);
+        console.log("ZIP:", address.zipcode);
+        console.log("Landmark:", address.landmark);
+        console.log("Is Default:", address.is_default);
+        console.log("===================");
+        
+        // Now call the Razorpay payment API
+        console.log("Calling Razorpay payment API...");
+        
+        // Validate address ID
+        if (!address._id) {
+          toast.error("Invalid address ID");
+          setCheckoutLoading(false);
+          return;
+        }
+
+        // Send both shipping_address_id and total_amount as required by backend
+        const paymentRequestData = {
+          shipping_address_id: address._id,
+          total_amount: finalTotal // Make sure finalTotal is the correct payable amount
+        };
+        
+        console.log("Payment request data:", paymentRequestData);
+        console.log("Shipping Address ID being sent:", address._id);
+        
+        const paymentResponse = await fetch("/api/payment/create-order", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify(paymentRequestData),
+        });
+
+        console.log("Payment response status:", paymentResponse.status);
+        
+        const paymentData = await paymentResponse.json();
+        console.log("Payment API Response:", paymentData);
+        
+        if (paymentResponse.ok && paymentData.success) {
+          toast.success("Payment order created successfully!");
+          const paymentInfo = paymentData.data || paymentData;
+          // Support both possible backend response shapes
+          const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
+          const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === 'number' ? paymentInfo.total_amount * 100 : undefined);
+          const razorpayKey = paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+          const currency = paymentInfo.currency || "INR";
+
+          console.log("=== PAYMENT DATA ===");
+          console.log("Order ID:", paymentInfo.order_id);
+          console.log("Razorpay Order ID:", razorpayOrderId);
+          console.log("Total Amount (paise):", amountPaise);
+          console.log("Currency:", currency);
+          console.log("Razorpay Key:", razorpayKey);
+          console.log("===================");
+
+          // Defensive: Check for required fields from backend or fallback
+          if (!amountPaise || !razorpayOrderId || !razorpayKey) {
+            toast.error("Payment gateway error: Missing order details. Please try again or contact support.");
+            setCheckoutLoading(false);
+            return;
+          }
+
+          // Ensure Razorpay script is loaded before using window.Razorpay
+          const scriptLoaded = await loadRazorpayScript();
+          if (!scriptLoaded || typeof window.Razorpay !== 'function') {
+            toast.error("Failed to load Razorpay payment gateway. Please try again.");
+            setCheckoutLoading(false);
+            return;
+          }
+
+          // Use backend's amount (in paise) and key
+          const options = {
+            key: razorpayKey, // Use backend-provided key or fallback
+            amount: amountPaise, // Amount in paise from backend or fallback
+            currency,
+            name: "Hilop",
+            description: "Order Payment",
+            order_id: razorpayOrderId,
+            handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+              // Call backend to verify payment
+              try {
+                const verifyRes = await fetch("/api/payment/verify", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    test_mode: true,
+                  }),
+                });
+                console.log(verifyRes)
+                const verifyData = await verifyRes.json();
+                if (verifyData.success) {
+                  // On successful payment verification, redirect to My Orders
+                  window.location.href = "/my-order";
+                } else {
+                  // Do NOT clear cart if payment verification fails
+                  toast.error(verifyData.message || "Payment verification failed. Please contact support.");
+                }
+              } catch {
+                toast.error("Payment verification failed. Please contact support.");
+              }
+            },
+            prefill: {},
+            theme: {
+              color: "#0f5132",
+            },
+          };
+
+          // TypeScript: window.Razorpay is now guaranteed to be a function
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rzp = new (window.Razorpay as any)(options);
+          rzp.open();
+          setCheckoutLoading(false);
+          return;
+        } else {
+          console.error("Payment API Error Status:", paymentResponse.status);
+          console.error("Payment API Error Response:", paymentData);
+          toast.error(paymentData.message || `Failed to create payment order (${paymentResponse.status})`);
+        }
+      } else {
+        console.error("API Error Status:", addressResponse.status);
+        console.error("API Error Response:", addressData);
+        toast.error(addressData.message || `Failed to get address (${addressResponse.status})`);
+      }
+    } catch (error) {
+      console.error("Address fetch error:", error);
+      toast.error("Failed to get address");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  // Determine if only BoldRise is in the cart
+  const isOnlyBoldRise = cart && cart.items.length === 1 && cart.items[0].name && (cart.items[0].name.en?.toLowerCase() === 'boldrise' || cart.items[0].name.hi?.toLowerCase() === 'boldrise');
+
   return (
     <>
       <Toaster position="bottom-right" />
@@ -438,79 +673,81 @@ export default function Cart() {
             {/* Left Section */}
             <div className="lg:w-2/3 w-full">
               {/* Choose Your Subscription Plan */}
-              <div className="bg-white p-6 rounded-3xl mb-6 overflow-hidden">
-                <h2 className="text-lg md:text-2xl font-semibold mb-2">
-                  Choose Your Subscription Plan
-                </h2>
-                <p className="text-gray-600 mb-7">
-                  Special discount for ordering 45 days
-                </p>
-                <div className="w-full">
-                  {plansLoading ? (
-                    <div className="text-gray-500 py-4">Loading plans...</div>
-                  ) : plansError ? (
-                    <div className="text-red-600 py-4">{plansError}</div>
-                  ) : plans.length === 0 ? (
-                    <div className="text-gray-500 py-4">
-                      No plans available.
-                    </div>
-                  ) : (
-                    <Swiper
-                      spaceBetween={16}
-                      slidesPerView={1.2}
-                      breakpoints={{
-                        640: { slidesPerView: 2.2 },
-                        768: { slidesPerView: 3.2 },
-                      }}
-                      className="!overflow-visible"
-                    >
-                      {plans.map((plan: SubscriptionPlan) => (
-                        <SwiperSlide key={plan._id}>
-                          <label className="inline-flex items-center w-full group">
-                            <input
-                              type="radio"
-                              name="subscription"
-                              value={plan._id}
-                              checked={selectedPlanId === plan._id}
-                              onChange={() => handlePlanSelection(plan._id)}
-                              className="peer sr-only"
-                            />
-                            <span
-                              className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 transition-colors ${
-                                planLoading
-                                  ? "opacity-60 pointer-events-none"
-                                  : ""
-                              } hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}
-                            >
-                              <div className="flex items-center gap-3 mb-3">
-                                <p className="text-dark font-medium">
-                                  {getText(plan.name, language)}
-                                </p>
-                                {planLoading && selectedPlanId === plan._id && (
-                                  <div className="ml-auto">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex gap-3 items-center">
-                                {plan.discount > 0 && (
-                                  <span className="text-dark font-medium">
-                                    {plan.discount}% OFF
+              {!isOnlyBoldRise && (
+                <div className="bg-white p-6 rounded-3xl mb-6 overflow-hidden">
+                  <h2 className="text-lg md:text-2xl font-semibold mb-2">
+                    Choose Your Subscription Plan
+                  </h2>
+                  <p className="text-gray-600 mb-7">
+                    Special discount for ordering 45 days
+                  </p>
+                  <div className="w-full">
+                    {plansLoading ? (
+                      <div className="text-gray-500 py-4">Loading plans...</div>
+                    ) : plansError ? (
+                      <div className="text-red-600 py-4">{plansError}</div>
+                    ) : plans.length === 0 ? (
+                      <div className="text-gray-500 py-4">
+                        No plans available.
+                      </div>
+                    ) : (
+                      <Swiper
+                        spaceBetween={16}
+                        slidesPerView={1.2}
+                        breakpoints={{
+                          640: { slidesPerView: 2.2 },
+                          768: { slidesPerView: 3.2 },
+                        }}
+                        className="!overflow-visible"
+                      >
+                        {plans.map((plan: SubscriptionPlan) => (
+                          <SwiperSlide key={plan._id}>
+                            <label className="inline-flex items-center w-full group">
+                              <input
+                                type="radio"
+                                name="subscription"
+                                value={plan._id}
+                                checked={selectedPlanId === plan._id}
+                                onChange={() => handlePlanSelection(plan._id)}
+                                className="peer sr-only"
+                              />
+                              <span
+                                className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 transition-colors ${
+                                  planLoading
+                                    ? "opacity-60 pointer-events-none"
+                                    : ""
+                                } hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}
+                              >
+                                <div className="flex items-center gap-3 mb-3">
+                                  <p className="text-dark font-medium">
+                                    {getText(plan.name, language)}
+                                  </p>
+                                  {planLoading && selectedPlanId === plan._id && (
+                                    <div className="ml-auto">
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex gap-3 items-center">
+                                  {plan.discount > 0 && (
+                                    <span className="text-dark font-medium">
+                                      {plan.discount}% OFF
+                                    </span>
+                                  )}
+                                  <span className="text-primary font-medium">
+                                    {plan.months} Month
+                                    {plan.months > 1 ? "s" : ""}
                                   </span>
-                                )}
-                                <span className="text-primary font-medium">
-                                  {plan.months} Month
-                                  {plan.months > 1 ? "s" : ""}
-                                </span>
-                              </div>
-                            </span>
-                          </label>
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-                  )}
+                                </div>
+                              </span>
+                            </label>
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Product List */}
               <div>
@@ -605,40 +842,47 @@ export default function Cart() {
 
               {/* Buy Again Section */}
               {purchasedLoading ? (
-                <div className="text-gray-500 py-4">
+                <div className="text-gray-500 py-4 text-center">
                   Loading purchased products...
                 </div>
               ) : buyAgainProducts.length > 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 mt-8">
-                  <h3 className="text-base font-semibold mb-4 pb-2 border-b border-gray-200">
+                <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-4 sm:mt-6 md:mt-8">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200">
                    Buy Again
                   </h3>
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3 sm:gap-4">
                     {buyAgainProducts.map((item, idx) => (
                       <div
                         key={item._id + "-" + idx}
-                        className="flex items-center gap-6 border-b last:border-0 border-gray-200 pb-3 last:pb-0"
+                        className="flex flex-row items-center gap-3 sm:gap-4 md:gap-6 border-b last:border-0 border-gray-200 pb-3 sm:pb-4 last:pb-0"
                       >
                         <Image
                           src={item.image}
                           alt={getText(item.name, language)}
-                          width={128}
-                          height={128}
-                          className="w-32 h-32 object-cover rounded-lg bg-gray-200"
+                          width={80}
+                          height={80}
+                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
                         />
-                        <div className="flex-1">
-                          <p className="text-lg font-semibold text-green-900 mb-1">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate" title={getText(item.name, language)}>
                             {getText(item.name, language)}
                           </p>
+                          {item.orderDate && (
+                            <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                              Last ordered: {new Date(item.orderDate).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
-                        <Button
-                          label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
-                          variant="btn-dark"
-                          size="lg"
-                          className="min-w-[120px]"
-                          onClick={() => handleAddPurchasedProductToCart(item._id)}
-                          disabled={!!addNowLoading[item._id]}
-                        />
+                        <div className="flex-shrink-0 ml-2">
+                          <Button
+                            label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
+                            variant="btn-dark"
+                            size="sm"
+                            className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
+                            onClick={() => handleAddPurchasedProductToCart(item._id)}
+                            disabled={!!addNowLoading[item._id]}
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -683,7 +927,7 @@ export default function Cart() {
                 {/* Coupon Input */}
                 {!appliedCoupon && (
                   <div className="mb-4">
-                    <div className="flex border border-gray-200 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <div className="flex border border-gray-200 bg-white rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                       <input
                         type="text"
                         id="couponCode"
@@ -827,10 +1071,12 @@ export default function Cart() {
           )}
         </div>
         <ArrowButton
-          label="Place Order"
+          label={checkoutLoading ? "Processing..." : "Place Order"}
           theme="dark"
           className="w-fit"
           size="lg"
+          onClick={handleCheckout}
+          disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
     </>

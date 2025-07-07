@@ -125,7 +125,7 @@ export default function BlogContent() {
 
   return (
     <>
-      <section className="w-full h-[500px] bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
+      <section className="w-full h-[320px] bg-cover bg-center bg-greenleaf lg:mb-20 mb-10">
         <div className="container text-center h-full flex flex-col justify-center">
           <h1 className="top-content-badge mx-auto">Hilop Health Blog</h1>
           <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">
