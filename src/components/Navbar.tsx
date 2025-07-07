@@ -208,38 +208,39 @@ const Navbar = () => {
                   </p>
                 </div>
               </div>
-              <Link
-                href="/profile"
-                className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
-                onClick={() => onClose(false)}
-              >
-                <UserIcon className="mr-3 h-4 w-4" />
-                Profile
-              </Link>
-              <Link
-                href="/my-order"
-                className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
-                onClick={() => onClose(false)}
-              >
-                <History className="mr-3 h-4 w-4" />
-                Orders
-              </Link>
-              <Link
-                href="/cart"
-                className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
-                onClick={() => onClose(false)}
-              >
-                <ShoppingBag className="mr-3 h-4 w-4" />
-                Cart
-              </Link>
-              <Link
-                href="/support"
-                className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
-                onClick={() => onClose(false)}
-              >
-                <MessageCircleQuestion className="mr-3 h-4 w-4" />
-                Support
-              </Link>
+               {/* Profile Menu Items - now rendered via a loop for maintainability */}
+              { [
+                {
+                  href: "/profile",
+                  icon: <UserIcon className="mr-3 h-4 w-4" />,
+                  label: "Profile",
+                },
+                {
+                  href: "/my-order",
+                  icon: <History className="mr-3 h-4 w-4" />,
+                  label: "Orders",
+                },
+                {
+                  href: "/cart",
+                  icon: <ShoppingBag className="mr-3 h-4 w-4" />,
+                  label: "Cart",
+                },
+                {
+                  href: "/support",
+                  icon: <MessageCircleQuestion className="mr-3 h-4 w-4" />,
+                  label: "Support",
+                },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center px-5 py-2 text-sm text-dark hover:bg-gray-100"
+                  onClick={() => onClose(false)}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
               <div className="border-t border-gray-300"></div>
               <button
                 className="flex items-center w-full text-left px-5 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer"
