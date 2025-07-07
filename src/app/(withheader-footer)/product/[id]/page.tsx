@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Button from "@/components/uiFramework/Button";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -204,10 +204,10 @@ export default function ProductPage() {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
-  const handleThumbsSwiper = (swiper: SwiperType) => {
+  const handleThumbsSwiper = useCallback((swiper: SwiperType) => {
     // Add custom class to swiper-wrapper
     swiper.wrapperEl.classList.add("justify-center");
-  };
+  }, []);
 
   useEffect(() => {
     const productId = params?.id as string;
@@ -256,10 +256,10 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language, showLoading, hideLoading]);
+  }, [params?.id, language]);
 
   // Add to Cart handler
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     const productId =
       product &&
       (typeof (product as ProductWithExtras & { _id?: string })._id === "string"
@@ -293,7 +293,7 @@ export default function ProductPage() {
     } finally {
       setAddToCartLoading(false);
     }
-  };
+  }, [product]);
 
   if (error) {
     return (
@@ -314,6 +314,27 @@ export default function ProductPage() {
   if (!product) {
     return null;
   }
+
+  // Helper: is this a placeholder product?
+  const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
+  const MIN_IMAGE_SLOTS = 3;
+  const getSafeImage = (img?: string) => img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
+  const isPlaceholderProduct = !product.images || product.images.length === 0 || product.images[0] === PLACEHOLDER_IMAGE;
+
+  let imagesToShow: string[] = [];
+  if (isPlaceholderProduct) {
+    imagesToShow = Array(MIN_IMAGE_SLOTS).fill(PLACEHOLDER_IMAGE);
+  } else {
+    imagesToShow = [...product.images];
+    while (imagesToShow.length < MIN_IMAGE_SLOTS) {
+      imagesToShow.push(PLACEHOLDER_IMAGE);
+    }
+  }
+
+  // For key ingredients, override image if placeholder
+  const keyIngredientsToShow = (product?.key_ingredients || []).map(ki =>
+    isPlaceholderProduct ? { ...ki, image: PLACEHOLDER_IMAGE } : { ...ki, image: getSafeImage(ki.image) }
+  );
 
   const dynamicProductContent = getProductContent(product.name);
   const productId =
@@ -371,7 +392,7 @@ export default function ProductPage() {
               {getText(product.label || "", language)}
             </h2>
             <p className="mb-3 text-gray-700">
-              {getText(product.label || "", language)}
+              {getText(product.description || "", language)}
             </p>
             <div className="flex md:flex-row flex-col gap-4 p-6 bg-white rounded-2xl justify-between mb-6">
               {(product.description_tags || []).map(
@@ -409,10 +430,10 @@ export default function ProductPage() {
               modules={[Thumbs]}
               className="w-full aspect-square"
             >
-              {product.images.map((image: string, index: number) => (
+              {imagesToShow.map((image: string, index: number) => (
                 <SwiperSlide key={index}>
                   <Image
-                    src={image}
+                    src={getSafeImage(image)}
                     alt={`${product.name} image ${index + 1}`}
                     width={500}
                     height={500}
@@ -434,13 +455,13 @@ export default function ProductPage() {
               modules={[Thumbs]}
               className="w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
             >
-              {product.images.map((image: string, index: number) => (
+              {imagesToShow.map((image: string, index: number) => (
                 <SwiperSlide
                   key={index}
                   className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300"
                 >
                   <Image
-                    src={image}
+                    src={getSafeImage(image)}
                     alt={`${product.name} thumbnail ${index + 1}`}
                     width={60}
                     height={60}
@@ -457,7 +478,7 @@ export default function ProductPage() {
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
           <div>
             <Image
-              src={getProductContent(product.name).customImage}
+              src={getSafeImage(dynamicProductContent.customImage)}
               alt={product.name}
               width={740}
               height={766}
@@ -510,12 +531,12 @@ export default function ProductPage() {
               1024: { slidesPerView: 3, spaceBetween: 24 },
             }}
           >
-            {(product?.key_ingredients || []).map((item: KeyIngredient, idx: number) => (
+            {keyIngredientsToShow.map((item: KeyIngredient, idx: number) => (
               <SwiperSlide key={idx} className="!h-full">
                 <div className="relative p-6 md:p-10 rounded-2xl bg-white h-full">
                   <div className="relative text-center">
                     <Image
-                      src={item.image}
+                      src={getSafeImage(item.image)}
                       alt={item.title}
                       width={200}
                       height={200}
@@ -620,7 +641,7 @@ export default function ProductPage() {
       </section>
       <section className="container mb-16 lg:mb-40 grid md:grid-cols-2 gap-6 lg:gap-10 items-center">
         <Image
-          src={dynamicProductContent.benefitImage}
+          src={getSafeImage(dynamicProductContent.benefitImage)}
           alt="Who can Benefit?"
           width={740}
           height={740}

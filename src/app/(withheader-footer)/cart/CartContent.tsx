@@ -99,12 +99,12 @@ const formatPrice = (price: number): string => {
 // Utility to load Razorpay script
 function loadRazorpayScript() {
   return new Promise((resolve) => {
-    if (typeof window !== 'undefined' && window.Razorpay) {
+    if (typeof window !== "undefined" && window.Razorpay) {
       resolve(true);
       return;
     }
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
@@ -129,7 +129,9 @@ export default function Cart() {
     PurchasedProduct[]
   >([]);
   const [purchasedLoading, setPurchasedLoading] = useState(true);
-  const [addNowLoading, setAddNowLoading] = useState<{ [key: string]: boolean }>({});
+  const [addNowLoading, setAddNowLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { language } = useLanguage();
 
@@ -472,7 +474,7 @@ export default function Cart() {
       });
 
       console.log("Addresses response status:", addressesResponse.status);
-      
+
       if (addressesResponse.status === 401) {
         toast.error("Please log in first");
         setCheckoutLoading(false);
@@ -481,40 +483,58 @@ export default function Cart() {
 
       const addressesData = await addressesResponse.json();
       console.log("Addresses data:", addressesData);
-      
-      if (!addressesData.success || !addressesData.data || addressesData.data.length === 0) {
+
+      if (
+        !addressesData.success ||
+        !addressesData.data ||
+        addressesData.data.length === 0
+      ) {
         toast.error("Please add a shipping address first");
         setCheckoutLoading(false);
         return;
       }
 
       // Find default address or use the first one
-      const selectedAddress = addressesData.data.find((addr: { is_default?: boolean }) => addr.is_default) || addressesData.data[0];
+      const selectedAddress =
+        addressesData.data.find(
+          (addr: { is_default?: boolean }) => addr.is_default
+        ) || addressesData.data[0];
       console.log("Selected address:", selectedAddress);
-      
+
       // Call the Next.js API route that handles authentication
       console.log("Selected address ID:", selectedAddress._id);
-      
-      const addressResponse = await fetch(`/api/v1/addresses/${selectedAddress._id}`, {
-        method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        credentials: "include",
-      });
+
+      const addressResponse = await fetch(
+        `/api/v1/addresses/${selectedAddress._id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
       console.log("Address response status:", addressResponse.status);
-      console.log("Address response headers:", Object.fromEntries(addressResponse.headers.entries()));
-      
+      console.log(
+        "Address response headers:",
+        Object.fromEntries(addressResponse.headers.entries())
+      );
+
       const addressData = await addressResponse.json();
       console.log("Address API Response:", addressData);
-      
+
       if (addressResponse.ok) {
-        toast.success(`Address retrieved successfully! ID: ${selectedAddress._id}`);
-        console.log("API URL called:", `/api/v1/addresses/${selectedAddress._id}`);
+        toast.success(
+          `Address retrieved successfully! ID: ${selectedAddress._id}`
+        );
+        console.log(
+          "API URL called:",
+          `/api/v1/addresses/${selectedAddress._id}`
+        );
         console.log("Address ID:", selectedAddress._id);
-        
+
         // Show all the data in console
         console.log("=== ADDRESS DATA ===");
         const address = addressData.data || addressData;
@@ -529,10 +549,10 @@ export default function Cart() {
         console.log("Landmark:", address.landmark);
         console.log("Is Default:", address.is_default);
         console.log("===================");
-        
+
         // Now call the Razorpay payment API
         console.log("Calling Razorpay payment API...");
-        
+
         // Validate address ID
         if (!address._id) {
           toast.error("Invalid address ID");
@@ -543,34 +563,40 @@ export default function Cart() {
         // Send both shipping_address_id and total_amount as required by backend
         const paymentRequestData = {
           shipping_address_id: address._id,
-          total_amount: finalTotal // Make sure finalTotal is the correct payable amount
+          total_amount: finalTotal, // Make sure finalTotal is the correct payable amount
         };
-        
+
         console.log("Payment request data:", paymentRequestData);
         console.log("Shipping Address ID being sent:", address._id);
-        
+
         const paymentResponse = await fetch("/api/payment/create-order", {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            Accept: "application/json",
           },
           credentials: "include",
           body: JSON.stringify(paymentRequestData),
         });
 
         console.log("Payment response status:", paymentResponse.status);
-        
+
         const paymentData = await paymentResponse.json();
         console.log("Payment API Response:", paymentData);
-        
+
         if (paymentResponse.ok && paymentData.success) {
           toast.success("Payment order created successfully!");
           const paymentInfo = paymentData.data || paymentData;
           // Support both possible backend response shapes
-          const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
-          const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === 'number' ? paymentInfo.total_amount * 100 : undefined);
-          const razorpayKey = paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+          const razorpayOrderId =
+            paymentInfo.razorpay_order_id || paymentInfo.order_id;
+          const amountPaise =
+            paymentInfo.amount ||
+            (typeof paymentInfo.total_amount === "number"
+              ? paymentInfo.total_amount * 100
+              : undefined);
+          const razorpayKey =
+            paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
           const currency = paymentInfo.currency || "INR";
 
           console.log("=== PAYMENT DATA ===");
@@ -583,15 +609,19 @@ export default function Cart() {
 
           // Defensive: Check for required fields from backend or fallback
           if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-            toast.error("Payment gateway error: Missing order details. Please try again or contact support.");
+            toast.error(
+              "Payment gateway error: Missing order details. Please try again or contact support."
+            );
             setCheckoutLoading(false);
             return;
           }
 
           // Ensure Razorpay script is loaded before using window.Razorpay
           const scriptLoaded = await loadRazorpayScript();
-          if (!scriptLoaded || typeof window.Razorpay !== 'function') {
-            toast.error("Failed to load Razorpay payment gateway. Please try again.");
+          if (!scriptLoaded || typeof window.Razorpay !== "function") {
+            toast.error(
+              "Failed to load Razorpay payment gateway. Please try again."
+            );
             setCheckoutLoading(false);
             return;
           }
@@ -604,7 +634,11 @@ export default function Cart() {
             name: "Hilop",
             description: "Order Payment",
             order_id: razorpayOrderId,
-            handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+            handler: async function (response: {
+              razorpay_payment_id: string;
+              razorpay_order_id: string;
+              razorpay_signature: string;
+            }) {
               // Call backend to verify payment
               try {
                 const verifyRes = await fetch("/api/payment/verify", {
@@ -617,17 +651,22 @@ export default function Cart() {
                     test_mode: true,
                   }),
                 });
-                console.log(verifyRes)
+                console.log(verifyRes);
                 const verifyData = await verifyRes.json();
                 if (verifyData.success) {
                   // On successful payment verification, redirect to My Orders
                   window.location.href = "/my-order";
                 } else {
                   // Do NOT clear cart if payment verification fails
-                  toast.error(verifyData.message || "Payment verification failed. Please contact support.");
+                  toast.error(
+                    verifyData.message ||
+                      "Payment verification failed. Please contact support."
+                  );
                 }
               } catch {
-                toast.error("Payment verification failed. Please contact support.");
+                toast.error(
+                  "Payment verification failed. Please contact support."
+                );
               }
             },
             prefill: {},
@@ -645,12 +684,18 @@ export default function Cart() {
         } else {
           console.error("Payment API Error Status:", paymentResponse.status);
           console.error("Payment API Error Response:", paymentData);
-          toast.error(paymentData.message || `Failed to create payment order (${paymentResponse.status})`);
+          toast.error(
+            paymentData.message ||
+              `Failed to create payment order (${paymentResponse.status})`
+          );
         }
       } else {
         console.error("API Error Status:", addressResponse.status);
         console.error("API Error Response:", addressData);
-        toast.error(addressData.message || `Failed to get address (${addressResponse.status})`);
+        toast.error(
+          addressData.message ||
+            `Failed to get address (${addressResponse.status})`
+        );
       }
     } catch (error) {
       console.error("Address fetch error:", error);
@@ -661,7 +706,12 @@ export default function Cart() {
   };
 
   // Determine if only BoldRise is in the cart
-  const isOnlyBoldRise = cart && cart.items.length === 1 && cart.items[0].name && (cart.items[0].name.en?.toLowerCase() === 'boldrise' || cart.items[0].name.hi?.toLowerCase() === 'boldrise');
+  const isOnlyBoldRise =
+    cart &&
+    cart.items.length === 1 &&
+    cart.items[0].name &&
+    (cart.items[0].name.en?.toLowerCase() === "boldrise" ||
+      cart.items[0].name.hi?.toLowerCase() === "boldrise");
 
   return (
     <>
@@ -721,11 +771,12 @@ export default function Cart() {
                                   <p className="text-dark font-medium">
                                     {getText(plan.name, language)}
                                   </p>
-                                  {planLoading && selectedPlanId === plan._id && (
-                                    <div className="ml-auto">
-                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                                    </div>
-                                  )}
+                                  {planLoading &&
+                                    selectedPlanId === plan._id && (
+                                      <div className="ml-auto">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                      </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-3 items-center">
                                   {plan.discount > 0 && (
@@ -765,6 +816,7 @@ export default function Cart() {
                       <Image
                         width={180}
                         height={180}
+                        // Always show placeholder if no product image is available
                         src={
                           item.images && item.images.length > 0
                             ? item.images[0]
@@ -847,7 +899,7 @@ export default function Cart() {
               ) : buyAgainProducts.length > 0 ? (
                 <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-4 sm:mt-6 md:mt-8">
                   <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200">
-                   Buy Again
+                    Buy Again
                   </h3>
                   <div className="flex flex-col gap-3 sm:gap-4">
                     {buyAgainProducts.map((item, idx) => (
@@ -863,22 +915,32 @@ export default function Cart() {
                           className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate" title={getText(item.name, language)}>
+                          <p
+                            className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                            title={getText(item.name, language)}
+                          >
                             {getText(item.name, language)}
                           </p>
                           {item.orderDate && (
                             <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                              Last ordered: {new Date(item.orderDate).toLocaleDateString()}
+                              Last ordered:{" "}
+                              {new Date(item.orderDate).toLocaleDateString()}
                             </p>
                           )}
                         </div>
                         <div className="flex-shrink-0 ml-2">
                           <Button
-                            label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
+                            label={
+                              addNowLoading[item._id]
+                                ? "Adding..."
+                                : "+ Add Now"
+                            }
                             variant="btn-dark"
                             size="sm"
                             className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
-                            onClick={() => handleAddPurchasedProductToCart(item._id)}
+                            onClick={() =>
+                              handleAddPurchasedProductToCart(item._id)
+                            }
                             disabled={!!addNowLoading[item._id]}
                           />
                         </div>
@@ -955,44 +1017,46 @@ export default function Cart() {
                   </div>
                 )}
 
-                {/* Hilop Coins */}
-                <div
-                  onClick={coinsLoading ? undefined : handleToggleCoins}
-                  className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
-          ${
-            cart?.use_coins
-              ? "bg-green-50 border-green-500"
-              : "bg-white border-gray-200"
-          } border ${coinsLoading ? "opacity-60 pointer-events-none" : ""}`}
-                >
-                  <Image
-                    width={32}
-                    height={32}
-                    src="/images/icon/hilop-coin.svg"
-                    alt="Hilop Coins"
-                  />
-                  <div>
-                    <h3 className="text-gray-900">Apply Hilop Coins</h3>
-                    <p className="text-xs md:text-sm text-gray-600">
-                      {cart
-                        ? `You have ${cart.available_coins.toLocaleString()} coins available${
-                            cart.coin_discount > 0
-                              ? ", giving you a discount of ₹" +
-                                formatPrice(cart.coin_discount)
-                              : ""
-                          }!`
-                        : "Loading coins..."}
-                    </p>
-                  </div>
-                  <div className="ml-auto pointer-events-none">
-                    <input
-                      type="checkbox"
-                      checked={cart?.use_coins ?? false}
-                      readOnly
-                      className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
+                {/* Hilop Coins - Only show when user has coins */}
+                {cart && cart.available_coins > 0 && (
+                  <div
+                    onClick={coinsLoading ? undefined : handleToggleCoins}
+                    className={`flex items-center cursor-pointer p-4 rounded-lg gap-4 transition-all duration-200 
+            ${
+              cart?.use_coins
+                ? "bg-green-50 border-green-500"
+                : "bg-white border-gray-200"
+            } border ${coinsLoading ? "opacity-60 pointer-events-none" : ""}`}
+                  >
+                    <Image
+                      width={32}
+                      height={32}
+                      src="/images/icon/hilop-coin.svg"
+                      alt="Hilop Coins"
                     />
+                    <div>
+                      <h3 className="text-gray-900">Apply Hilop Coins</h3>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {cart
+                          ? `You have ${cart.available_coins.toLocaleString()} coins available${
+                              cart.coin_discount > 0
+                                ? ", giving you a discount of ₹" +
+                                  formatPrice(cart.coin_discount)
+                                : ""
+                            }!`
+                          : "Loading coins..."}
+                      </p>
+                    </div>
+                    <div className="ml-auto pointer-events-none">
+                      <input
+                        type="checkbox"
+                        checked={cart?.use_coins ?? false}
+                        readOnly
+                        className="accent-primary peer focus:shadow-outline relative inline-block h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Order Summary */}
@@ -1044,7 +1108,9 @@ export default function Cart() {
                         <span className="font-medium text-primary">
                           Selected Plan:
                         </span>{" "}
-                        {getText(cart.selected_plan.name, language)} ({cart.selected_plan.months} month{cart.selected_plan.months > 1 ? "s" : ""})
+                        {getText(cart.selected_plan.name, language)} (
+                        {cart.selected_plan.months} month
+                        {cart.selected_plan.months > 1 ? "s" : ""})
                       </div>
                     )}
                   </div>

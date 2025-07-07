@@ -18,8 +18,18 @@ const demoImages = [
   ];
   
 
-  const ProductCard: React.FC<ProductCardProps> = ({ product, index }) => {
-    const fallbackImage = demoImages[index % demoImages.length];
+  const ProductCard: React.FC<ProductCardProps> = ({ product, index, totalItems }) => {
+    let fallbackImage: string;
+    // Last 3 cards: use demoImages
+    if (totalItems >= 3 && index >= totalItems - 3) {
+        const imageIdx = index - (totalItems - 3);
+        fallbackImage = demoImages[imageIdx];
+    } else {
+        // For new cards: use product image if available, else placeholder
+        fallbackImage = (product.images && product.images.length > 0)
+            ? product.images[0]
+            : "/images/placeholder.svg";
+    }
     const { language } = useLanguage();
 
     const getText = (field: MultilingualText | string | undefined): string => {

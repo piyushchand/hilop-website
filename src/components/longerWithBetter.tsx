@@ -90,13 +90,13 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
       style={{ display: "block" }}
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
-            <div className="grid sm:grid-cols-2 gap-4 -mt-[52px]">
+            <div className="flex flex-col sm:flex-row gap-4 -mt-[52px]">
               {productId1 && (
                 <Button
                   label="Get Started"
                   variant="btn-dark"
                   size="xl"
-                  className="w-full"
+                  className="w-full sm:w-auto"
                   link={`/product/${productId1}`}
                 />
               )}
@@ -105,7 +105,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                   label="Take the test"
                   variant="btn-light"
                   size="xl"
-                  className="w-full"
+                  className="w-full sm:w-auto"
                   link={`/consultation?testId=${testId2}`}
                 />
               )}
@@ -123,12 +123,13 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
               Natural For Improve Testosterone, Stamina & Energy
               </h3>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {testId1 && (
                   <Button
                     label="Get Started"
                     variant="btn-dark"
                     size="xl"
+                    className="w-full sm:w-auto"
                     link={`/consultation?testId=${testId1}`}
                   />
                 )}
@@ -137,6 +138,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                     label="Buy Now"
                     variant="btn-light"
                     size="xl"
+                    className="w-full sm:w-auto"
                     link={`/product/${productId1}`}
                   />
                 )}
@@ -153,12 +155,13 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
               Last Longer Herbal Sexual Enhancer Powder
               </h3>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {testId2 && (
                   <Button
                     label="Get Started"
                     variant="btn-dark"
                     size="xl"
+                    className="w-full sm:w-auto"
                     link={`/consultation?testId=${testId2}`}
                   />
                 )}
@@ -167,6 +170,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                     label="Buy Now"
                     variant="btn-light"
                     size="xl"
+                    className="w-full sm:w-auto"
                     link={`/product/${productId2}`}
                   />
                 )}

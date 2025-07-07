@@ -53,7 +53,7 @@ function AssessmentPageContent() {
   const [testStarted, setTestStarted] = useState(false);
   const [testResultId, setTestResultId] = useState<string | null>(null);
 
-  const queryTestId = searchParams?.get("testId");
+  const queryTestId = searchParams ? searchParams.get("testId") : null;
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
@@ -172,7 +172,6 @@ function AssessmentPageContent() {
       } else {
         setTimeout(() => proceedToNextStep(), 200);
       }
-      setTimeout(() => proceedToNextStep(), 200);
     }
   };
 
@@ -208,12 +207,14 @@ function AssessmentPageContent() {
       {/* Header */}
       <div className="py-4 border-b border-gray-200 bg-white">
         <div className="container flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            className="bg-dark rounded-xl md:size-12 size-8 flex justify-center items-center text-white hover:text-gray-300 p-1 md:p-0"
-          >
-            <Undo2 size={24} />
-          </button>
+          {(modalStep === 1 || (modalStep === 2 && currentStep > 0)) && (
+            <button
+              onClick={handleBack}
+              className="bg-dark rounded-xl md:size-12 size-8 flex justify-center items-center text-white hover:text-gray-300 p-1 md:p-0"
+            >
+              <Undo2 size={24} />
+            </button>
+          )}
 
           <Link href="/">
             <Image src="/logo.svg" alt="Logo" width={100} height={40} />
