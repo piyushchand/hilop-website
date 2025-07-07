@@ -13,6 +13,8 @@ const Footer = () => {
   const hilopLinks = [
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
+    { href: "/how-it-works", label: "How it works" },
+    { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact Us" },
     // { href: "/blogs", label: "Blogs" },
     { href: "/support", label: "Help & Support" },
@@ -102,7 +104,7 @@ const Footer = () => {
             <div>
               <p className="mb-4 text-base uppercase text-dark font-medium">
                 Hilop
-              </p>
+              </p> 
               {hilopLinks.map((link, index) => (
                 <Link
                   key={index}
