@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   
   try {
@@ -15,7 +18,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    const response = await fetch(`https://api.hilop.com/api/v1/test-results/${id}/complete`, {
+    const response = await fetch(`${API_URL}/test-results/${id}/complete`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

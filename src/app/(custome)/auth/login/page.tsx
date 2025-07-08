@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
@@ -8,9 +8,11 @@ import AuthLayout from "../AuthLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook } = useAuth();
+  const router = useRouter();
+  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook, user } = useAuth();
   const [mobileNumber, setMobileNumber] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +60,17 @@ export default function LoginPage() {
       }
     }
   };
+
+  // After successful login, check for redirectAfterLogin in localStorage
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, router]);
 
   return (
     <>

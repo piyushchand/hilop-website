@@ -8,7 +8,7 @@ const protectedRoutes = [
   // '/cart',
   '/prescription',
   '/hilop-coins',
-  '/book-call',
+  '/book-call', 
   '/consultation'
 ];
 

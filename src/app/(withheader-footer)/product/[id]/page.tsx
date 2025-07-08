@@ -277,11 +277,6 @@ export default function ProductPage() {
         body: JSON.stringify({ product_id: productId, quantity: 1 }),
       });
       const data = await response.json();
-      if (response.status === 401) {
-        toast.error("Please log in to add items to your cart.");
-        // Optionally redirect: window.location.href = '/auth/login';
-        return;
-      }
       if (data.success) {
         toast.success(data.message || "Added to cart!");
         // Optionally: update cart count in navbar/global state

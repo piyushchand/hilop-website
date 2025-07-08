@@ -11,6 +11,8 @@ import ArrowButton from "@/components/uiFramework/ArrowButton";
 import Button from "@/components/uiFramework/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getText } from "@/utils/getText";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 // Add Razorpay type declaration for TypeScript
 declare global {
@@ -134,13 +136,15 @@ export default function Cart() {
   }>({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const COUPON_API_URL = "/api/coupons";
 
-  // Debug: Log Razorpay Key to verify environment variable is set
-  console.log("Razorpay Key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+  // // Debug: Log Razorpay Key to verify environment variable is set
+  // console.log("Razorpay Key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -190,21 +194,40 @@ export default function Cart() {
     }
   }, []);
 
+  // On mount, if redirected from login, restore selected plan from localStorage
+  useEffect(() => {
+    // Restore selected plan after login
+    if (user && typeof window !== "undefined") {
+      const planId = localStorage.getItem("pendingPlanId");
+      if (planId && planId !== selectedPlanId) {
+        handlePlanSelection(planId);
+        localStorage.removeItem("pendingPlanId");
+      }
+    }
+    // For guests, restore selected plan from localStorage for UI
+    if (!user && typeof window !== "undefined") {
+      const planId = localStorage.getItem("pendingPlanId");
+      if (planId && planId !== selectedPlanId) {
+        setSelectedPlanId(planId);
+      }
+    }
+  }, [user]);
+
+  // Always fetch cart when user changes (after login, logout, etc.)
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]);
+  }, [fetchCart, user]);
 
   const handlePlanSelection = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
 
     setPlanLoading(true);
-    // Store previous cart items' quantities and months_quantity
-    const prevCartItems = cart?.items.map(item => ({
-      product_id: item.product_id,
-      quantity: item.quantity,
-      months_quantity: item.months_quantity,
-    })) || [];
     try {
+      // Find the selected plan's months
+      const plan = plans.find((p) => p._id === planId);
+      const months = plan ? plan.months : 1;
+
+      // 1. Update the plan in the backend (for logged-in users)
       const res = await fetch("/api/cart/plan", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -216,44 +239,29 @@ export default function Cart() {
         return;
       }
       const data = await res.json();
-
       if (!data.success) {
         throw new Error(data.message || "Failed to update plan");
       }
       setSelectedPlanId(planId);
-      setCart((prev) =>
-        prev
-          ? {
-              ...prev,
-              selected_plan: plans.find((p) => p._id === planId)
-                ? {
-                    id: planId,
-                    name: plans.find((p) => p._id === planId)?.name || "",
-                    months: plans.find((p) => p._id === planId)?.months || 0,
-                    discount:
-                      plans.find((p) => p._id === planId)?.discount || 0,
-                    discount_type:
-                      plans.find((p) => p._id === planId)?.discount_type || "",
-                  }
-                : null,
+      // 2. Update all cart items' quantity to match plan months
+      if (cart && cart.items.length > 0) {
+        // For each product, update quantity
+        await Promise.all(
+          cart.items.map(async (item) => {
+            // Only update if quantity is different
+            if (item.quantity !== months) {
+              await fetch(`/api/cart/${item.product_id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ quantity: months, months_quantity: months }),
+              });
             }
-          : prev
-      );
-      toast.success("Plan updated successfully");
-      // Re-fetch cart and forcibly reset quantities if changed
+          })
+        );
+      }
+      // 3. Refresh cart
       await fetchCart();
-      // Defensive: If backend changed quantities, reset them
-      setCart((prev) => {
-        if (!prev) return prev;
-        const newItems = prev.items.map(item => {
-          const prevItem = prevCartItems.find(i => i.product_id === item.product_id);
-          if (prevItem && (item.quantity !== prevItem.quantity || item.months_quantity !== prevItem.months_quantity)) {
-            return { ...item, quantity: prevItem.quantity, months_quantity: prevItem.months_quantity };
-          }
-          return item;
-        });
-        return { ...prev, items: newItems };
-      });
+      toast.success("Plan and quantities updated");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update plan");
       // Revert selection on error
@@ -420,17 +428,26 @@ export default function Cart() {
   // Coupon discount from cart
   const couponDiscount =
     cart && cart.coupon_discount ? cart.coupon_discount : 0;
-  // Subscription discount calculation
+  // Get the selected plan object (works for both guests and logged-in users)
+  let selectedPlan: SubscriptionPlan | null = null;
+  if (user) {
+    if (cart && cart.selected_plan && cart.selected_plan.id) {
+      const planId = cart.selected_plan.id;
+      selectedPlan = plans.find((p) => p._id === planId) || null;
+    }
+  } else if (selectedPlanId) {
+    selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
+  }
+
+  // Calculate subscription discount for both guests and logged-in users
   const subscriptionDiscount =
-    cart && cart.selected_plan && cart.selected_plan.discount > 0
-      ? Math.round((cart.subtotal * cart.selected_plan.discount) / 100)
+    selectedPlan && cart && selectedPlan.discount > 0
+      ? Math.round((cart.subtotal * selectedPlan.discount) / 100)
       : 0;
-  // Final total calculation
+
+  // Final total calculation for both guests and logged-in users
   const finalTotal = cart
-    ? cart.subtotal -
-      (cart.coin_discount ?? 0) -
-      subscriptionDiscount -
-      couponDiscount
+    ? cart.subtotal - (cart.coin_discount ?? 0) - subscriptionDiscount - (cart.coupon_discount ?? 0)
     : 0;
 
   // Fetch purchased products from new API
@@ -491,6 +508,13 @@ export default function Cart() {
 
   // Handle checkout
   const handleCheckout = async () => {
+    if (!user) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("redirectAfterLogin", "/cart");
+      }
+      router.push("/auth/login");
+      return;
+    }
     if (!cart || cart.items.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -592,7 +616,6 @@ export default function Cart() {
           return;
         }
 
-        // Send both shipping_address_id and total_amount as required by backend
         const paymentRequestData = {
           shipping_address_id: address._id,
           total_amount: finalTotal, // Make sure finalTotal is the correct payable amount
@@ -737,6 +760,45 @@ export default function Cart() {
     }
   };
 
+  // Modified handlePlanClick to support guests and update UI
+  const handlePlanClick = async (planId: string) => {
+    if (planId === selectedPlanId || planLoading) return;
+    const plan = plans.find((p) => p._id === planId);
+    const months = plan ? plan.months : 1;
+    if (!user) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("pendingPlanId", planId);
+        setSelectedPlanId(planId);
+        // For guests: update guest cart quantities in cookie/localStorage
+        // Fetch guest cart from API, update, and set
+        try {
+          const res = await fetch("/api/cart");
+          const data = await res.json();
+          if (data.success && data.data && Array.isArray(data.data.items)) {
+            await Promise.all(
+              data.data.items.map(async (item: CartProduct) => {
+                if (item.quantity !== months) {
+                  await fetch(`/api/cart/${item.product_id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ quantity: months, months_quantity: months }),
+                  });
+                }
+              })
+            );
+            await fetchCart();
+            toast.success("Plan and quantities updated");
+          }
+        } catch {
+          toast.error("Failed to update guest cart quantities");
+        }
+      }
+      return;
+    }
+    // For logged-in users
+    await handlePlanSelection(planId);
+  };
+
   // Determine if only BoldRise is in the cart
   const isOnlyBoldRise =
     cart &&
@@ -789,15 +851,16 @@ export default function Cart() {
                                 name="subscription"
                                 value={plan._id}
                                 checked={selectedPlanId === plan._id}
-                                onChange={() => handlePlanSelection(plan._id)}
+                                onChange={() => handlePlanClick(plan._id)}
                                 className="peer sr-only"
                               />
                               <span
-                                className={`p-4 rounded-lg cursor-pointer w-full border bg-gray-100 border-gray-200 transition-colors ${
+                                className={`p-4 rounded-lg w-full border bg-gray-100 border-gray-200 transition-colors ${
                                   planLoading
                                     ? "opacity-60 pointer-events-none"
                                     : ""
                                 } hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}
+                                // Remove onClick from here
                               >
                                 <div className="flex items-center gap-3 mb-3">
                                   <p className="text-dark font-medium">
@@ -888,7 +951,13 @@ export default function Cart() {
                                   variant="btn-dark"
                                   size="sm"
                                   className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
-                                  onClick={() => handleAddPurchasedProductToCart(item._id)}
+                                  onClick={() => {
+                                    if (!user) {
+                                      router.push("/auth/login");
+                                      return;
+                                    }
+                                    handleAddPurchasedProductToCart(item._id);
+                                  }}
                                   disabled={!!addNowLoading[item._id]}
                                 />
                               </div>
@@ -1030,7 +1099,13 @@ export default function Cart() {
                               variant="btn-dark"
                               size="sm"
                               className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
-                              onClick={() => handleAddPurchasedProductToCart(item._id)}
+                              onClick={() => {
+                                if (!user) {
+                                  router.push("/auth/login");
+                                  return;
+                                }
+                                handleAddPurchasedProductToCart(item._id);
+                              }}
                               disabled={!!addNowLoading[item._id]}
                             />
                           </div>
@@ -1197,14 +1272,14 @@ export default function Cart() {
                         <span>Total</span>
                         <span>₹{formatPrice(finalTotal)}</span>
                       </div>
-                      {cart.selected_plan && (
+                      {selectedPlan && (
                         <div className="mt-4 p-3 bg-primary/10 rounded-lg">
                           <span className="font-medium text-primary">
                             Selected Plan:
                           </span>{" "}
-                          {getText(cart.selected_plan.name, language)} (
-                          {cart.selected_plan.months} month
-                          {cart.selected_plan.months > 1 ? "s" : ""})
+                          {getText(selectedPlan.name, language)} (
+                          {selectedPlan.months} month
+                          {selectedPlan.months > 1 ? "s" : ""})
                         </div>
                       )}
                     </div>

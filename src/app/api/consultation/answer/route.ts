@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -15,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await fetch(
-      "https://api.hilop.com/api/v1/test-results/answer",
+      `${API_URL}/test-results/answer`,
       {
         method: "POST",
         headers: {
