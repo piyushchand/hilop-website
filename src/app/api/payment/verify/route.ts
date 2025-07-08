@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Forward the verification payload to the correct backend endpoint
-    const response = await fetch(`https://api.hilop.com/api/v1/payment/verify`, {
+    const response = await fetch(`${API_URL}/payment/verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

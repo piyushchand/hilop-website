@@ -208,7 +208,6 @@ const Navbar = () => {
                   </p>
                 </div>
               </div>
-               {/* Profile Menu Items - now rendered via a loop for maintainability */}
               { [
                 {
                   href: "/profile",
@@ -301,7 +300,7 @@ const Navbar = () => {
        
 
         {/* Right Side Desktop */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Language Toggle and Cart */}
           <div className="md:flex gap-4 relative hidden">
             {shouldShowLanguageToggle() && (

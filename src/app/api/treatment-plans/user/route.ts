@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_URL) throw new Error('API URL is not set in environment variables');
+
 export async function GET(req: NextRequest) {
   try {
     // Get the token from the request cookies or headers
@@ -15,7 +18,7 @@ export async function GET(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ success: false, message: 'No auth token' }, { status: 401 });
     }
-    const apiRes = await fetch('https://api.hilop.com/api/v1/treatment-plans/user', {
+    const apiRes = await fetch(`${API_URL}/treatment-plans/user`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
