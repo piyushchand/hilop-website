@@ -61,17 +61,21 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchCartCount = async () => {
-      if (!user) {
-        dispatch(setCartCount(0));
-        return;
-      }
-
       setCartLoading(true);
       try {
-        const res = await fetch("/api/cart/count", { credentials: "include" });
-        if (!res.ok) throw new Error("Failed to fetch cart count");
-        const data = await res.json();
-        dispatch(setCartCount(data?.data?.count ?? 0));
+        if (user) {
+          // Logged-in user: fetch count from /api/cart/count
+          const res = await fetch("/api/cart/count", { credentials: "include" });
+          if (!res.ok) throw new Error("Failed to fetch cart count");
+          const data = await res.json();
+          dispatch(setCartCount(data?.data?.count ?? 0));
+        } else {
+          // Guest user: fetch cart and count items
+          const res = await fetch("/api/cart", { credentials: "include" });
+          if (!res.ok) throw new Error("Failed to fetch cart");
+          const data = await res.json();
+          dispatch(setCartCount(data?.data?.item_count ?? 0));
+        }
       } catch {
         dispatch(setCartCount(0));
       } finally {
@@ -108,14 +112,12 @@ const Navbar = () => {
 
   // Subcomponent: CartButton
   interface CartButtonProps {
-    user: User | null;
     cartLoading: boolean;
     cartCount: number;
     size?: "md" | "lg" | "sm" | "xl" | "2xl";
     className?: string;
   }
   const CartButton = ({
-    user,
     cartLoading,
     cartCount,
     size = "md",
@@ -128,7 +130,7 @@ const Navbar = () => {
         className={`relative rounded-full ${size === "lg" ? "size-[52px]" : "size-[40px]"} hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center ${className}`}
       >
         <ShoppingCart className={`text-dark ${size === "lg" ? "w-5 h-5" : "w-4 h-4"}`} />
-        {user && (cartLoading ? (
+        {(cartLoading) ? (
           <span className={`absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full animate-pulse`}>
             ...
           </span>
@@ -136,7 +138,7 @@ const Navbar = () => {
           <span className={`absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full`}>
             {cartCount}
           </span>
-        ) : null)}
+        ) : null}
       </Link>
     );
   };
@@ -204,7 +206,7 @@ const Navbar = () => {
                     className="flex-shrink-0"
                   />
                   <p className="text-sm text-green-800">
-                    {(user.hilop_coins ?? 0).toLocaleString()} Hilop Coins
+                    {(user.hilop_coins ?? 0).toLocaleString()}  Coins
                   </p>
                 </div>
               </div>
@@ -326,7 +328,7 @@ const Navbar = () => {
               </button>
             )}
 
-            <CartButton user={user} cartLoading={cartLoading} cartCount={cartCount} size="lg" />
+            <CartButton cartLoading={cartLoading} cartCount={cartCount} size="lg" />
           </div>
 
           {/* Mobile Cart and Language */}
@@ -354,7 +356,7 @@ const Navbar = () => {
               </button>
             )}
 
-            <CartButton user={user} cartLoading={cartLoading} cartCount={cartCount} size="sm" />
+            <CartButton cartLoading={cartLoading} cartCount={cartCount} size="sm" />
           </div>
 
           {/* Login/Profile */}

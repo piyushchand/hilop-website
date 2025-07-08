@@ -13,6 +13,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getText } from "@/utils/getText";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
+import AddresssModal from "@/components/model/Address";
 
 // Add Razorpay type declaration for TypeScript
 declare global {
@@ -113,6 +115,20 @@ function loadRazorpayScript() {
   });
 }
 
+// Define Address type for address banner
+interface Address {
+  _id: string;
+  name: string;
+  address: string;
+  phone_number: string;
+  landmark?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipcode?: string;
+  is_default?: boolean;
+}
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -138,6 +154,11 @@ export default function Cart() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
+
+  // Address state
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  // Address modal state
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -198,6 +219,39 @@ export default function Cart() {
   useEffect(() => {
     // Restore selected plan after login
     if (user && typeof window !== "undefined") {
+      // 1. Merge guest cart into user cart if present
+      const guestCartRaw = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('guestCart='));
+      if (guestCartRaw) {
+        try {
+          const guestCart = JSON.parse(decodeURIComponent(guestCartRaw.split('=')[1]));
+          if (Array.isArray(guestCart) && guestCart.length > 0) {
+            // For each item in guest cart, add to user cart
+            Promise.all(
+              guestCart.map(async (item) => {
+                await fetch("/api/cart", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    months_quantity: item.months_quantity ?? 1,
+                  }),
+                  credentials: "include",
+                });
+              })
+            ).then(() => {
+              // Clear guest cart cookie
+              document.cookie = "guestCart=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              fetchCart();
+            });
+          }
+        } catch {
+          // Ignore parse errors
+        }
+      }
+      // Restore selected plan after login
       const planId = localStorage.getItem("pendingPlanId");
       if (planId && planId !== selectedPlanId) {
         handlePlanSelection(planId);
@@ -217,6 +271,27 @@ export default function Cart() {
   useEffect(() => {
     fetchCart();
   }, [fetchCart, user]);
+
+  // Address state
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      if (!user) return;
+      try {
+        const res = await fetch("/api/v1/addresses", { credentials: "include" });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          // Prefer default address, else first
+          const def = data.data.find((a: Address) => a.is_default) || data.data[0];
+          setSelectedAddress(def);
+        } else {
+          setSelectedAddress(null);
+        }
+      } finally {
+        // setAddressLoading(false); // Removed as per edit hint
+      }
+    };
+    fetchAddresses();
+  }, [user]);
 
   const handlePlanSelection = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
@@ -807,11 +882,88 @@ export default function Cart() {
     (cart.items[0].name.en?.toLowerCase() === "boldrise" ||
       cart.items[0].name.hi?.toLowerCase() === "boldrise");
 
+  // Helper to extract pincode (zipcode) from address
+  const getPincode = (address: Address | null) => (address && address.zipcode ? address.zipcode : "------");
+
+  // Helper to format phone number
+  const formatPhone = (phone: string) => {
+    if (!phone) return "";
+    if (phone.startsWith("+")) return phone;
+    if (phone.startsWith("91") && phone.length === 12) return "+" + phone;
+    if (phone.length === 10) return "+91 " + phone;
+    return phone;
+  };
+
+  // After closing the modal, refetch addresses
+  const handleAddressModalClose = () => {
+    setAddressModalOpen(false);
+    // Refetch addresses to update selected address
+    if (user) {
+      fetchAddresses();
+    }
+  };
+
+  // Move fetchAddresses out of useEffect so it can be called from handleAddressModalClose
+  const fetchAddresses = async () => {
+    if (!user) return;
+    try {
+      const res = await fetch("/api/v1/addresses", { credentials: "include" });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        const def = data.data.find((a: Address) => a.is_default) || data.data[0];
+        setSelectedAddress(def);
+      } else {
+        setSelectedAddress(null);
+      }
+    } finally {
+      // setAddressLoading(false); // Removed as per edit hint
+    }
+  };
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [user]);
+
   return (
     <>
       <Toaster position="bottom-right" />
+      {/* Address Banner - Green Gradient, prominent, with location illustration */}
+      <div className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6">
+        <div className="container flex items-center gap-4 relative min-h-[64px]">
+          {/* Illustration */}
+          <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 md:h-16 md:w-16">
+            <Image src="/images/adresss.svg" alt="Address Banner" width={64} height={64} className="object-contain h-12 w-12 md:h-16 md:w-16" />
+          </div>
+          {/* Address Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold text-dark text-base md:text-lg">Deliver to : {getPincode(selectedAddress)}</span>
+            </div>
+            <div className="text-gray-700 text-sm md:text-base truncate">
+              {selectedAddress ? selectedAddress.address : "No address found. Please add a delivery address."}
+              {selectedAddress && selectedAddress.city && ", " + selectedAddress.city}
+              {selectedAddress && selectedAddress.state && ", " + selectedAddress.state}
+            </div>
+            {selectedAddress && (
+              <div className="text-gray-500 text-xs md:text-sm mt-0.5">{formatPhone(selectedAddress.phone_number)}</div>
+            )}
+          </div>
+          {/* Dropdown/Caret for address selection */}
+          <button
+            className="ml-2 bg-green-200 hover:bg-green-300 rounded-full p-1 flex items-center justify-center transition-colors"
+            style={{ minWidth: 32, minHeight: 32 }}
+            aria-label="Change address"
+            onClick={() => user && setAddressModalOpen(true)}
+            disabled={!user}
+          >
+            <ChevronDown className="text-green-700 w-5 h-5" />
+          </button>
+        </div>
+      </div>
+      {/* Address Modal */}
+      <AddresssModal isOpen={addressModalOpen} onClose={handleAddressModalClose} />
       <section className="w-full bg-gray-100 mb-16 lg:mb-40">
-        <div className="container lg:pt-20 pt-10 relative">
+        <div className="container   relative">
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Left Section */}
             <div className={`w-full ${cart && cart.items.length > 0 ? 'lg:w-2/3' : ''}`}> 

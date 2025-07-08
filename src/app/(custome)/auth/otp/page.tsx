@@ -76,6 +76,14 @@ function OtpPageContent() {
         setSuccess(data.message || '');
         await refreshUserData();
         setTimeout(() => {
+          if (typeof window !== "undefined") {
+            const redirectPath = localStorage.getItem("redirectAfterLogin");
+            if (redirectPath) {
+              localStorage.removeItem("redirectAfterLogin");
+              router.replace(redirectPath);
+              return;
+            }
+          }
           router.push('/');
         }, 1200);
       } else {
