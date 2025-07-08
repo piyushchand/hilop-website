@@ -928,7 +928,34 @@ export default function Cart() {
     <>
       <Toaster position="bottom-right" />
       {/* Address Banner - Green Gradient, prominent, with location illustration */}
-      <div className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6">
+      <div
+        className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6 cursor-pointer select-none"
+        onClick={() => {
+          if (user) {
+            setAddressModalOpen(true);
+          } else {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("redirectAfterLogin", "/cart");
+            }
+            router.push("/auth/login");
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label="Change address"
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            if (user) {
+              setAddressModalOpen(true);
+            } else {
+              if (typeof window !== "undefined") {
+                localStorage.setItem("redirectAfterLogin", "/cart");
+              }
+              router.push("/auth/login");
+            }
+          }
+        }}
+      >
         <div className="container flex items-center gap-4 relative min-h-[64px]">
           {/* Illustration */}
           <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 md:h-16 md:w-16">
@@ -950,11 +977,22 @@ export default function Cart() {
           </div>
           {/* Dropdown/Caret for address selection */}
           <button
-            className="ml-2 bg-green-200 hover:bg-green-300 rounded-full p-1 flex items-center justify-center transition-colors"
+            className="ml-2 bg-green-200 hover:bg-green-300 cursor-pointer rounded-full p-1 flex items-center justify-center transition-colors"
             style={{ minWidth: 32, minHeight: 32 }}
             aria-label="Change address"
-            onClick={() => user && setAddressModalOpen(true)}
-            disabled={!user}
+            tabIndex={0}
+            type="button"
+            onClick={e => {
+              e.preventDefault();
+              if (user) {
+                setAddressModalOpen(true);
+              } else {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("redirectAfterLogin", "/cart");
+                }
+                router.push("/auth/login");
+              }
+            }}
           >
             <ChevronDown className="text-green-700 w-5 h-5" />
           </button>
@@ -997,7 +1035,7 @@ export default function Cart() {
                       >
                         {plans.map((plan: SubscriptionPlan) => (
                           <SwiperSlide key={plan._id}>
-                            <label className="inline-flex items-center w-full group">
+                            <label className="inline-flex items-center w-full group cursor-pointer">
                               <input
                                 type="radio"
                                 name="subscription"
