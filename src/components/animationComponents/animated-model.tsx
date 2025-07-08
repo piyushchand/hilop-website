@@ -40,7 +40,7 @@ export default function Modal({ isOpen, onClose, children, className = "" }: Mod
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6"
+          className="fixed inset-0  flex items-center justify-center z-80 bg-black/50 px-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
           exit={{ opacity: 0 }}

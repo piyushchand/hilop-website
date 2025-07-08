@@ -21,6 +21,7 @@ import { Checkmark } from "@/components/checkmark";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
 import type { Product as ProductType } from '@/types/index';
+import { useRouter } from "next/navigation";
 
 // Define a type for the dynamic content to ensure consistency
 interface ProductDynamicContent {
@@ -203,6 +204,7 @@ export default function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
+  const router = useRouter();
 
   const handleThumbsSwiper = useCallback((swiper: SwiperType) => {
     // Add custom class to swiper-wrapper
@@ -258,8 +260,8 @@ export default function ProductPage() {
     fetchProduct();
   }, [params?.id, language]);
 
-  // Add to Cart handler
-  const handleAddToCart = useCallback(async () => {
+  // Buy Now handler
+  const handleBuyNow = useCallback(async () => {
     const productId =
       product &&
       (typeof (product as ProductWithExtras & { _id?: string })._id === "string"
@@ -278,8 +280,7 @@ export default function ProductPage() {
       });
       const data = await response.json();
       if (data.success) {
-        toast.success(data.message || "Added to cart!");
-        // Optionally: update cart count in navbar/global state
+        router.push("/cart");
       } else {
         toast.error(data.message || "Failed to add to cart.");
       }
@@ -288,7 +289,7 @@ export default function ProductPage() {
     } finally {
       setAddToCartLoading(false);
     }
-  }, [product]);
+  }, [product, router]);
 
   if (error) {
     return (
@@ -410,7 +411,7 @@ export default function ProductPage() {
                 label={addToCartLoading ? "Adding..." : "Buy Now"}
                 variant="btn-dark"
                 size="xl"
-                onClick={handleAddToCart}
+                onClick={handleBuyNow}
                 disabled={addToCartLoading}
               />
             </div>
