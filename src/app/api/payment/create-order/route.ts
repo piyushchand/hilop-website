@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${accessToken.value}`,
       },
       body: JSON.stringify({
-        address_id: body.shipping_address_id,
+        shipping_address_id: body.shipping_address_id,
         total_amount: body.total_amount
       }),
     });

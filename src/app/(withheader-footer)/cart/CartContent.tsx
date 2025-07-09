@@ -1,20 +1,19 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast, Toaster } from "react-hot-toast";
 import ArrowButton from "@/components/uiFramework/ArrowButton";
-import Button from "@/components/uiFramework/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getText } from "@/utils/getText";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import AddresssModal from "@/components/model/Address";
+import Button from "@/components/uiFramework/Button";
 
 // Add Razorpay type declaration for TypeScript
 declare global {
@@ -129,6 +128,55 @@ interface Address {
   is_default?: boolean;
 }
 
+// Payment Success Modal (move outside Cart to avoid variable shadowing)
+type OrderSummary = {
+  _id?: string;
+  order_id?: string;
+  order_number?: string;
+  total?: number;
+  total_amount?: number;
+  status?: string;
+};
+
+interface PaymentSuccessModalProps {
+  show: boolean;
+  orderSummary: OrderSummary | null;
+  onClose: () => void;
+}
+
+const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({ show, orderSummary, onClose }) => {
+  if (!show) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
+        <div className="mb-4">
+          <Image src="/images/icon/verify.svg" width={64} height={64} alt="Success" className="mx-auto mb-2" />
+          <h2 className="text-2xl font-bold text-green-700 mb-2">Payment Successful!</h2>
+          <p className="text-gray-700 mb-2">Your order has been placed successfully.</p>
+        </div>
+        {orderSummary && (
+          <div className="mb-4 text-left bg-gray-50 rounded-lg p-4">
+            <h3 className="font-semibold mb-2">Order Summary</h3>
+            <div className="text-sm text-gray-800">
+              <div><b>Order ID:</b> {orderSummary._id || orderSummary.order_id}</div>
+              <div><b>Order Number:</b> {orderSummary.order_number}</div>
+              <div><b>Total:</b> ₹{orderSummary.total?.toFixed(2) || orderSummary.total_amount}</div>
+              <div><b>Status:</b> {orderSummary.status}</div>
+            </div>
+          </div>
+        )}
+        <Button
+          label="Go to My Orders"
+          variant="btn-dark"
+          size="xl"
+          className="w-full mt-2"
+          onClick={onClose}
+        />
+      </div>
+    </div>
+  );
+};
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -159,6 +207,10 @@ export default function Cart() {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   // Address modal state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
+
+  // State for payment confirmation modal
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  const [lastOrderSummary, setLastOrderSummary] = useState<OrderSummary | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -273,25 +325,25 @@ export default function Cart() {
   }, [fetchCart, user]);
 
   // Address state
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      if (!user) return;
-      try {
-        const res = await fetch("/api/v1/addresses", { credentials: "include" });
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          // Prefer default address, else first
-          const def = data.data.find((a: Address) => a.is_default) || data.data[0];
-          setSelectedAddress(def);
-        } else {
-          setSelectedAddress(null);
-        }
-      } finally {
-        // setAddressLoading(false); // Removed as per edit hint
-      }
-    };
-    fetchAddresses();
-  }, [user]);
+  // useEffect(() => {
+  //   const fetchAddresses = async () => {
+  //     if (!user) return;
+  //     try {
+  //       const res = await fetch("/api/v1/addresses", { credentials: "include" });
+  //       const data = await res.json();
+  //       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+  //         // Prefer default address, else first
+  //         const def = data.data.find((a: Address) => a.is_default) || data.data[0];
+  //         setSelectedAddress(def);
+  //       } else {
+  //         setSelectedAddress(null);
+  //       }
+  //     } finally {
+  //       // setAddressLoading(false); // Removed as per edit hint
+  //     }
+  //   };
+  //   fetchAddresses();
+  // }, [user]);
 
   const handlePlanSelection = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
@@ -597,122 +649,34 @@ export default function Cart() {
 
     setCheckoutLoading(true);
     try {
-      // First, get the user's addresses to find the default or first address
-      const addressesResponse = await fetch("/api/v1/addresses", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+      // Use the address selected in the UI (component state) for payment
+      if (!selectedAddress || !selectedAddress._id) {
+        toast.error("No address selected. Please select a delivery address.");
+        setCheckoutLoading(false);
+        return;
+      }
+      const address = selectedAddress;
+      // Always use 'shipping_address_id' for backend, never 'address_id'
+      const paymentRequestData = {
+        shipping_address_id: address._id,
+        total_amount: finalTotal,
+      };
+      // Double-check: log the request body to ensure correct key
+      console.log("Sending payment request data:", paymentRequestData);
+      const paymentResponse = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         credentials: "include",
+        body: JSON.stringify(paymentRequestData),
       });
 
-      console.log("Addresses response status:", addressesResponse.status);
+      console.log("Payment response status:", paymentResponse.status);
 
-      if (addressesResponse.status === 401) {
-        toast.error("Please log in first");
-        setCheckoutLoading(false);
-        return;
-      }
-
-      const addressesData = await addressesResponse.json();
-      console.log("Addresses data:", addressesData);
-
-      if (
-        !addressesData.success ||
-        !addressesData.data ||
-        addressesData.data.length === 0
-      ) {
-        toast.error("Please add a shipping address first");
-        setCheckoutLoading(false);
-        return;
-      }
-
-      // Find default address or use the first one
-      const selectedAddress =
-        addressesData.data.find(
-          (addr: { is_default?: boolean }) => addr.is_default
-        ) || addressesData.data[0];
-      console.log("Selected address:", selectedAddress);
-
-      // Call the Next.js API route that handles authentication
-      console.log("Selected address ID:", selectedAddress._id);
-
-      const addressResponse = await fetch(
-        `/api/v1/addresses/${selectedAddress._id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      console.log("Address response status:", addressResponse.status);
-      console.log(
-        "Address response headers:",
-        Object.fromEntries(addressResponse.headers.entries())
-      );
-
-      const addressData = await addressResponse.json();
-      console.log("Address API Response:", addressData);
-
-      if (addressResponse.ok) {
-        toast.success(
-          `Address retrieved successfully! ID: ${selectedAddress._id}`
-        );
-        console.log(
-          "API URL called:",
-          `/api/v1/addresses/${selectedAddress._id}`
-        );
-        console.log("Address ID:", selectedAddress._id);
-
-        // Show all the data in console
-        console.log("=== ADDRESS DATA ===");
-        const address = addressData.data || addressData;
-        console.log("ID:", address._id);
-        console.log("Name:", address.name);
-        console.log("Address:", address.address);
-        console.log("Phone:", address.phone_number);
-        console.log("City:", address.city);
-        console.log("State:", address.state);
-        console.log("Country:", address.country);
-        console.log("ZIP:", address.zipcode);
-        console.log("Landmark:", address.landmark);
-        console.log("Is Default:", address.is_default);
-        console.log("===================");
-
-        // Now call the Razorpay payment API
-        console.log("Calling Razorpay payment API...");
-
-        // Validate address ID
-        if (!address._id) {
-          toast.error("Invalid address ID");
-          setCheckoutLoading(false);
-          return;
-        }
-
-        const paymentRequestData = {
-          shipping_address_id: address._id,
-          total_amount: finalTotal, // Make sure finalTotal is the correct payable amount
-        };
-
-        console.log("Payment request data:", paymentRequestData);
-        console.log("Shipping Address ID being sent:", address._id);
-
-        const paymentResponse = await fetch("/api/payment/create-order", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(paymentRequestData),
-        });
-
-        console.log("Payment response status:", paymentResponse.status);
-
-        const paymentData = await paymentResponse.json();
-        console.log("Payment API Response:", paymentData);
+      const paymentData = await paymentResponse.json();
+      console.log("Payment API Response:", paymentData);
 
         if (paymentResponse.ok && paymentData.success) {
           toast.success("Payment order created successfully!");
@@ -729,13 +693,7 @@ export default function Cart() {
             paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
           const currency = paymentInfo.currency || "INR";
 
-          console.log("=== PAYMENT DATA ===");
-          console.log("Order ID:", paymentInfo.order_id);
-          console.log("Razorpay Order ID:", razorpayOrderId);
-          console.log("Total Amount (paise):", amountPaise);
-          console.log("Currency:", currency);
-          console.log("Razorpay Key:", razorpayKey);
-          console.log("===================");
+        
 
           // Defensive: Check for required fields from backend or fallback
           if (!amountPaise || !razorpayOrderId || !razorpayKey) {
@@ -771,29 +729,50 @@ export default function Cart() {
             }) {
               // Call backend to verify payment
               try {
+                setCheckoutLoading(true); // Show loading while processing
                 const verifyRes = await fetch("/api/payment/verify", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
+                  credentials: "include",
                   body: JSON.stringify({
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature,
-                    test_mode: true,
+                    // test_mode: true,
                   }),
                 });
-                console.log(verifyRes);
                 const verifyData = await verifyRes.json();
+                console.log("Payment verify response:", verifyData);
                 if (verifyData.success) {
-                  // On successful payment verification, redirect to My Orders
-                  window.location.href = "/my-order";
+                  // Optionally fetch the latest order summary
+                  const orderId = verifyData.order_id || (verifyData.data && verifyData.data.order_id);
+                  let orderSummary: OrderSummary | null = null;
+                  if (orderId) {
+                    try {
+                      const orderRes = await fetch(`/api/orders/${orderId}`);
+                      if (orderRes.ok) {
+                        const orderData = await orderRes.json();
+                        orderSummary = orderData.data || null;
+                      }
+                    } catch {}
+                  }
+                  setLastOrderSummary(orderSummary);
+                  setShowPaymentSuccess(true);
+                  await fetch("/api/cart", { credentials: "include" });
+                  await fetch("/api/orders", { credentials: "include" });
+                  setCheckoutLoading(false);
+                  // Do not redirect immediately; wait for user to close modal
+                  return;
+                  // Wait for backend to process order, then refresh cart and orders
                 } else {
-                  // Do NOT clear cart if payment verification fails
+                  setCheckoutLoading(false);
                   toast.error(
                     verifyData.message ||
                       "Payment verification failed. Please contact support."
                   );
                 }
               } catch {
+                setCheckoutLoading(false);
                 toast.error(
                   "Payment verification failed. Please contact support."
                 );
@@ -819,20 +798,12 @@ export default function Cart() {
               `Failed to create payment order (${paymentResponse.status})`
           );
         }
-      } else {
-        console.error("API Error Status:", addressResponse.status);
-        console.error("API Error Response:", addressData);
-        toast.error(
-          addressData.message ||
-            `Failed to get address (${addressResponse.status})`
-        );
+      } catch (error) {
+        console.error("Checkout error:", error);
+        toast.error("Checkout failed. Please try again.");
+      } finally {
+        setCheckoutLoading(false);
       }
-    } catch (error) {
-      console.error("Address fetch error:", error);
-      toast.error("Failed to get address");
-    } finally {
-      setCheckoutLoading(false);
-    }
   };
 
   // Modified handlePlanClick to support guests and update UI
@@ -928,7 +899,34 @@ export default function Cart() {
     <>
       <Toaster position="bottom-right" />
       {/* Address Banner - Green Gradient, prominent, with location illustration */}
-      <div className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6">
+      <div
+        className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6 cursor-pointer select-none"
+        onClick={() => {
+          if (user) {
+            setAddressModalOpen(true);
+          } else {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("redirectAfterLogin", "/cart");
+            }
+            router.push("/auth/login");
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label="Change address"
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            if (user) {
+              setAddressModalOpen(true);
+            } else {
+              if (typeof window !== "undefined") {
+                localStorage.setItem("redirectAfterLogin", "/cart");
+              }
+              router.push("/auth/login");
+            }
+          }
+        }}
+      >
         <div className="container flex items-center gap-4 relative min-h-[64px]">
           {/* Illustration */}
           <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 md:h-16 md:w-16">
@@ -950,11 +948,22 @@ export default function Cart() {
           </div>
           {/* Dropdown/Caret for address selection */}
           <button
-            className="ml-2 bg-green-200 hover:bg-green-300 rounded-full p-1 flex items-center justify-center transition-colors"
+            className="ml-2 bg-green-200 hover:bg-green-300 cursor-pointer rounded-full p-1 flex items-center justify-center transition-colors"
             style={{ minWidth: 32, minHeight: 32 }}
             aria-label="Change address"
-            onClick={() => user && setAddressModalOpen(true)}
-            disabled={!user}
+            tabIndex={0}
+            type="button"
+            onClick={e => {
+              e.preventDefault();
+              if (user) {
+                setAddressModalOpen(true);
+              } else {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("redirectAfterLogin", "/cart");
+                }
+                router.push("/auth/login");
+              }
+            }}
           >
             <ChevronDown className="text-green-700 w-5 h-5" />
           </button>
@@ -997,7 +1006,7 @@ export default function Cart() {
                       >
                         {plans.map((plan: SubscriptionPlan) => (
                           <SwiperSlide key={plan._id}>
-                            <label className="inline-flex items-center w-full group">
+                            <label className="inline-flex items-center w-full group cursor-pointer">
                               <input
                                 type="radio"
                                 name="subscription"
@@ -1062,7 +1071,7 @@ export default function Cart() {
                         Loading purchased products...
                       </div>
                     ) : buyAgainProducts.length > 0 ? (
-                      <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-6 w-full max-w-xl mx-auto">
+<div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-6 w-full max-w-md mx-auto">
                         <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200 text-center">
                           Buy Again
                         </h3>
@@ -1100,7 +1109,7 @@ export default function Cart() {
                                       ? "Adding..."
                                       : "+ Add Now"
                                   }
-                                  variant="btn-dark"
+                                  variant="btn-primary"
                                   size="sm"
                                   className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
                                   onClick={() => {
@@ -1466,6 +1475,14 @@ export default function Cart() {
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
+      <PaymentSuccessModal
+        show={showPaymentSuccess}
+        orderSummary={lastOrderSummary}
+        onClose={() => {
+          setShowPaymentSuccess(false);
+          window.location.href = "/my-order";
+        }}
+      />
     </>
   );
 }
