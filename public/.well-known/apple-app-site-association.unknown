@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "537QF7R9GY.com.hilopapp",
+        "paths": [ "/redeem/*" ]
+      }
+    ]
+  }
+}
