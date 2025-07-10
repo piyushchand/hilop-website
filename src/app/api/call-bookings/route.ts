@@ -1,101 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-if (!API_URL) throw new Error('API URL is not set in environment variables');
+// Always use the live API endpoint
+const LIVE_API_URL = 'https://api.hilop.com/api/v1/call-bookings';
 
 export async function POST(request: NextRequest) {
-  let body: { 
-    booking_date?: string; 
-    time_slot?: string; 
-    fullName?: string; 
-    mobileNumber?: string; 
-    additionalNotes?: string; 
-    services?: string[] 
-  } = {};
-  
   try {
-    body = await request.json();
-    const { booking_date, time_slot, fullName, mobileNumber, additionalNotes, services } = body;
-    
-    if (!booking_date || !time_slot) {
-      return NextResponse.json(
-        { success: false, message: 'booking_date and time_slot are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!fullName || !mobileNumber) {
-      return NextResponse.json(
-        { success: false, message: 'fullName and mobileNumber are required' },
-        { status: 400 }
-      );
-    }
-
+    const body = await request.json();
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken');
-
+    const accessToken = cookieStore.get('accessToken')?.value;
+    if (!accessToken) {
+      return NextResponse.json(
+        { success: false, message: 'Authentication token not found.' },
+        { status: 401 }
+      );
+    }
     const headers: Record<string, string> = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`,
     };
-
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken.value}`;
-    }
-
-    // Prepare booking data for external API
-    const bookingData = {
-      booking_date,
-      time_slot,
-      customer_name: fullName,
-      mobile_number: mobileNumber,
-      additional_notes: additionalNotes,
-      services: services || [],
-    };
-
-    // Forward the request to the external API
-    const response = await fetch(
-      `${API_URL}/call-bookings/`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(bookingData),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // If external API fails, return success for testing
-      console.log('External API failed, returning mock success');
-      return NextResponse.json({
-        success: true,
-        message: 'Appointment booked successfully (mock)',
-        data: {
-          booking_id: 'mock-booking-' + Date.now(),
-          booking_date,
-          time_slot,
-          customer_name: fullName,
-          mobile_number: mobileNumber,
-          status: 'confirmed'
-        }
-      });
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Call booking error:', error);
-    // Return mock success if there's a connection error
-    return NextResponse.json({
-      success: true,
-      message: 'Appointment booked successfully (mock - connection error)',
-      data: {
-        booking_id: 'mock-booking-' + Date.now(),
-        booking_date: body?.booking_date || 'unknown',
-        time_slot: body?.time_slot || 'unknown',
-        status: 'confirmed'
-      }
+    // Always send to the live API
+    const response = await fetch(LIVE_API_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
     });
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    console.error('Error forwarding booking:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
   }
 } 

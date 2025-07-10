@@ -935,8 +935,15 @@ export default function Cart() {
           {/* Address Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-dark text-base md:text-lg">Deliver to : {getPincode(selectedAddress)}</span>
+              <span className="font-semibold text-dark text-base md:text-lg">
+                Deliver to : {getPincode(selectedAddress)}
+              </span>
             </div>
+            {selectedAddress && (
+              <div className="text-dark font-semibold text-sm md:text-base mb-0.5">
+                {selectedAddress.name}
+              </div>
+            )}
             <div className="text-gray-700 text-sm md:text-base truncate">
               {selectedAddress ? selectedAddress.address : "No address found. Please add a delivery address."}
               {selectedAddress && selectedAddress.city && ", " + selectedAddress.city}
@@ -1236,39 +1243,36 @@ export default function Cart() {
                             height={80}
                             className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
                           />
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
-                              title={getText(item.name, language)}
-                            >
-                              {getText(item.name, language)}
-                            </p>
-                            {item.orderDate && (
-                              <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                                Last ordered:{" "}
-                                {new Date(item.orderDate).toLocaleDateString()}
+                          <div className="flex-1 min-w-0 flex flex-row items-center justify-between gap-2">
+                            <div>
+                              <p
+                                className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                                title={getText(item.name, language)}
+                              >
+                                {getText(item.name, language)}
                               </p>
-                            )}
-                          </div>
-                          <div className="flex-shrink-0 ml-2">
-                            <Button
-                              label={
-                                addNowLoading[item._id]
-                                  ? "Adding..."
-                                  : "+ Add Now"
-                              }
-                              variant="btn-dark"
-                              size="sm"
-                              className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
-                              onClick={() => {
-                                if (!user) {
-                                  router.push("/auth/login");
-                                  return;
-                                }
-                                handleAddPurchasedProductToCart(item._id);
-                              }}
-                              disabled={!!addNowLoading[item._id]}
-                            />
+                              {item.orderDate && (
+                                <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                                  Last ordered: {new Date(item.orderDate).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex-shrink-0 ml-2">
+                              <Button
+                                label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
+                                variant="btn-primary"
+                                size="sm"
+                                className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
+                                onClick={() => {
+                                  if (!user) {
+                                    router.push("/auth/login");
+                                    return;
+                                  }
+                                  handleAddPurchasedProductToCart(item._id);
+                                }}
+                                disabled={!!addNowLoading[item._id]}
+                              />
+                            </div>
                           </div>
                         </div>
                       ))}
