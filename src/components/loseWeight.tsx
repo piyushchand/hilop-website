@@ -3,8 +3,16 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import Paragraph from "./animationComponents/TextVisble";
 import Button from "./uiFramework/Button";
+import React, { useState } from "react";
+import BmiCalculatorModal from "./model/BmiCalculatorModal";
 
-const LoseWeight = () => {
+type LoseWeightProps = {
+  testId?: string;
+  productId?: string;
+};
+
+const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
+  const [bmiModalOpen, setBmiModalOpen] = useState(false);
   return (
     <>
       <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
@@ -38,14 +46,14 @@ const LoseWeight = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link="/product/fat-loss"
+                link={productId ? `/product/${productId}` : "#"}
               />
               <Button
                 label="Take the test"
                 variant="btn-light"
                 size="xl"
                 className="w-full"
-                link="/consultation"
+                link={`/consultation?testId=${testId}`}
               />
             </div>
           </div>
@@ -100,7 +108,7 @@ const LoseWeight = () => {
                 variant="btn-dark"
                 size="xl"
                 className="w-fit"
-                link="/"
+                onClick={() => setBmiModalOpen(true)}
               />
                 </div>
                 <Image
@@ -114,6 +122,7 @@ const LoseWeight = () => {
           </div>
         </div>
       </section>
+      <BmiCalculatorModal isOpen={bmiModalOpen} onClose={() => setBmiModalOpen(false)} />
     </>
   );
 };

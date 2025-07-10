@@ -13,6 +13,7 @@ export interface OrderItem {
 }
 
 export interface ShippingAddress {
+  _id?: string;
   name: string;
   phone_number: string;
   address: string;
@@ -21,6 +22,7 @@ export interface ShippingAddress {
   zipcode: string;
   state: string;
   country: string;
+  is_default?: boolean;
 }
 
 export interface Payment {

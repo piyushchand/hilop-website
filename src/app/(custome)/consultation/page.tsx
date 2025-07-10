@@ -44,14 +44,16 @@ function AssessmentPageContent() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [heightUnit, setHeightUnit] = useState("cm");
   const [weightUnit, setWeightUnit] = useState("kg");
+  
   const [bmi, setBmi] = useState<number | null>(null);
+  const [testStarted, setTestStarted] = useState(false);
+  const [testResultId, setTestResultId] = useState<string | null>(null);
 
-  const queryTestId = searchParams.get("testId");
+  const queryTestId = searchParams ? searchParams.get("testId") : null;
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "hi" : "en");
@@ -88,7 +90,9 @@ function AssessmentPageContent() {
     };
 
     fetchQuestions();
+    
   }, [selectedTestId, modalStep]);
+  
 
   const fetchTests = async () => {
     setIsLoading(true);
@@ -122,9 +126,76 @@ function AssessmentPageContent() {
     setSelectedOption(null);
   };
 
-  const handleOptionClick = (answerId: string) => {
+  const handleOptionClick = async (answerId: string) => {
     setSelectedOption(answerId);
-    setTimeout(() => proceedToNextStep(), 200);
+    if (!testStarted) {
+      // First answer: start the test
+      const res = await fetch('/api/consultation/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data && data.data._id) {
+        setTestResultId(data.data._id);
+        setTestStarted(true);
+      }
+      setTimeout(() => proceedToNextStep(), 200);
+    } else {
+      // Subsequent answers: submit answer
+      const isLastQuestion = currentStep === questions.length - 1;
+      const res = await fetch('/api/consultation/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          test_result_id: testResultId,
+          test_id: selectedTestId,
+          question_id: currentQuestion._id,
+          answer_id: answerId,
+        }),
+      });
+      await res.json();
+      if (isLastQuestion && testResultId) {
+        try {
+          const completeRes = await fetch(`/api/consultation/complete/${testResultId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({}),
+          });
+          const completeData = await completeRes.json();
+          if (completeRes.ok && completeData.success) {
+            // Try to add recommended product to cart if present
+            const recommendedProductId = completeData.data?.recommended_product_id || completeData.recommended_product_id;
+            if (recommendedProductId) {
+              const cartRes = await fetch('/api/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ product_id: recommendedProductId, quantity: 1 }),
+              });
+              if (!cartRes.ok) {
+                setError('Consultation complete, but failed to add product to cart.');
+                return;
+              }
+            }
+            window.location.href = '/cart';
+          } else {
+            setError(completeData.message || 'Failed to complete consultation. Please try again.');
+          }
+        } catch {
+          setError('Failed to complete consultation. Please try again.');
+        }
+      } else {
+        setTimeout(() => proceedToNextStep(), 200);
+      }
+    }
   };
 
   const calculateBmi = () => {
@@ -159,12 +230,14 @@ function AssessmentPageContent() {
       {/* Header */}
       <div className="py-4 border-b border-gray-200 bg-white">
         <div className="container flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            className="bg-dark rounded-xl md:size-12 size-8 flex justify-center items-center text-white hover:text-gray-300 p-1 md:p-0"
-          >
-            <Undo2 size={24} />
-          </button>
+          {(modalStep === 1 || (modalStep === 2 && currentStep > 0)) && (
+            <button
+              onClick={handleBack}
+              className="bg-dark rounded-xl md:size-12 size-8 flex justify-center items-center text-white hover:text-gray-300 p-1 md:p-0"
+            >
+              <Undo2 size={24} />
+            </button>
+          )}
 
           <Link href="/">
             <Image src="/logo.svg" alt="Logo" width={100} height={40} />

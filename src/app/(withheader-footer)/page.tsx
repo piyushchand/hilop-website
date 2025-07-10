@@ -15,6 +15,12 @@ import { Product } from "@/types";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import RotatingText from "@/components/animationComponents/RotatingText";
 
+interface Test {
+  _id: string;
+  title_en: string;
+  title_hi: string;
+}
+
 // Loading component
 const Loading = () => (
   <div className="w-full py-20 bg-cover bg-center bg-greenleaf">
@@ -86,6 +92,21 @@ export default function Home() {
     requireAuth: false,
   });
 
+  // --- Dynamic testId for LoseWeight ---
+  const DEFAULT_TEST_ID = "682474c65b9ab999150472e9";
+
+  let product1 = products.find(p => p.name.toLowerCase().includes("testosterone") || p.name.toLowerCase().includes("stamina"));
+  let product2 = products.find(p => p.name.toLowerCase().includes("longer") || p.name.toLowerCase().includes("enhancer"));
+
+  // Fallback logic if not found
+  if (!product1 && products.length > 0) product1 = products[0];
+  if ((!product2 || product2._id === product1?._id) && products.length > 1) product2 = products[1];
+
+  const [testId1, setTestId1] = useState<string | null>(null);
+  const [testId2, setTestId2] = useState<string | null>(null);
+  const DEFAULT_TEST_ID_1 = "682f074c076fa37f15f16b34";
+  const DEFAULT_TEST_ID_2 = "682f0b48076fa37f15f16b83";
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -113,12 +134,43 @@ export default function Home() {
     fetchProducts();
   }, [language]);
 
+  // Fetch testId for LoseWeight dynamically
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tests`);
+        if (!response.ok) throw new Error("Failed to fetch tests");
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data)) {
+          const match1 = data.data.find((test: Test) => (test.title_en || "").toLowerCase().includes("testosterone") || (test.title_en || "").toLowerCase().includes("stamina"));
+          const match2 = data.data.find((test: Test) => (test.title_en || "").toLowerCase().includes("longer") || (test.title_en || "").toLowerCase().includes("enhancer"));
+          setTestId1(match1?._id || DEFAULT_TEST_ID_1);
+          setTestId2(match2?._id || DEFAULT_TEST_ID_2);
+        } else {
+          setTestId1(DEFAULT_TEST_ID_1);
+          setTestId2(DEFAULT_TEST_ID_2);
+        }
+      } catch {
+        setTestId1(DEFAULT_TEST_ID_1);
+        setTestId2(DEFAULT_TEST_ID_2);
+      }
+    };
+    fetchTests();
+  }, [products]);
+
+  const weightLossProduct = products.find(
+    (p) =>
+      p.name.toLowerCase().includes("weight") ||
+      p.name.toLowerCase().includes("slimvibe") ||
+      (p.category && p.category.toLowerCase().includes("weight"))
+  );
+
   if (!useRequireAuthInitialized) return <Loading />;
 
   return (
     <>
       <section className="container overflow-hidden mb-16 lg:mb-40">
-        <div className="grid md:grid-cols-[auto_316px] items-center mt-8 lg:mt-14 mb-9">
+        <div className="grid md:grid-cols-[auto_316px] items-center mt-8 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
             <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl font-medium mb-6">
@@ -186,12 +238,16 @@ export default function Home() {
           )}
         </div>
       </section>
-      <LoseWeight />
-      {/* <VelocityScroll>100% Natural Product</VelocityScroll> */}
+      <LongerWithBetter
+        productId1={product1?._id}
+        testId1={testId1 || undefined}
+        productId2={product2?._id}
+        testId2={testId2 || undefined}
+      />
       <ParallaxText baseVelocity={80}>
         ✅ 100% money back guarantee
       </ParallaxText>
-      <LongerWithBetter />
+      <LoseWeight testId={DEFAULT_TEST_ID} productId={weightLossProduct?._id} />
       <Testimonials />
       <WhyChoose />
       <OurProcess />

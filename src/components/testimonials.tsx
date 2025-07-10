@@ -1,19 +1,21 @@
-import { cn } from '@/lib/utils';
-import Paragraph from './animationComponents/TextVisble';
-import { Marquee } from './animationComponents/Marquee';
-import { BadgeCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+"use client";
+import { cn } from "@/lib/utils";
+import Paragraph from "./animationComponents/TextVisble";
+import { Marquee } from "./animationComponents/Marquee";
+import { BadgeCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface Review {
   _id: string;
   user?: {
     name: string;
+    profile_image?: string;
   } | null;
   product: string;
   rating: number;
   description: string;
 }
-
 
 interface TestimonialsProps {
   filteredByProductId?: string;
@@ -24,17 +26,36 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ review }: ReviewCardProps) => {
-  // Add null checks and fallbacks
-  const userName = review?.user?.name || 'Anonymous Customer';
-  const description = review?.description || 'No review content available';
+  const userName = review?.user?.name || "Anonymous Customer";
+  const userImage = review?.user?.profile_image;
+  const description = review?.description || "No review content available";
   
   return (
     <div
       className={cn(
-        'relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center'
+        "relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center"
       )}
     >
-      <span className=" inline-block mb-10 text-gray-700">{userName}</span>
+      <div className="flex items-center justify-center gap-3 mb-10">
+        {userImage ? (
+          <Image
+            src={userImage}
+            alt={`${userName}'s profile`}
+            width={48}
+            height={48}
+            className="rounded-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold text-lg">
+            {userName.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <span className="text-gray-700 font-medium">{userName}</span>
+      </div>
       <p className="mb-10 sm:text-2xl line-clamp-6">{description}</p>
       <div className="flex items-center gap-2 text-green-800 justify-center mt-auto">
         <BadgeCheck className="text-green-800" />
@@ -52,47 +73,40 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        if (!process.env.NEXT_PUBLIC_API_URL) throw new Error('API URL is not set in environment variables');
+        if (!process.env.NEXT_PUBLIC_API_URL)
+          throw new Error("API URL is not set in environment variables");
         const url = filteredByProductId
-          ? `${process.env.NEXT_PUBLIC_API_URL}/products/${filteredByProductId}/reviews`
+          ? `${process.env.NEXT_PUBLIC_API_URL}/reviews?product=${filteredByProductId}`
           : `${process.env.NEXT_PUBLIC_API_URL}/reviews`;
 
-        console.log('Fetching reviews from:', url);
         const response = await fetch(url);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch reviews');
-        }
-
         const result = await response.json();
-        console.log('Reviews API Response:', result);
 
-        if (result.success) {
-          // If we're fetching product-specific reviews, the data structure might be different
-          const reviewsData = filteredByProductId 
-            ? (result.data?.reviews || [])
-            : result.data;
+        if (!result.success) throw new Error(result.message || "API error");
 
-          console.log('Processed Reviews:', reviewsData);
-          
-          // Filter out invalid reviews and ensure they have required properties
-          const validReviews = reviewsData.filter((review: Review) => 
-            review && 
-            review._id && 
-            review.description && 
-            typeof review.description === 'string' &&
-            review.description.trim().length > 0
-          );
-          
-          setReviews(validReviews);
+        let reviewsData: Review[] = [];
+        if (Array.isArray(result.data)) {
+          reviewsData = result.data;
+        } else if (result.data && Array.isArray(result.data.reviews)) {
+          reviewsData = result.data.reviews;
         }
+
+        setReviews(
+          reviewsData.filter(
+            (review) =>
+              review &&
+              review._id &&
+              typeof review.description === "string" &&
+              review.description.trim().length > 0
+          )
+        );
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error("Error fetching reviews:", error);
+        setReviews([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchReviews();
   }, [filteredByProductId]);
 
@@ -124,7 +138,6 @@ export function Testimonials({ filteredByProductId }: TestimonialsProps) {
           highlightedWord="Results"
         />
       </div>
-
       <div className="relative mb-16 flex w-full flex-col items-center justify-center overflow-hidden lg:mb-40">
         <Marquee pauseOnHover className="[--duration:30s]">
           {reviews.map((review) => (

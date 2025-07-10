@@ -1,51 +1,87 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-} from "lucide-react";
+import { Facebook, Instagram, Twitter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Product } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const { user } = useAuth();
 
-  
   const hilopLinks = [
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
-    { href: "/contact", label: "Contact Us" },
-    { href: "/blogs", label: "Blogs" },
+    { href: "/how-it-works", label: "How it works" },
+    { href: "/blog", label: "Blog" },
+    { href: "/book-call", label: "Contact Us", authOnly: true },
     { href: "/support", label: "Help & Support" },
   ];
 
-  const learnLinks = [
-    { href: "/learn/sexual-health", label: "Sexual Health" },
-    { href: "/learn/longer-sex", label: "Have Longer Sex" },
-    { href: "/learn/better-sex", label: "Have Better Sex" },
-  ];
+  // Only show Contact Us if user is logged in
+  const filteredLinks = hilopLinks.filter(link => {
+    if (link.authOnly) {
+      return !!user;
+    }
+    return true;
+  });
 
-  const productLinks = [
-    { href: "/product/fat-loss", label: "Herbal Fat Loss Formula" },
-    { href: "/product/enhancer", label: "Sexual Enhancer" },
-    { href: "/product/wellness", label: "Sexual Wellness Formula" },
-  ];
+  // Fetch products for dynamic footer links
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setProductsLoading(true);
+        if (!process.env.NEXT_PUBLIC_API_URL) {
+          console.warn("API URL is not set in environment variables");
+          return;
+        }
+        
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/products?lang=en`,
+          { cache: "no-store" }
+        );
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          setProducts(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching products for footer:", error);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const productLinks = products.map(product => ({
+    href: `/product/${product._id}`,
+    label: product.name
+  }));
   return (
     <footer className="pb-4 pt-20 bg-white relative">
-       <Image
-                src="/images/footer/leaf-1.png"
-                width={167}
-                height={211}
-                alt="mobile app mockup"
-                className="absolute bottom-9 left-0 max-w-[167px] w-1/6"
-              />
-               <Image
-                src="/images/footer/leaf-2.png"
-                width={126}
-                height={148}
-                alt="mobile app mockup"
-                className="absolute top-1 end-0 max-w-[126px] w-1/6"
-              />
+      <Image
+        src="/images/footer/leaf-1.png"
+        width={167}
+        height={211}
+        alt="mobile app mockup"
+        className="absolute bottom-9 left-0 max-w-[167px] w-1/6"
+      />
+      <Image
+        src="/images/footer/leaf-2.png"
+        width={126}
+        height={148}
+        alt="mobile app mockup"
+        className="absolute top-1 end-0 max-w-[126px] w-1/6"
+      />
       <div className="container relative">
         <div className="grid md:grid-cols-[362px_auto] md:gap-10 gap-6 mb-4">
           <div className="px-4 pt-4 border border-gray-200 rounded-lg order-2 md:order-1 bg-white">
@@ -64,9 +100,8 @@ const Footer = () => {
               />
             </div>
             <div className="flex items-center gap-4 justify-between">
-              <p className="text-gray-800">Download the
-              Application</p>
-            <Image
+              <p className="text-gray-800">Download the Application</p>
+              <Image
                 src="/images/footer/footer-mobile.png"
                 width={164}
                 height={191}
@@ -76,12 +111,16 @@ const Footer = () => {
           </div>
           <div className="grid grid-cols-2 xl:grid-cols-4 md:gap-x-6 gap-x-4 gap-y-6 order-1 md:order-2">
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">Hilop</p>
-              {hilopLinks.map((link, index) => (
+              <p className="mb-4 text-base uppercase text-dark font-medium">
+                Hilop
+              </p> 
+              {filteredLinks.map((link, index) => (
                 <Link
                   key={index}
                   href={link.href}
-                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== hilopLinks.length - 1 ? "mb-4" : ""}`}
+                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
+                    index !== filteredLinks.length - 1 ? "mb-4" : ""
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -89,49 +128,76 @@ const Footer = () => {
             </div>
 
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">Learn</p>
-              {learnLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== learnLinks.length - 1 ? "mb-4" : ""}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <p className="mb-4 text-base uppercase text-dark font-medium">
+                Product
+              </p>
+              {productsLoading ? (
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ) : productLinks.length > 0 ? (
+                productLinks.map((link, index) => (
+                  <Link
+                    key={index}
+                    href={link.href}
+                    className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
+                      index !== productLinks.length - 1 ? "mb-4" : ""
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No products available</p>
+              )}
             </div>
 
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">Our Products</p>
-              {productLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  href={link.href}
-                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${index !== productLinks.length - 1 ? "mb-4" : ""}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
 
-            <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">Contact Us</p>
-              <p className="mb-4 text-gray-600">123 Herbal Lane, Nature City, Earth</p>
-              <a href="tel:+12345678900" className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300">
+              <p className="mb-4 text-gray-600">
+                123 Herbal Lane, Nature City, Earth
+              </p>
+              <a
+                href="tel:+12345678900"
+                className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300"
+              >
                 +1 (234) 567-8900
               </a>
-              <a href="mailto:info@hilop.com" className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300">
+              <a
+                href="mailto:info@hilop.com"
+                className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300"
+              >
                 info@hilop.com
               </a>
 
               <div className="flex gap-3 mt-2">
-                <Link className="social-icon" href="https://www.instagram.com/think.novus/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                <Link
+                  className="social-icon"
+                  href="https://www.instagram.com/think.novus/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
                   <Instagram />
                 </Link>
-                <Link className="social-icon" href="https://www.facebook.com/thinknovus.official/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <Link
+                  className="social-icon"
+                  href="https://www.facebook.com/thinknovus.official/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                >
                   <Facebook />
                 </Link>
-                <Link className="social-icon" href="https://x.com/thinknovus" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                <Link
+                  className="social-icon"
+                  href="https://x.com/thinknovus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                >
                   <Twitter />
                 </Link>
               </div>
@@ -144,11 +210,17 @@ const Footer = () => {
             &copy; {currentYear} Hilop Health, Inc. All rights reserved.
           </p>
           <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-white">
-            <Link href="/terms" className="text-gray-600 hover:underline">Terms & Conditions</Link>
+            <Link href="/terms" className="text-gray-600 hover:underline">
+              Terms & Conditions
+            </Link>
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <Link href="/privacy" className="text-gray-600 hover:underline">Privacy Policy</Link>
+            <Link href="/privacy" className="text-gray-600 hover:underline">
+              Privacy Policy
+            </Link>
             <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <Link href="/sitemap" className="text-gray-600 hover:underline">Sitemap</Link>
+            <Link href="/sitemap" className="text-gray-600 hover:underline">
+              Sitemap
+            </Link>
           </div>
         </div>
       </div>

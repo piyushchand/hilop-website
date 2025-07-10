@@ -10,6 +10,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import TestModal from "./model/TestModal";
+
 const testimonials = [
   {
     name: "Purav Jha",
@@ -36,6 +37,7 @@ const testimonials = [
       "I prefer herbal options, and this one actually works. No side effects, only results.",
   },
 ];
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -51,7 +53,15 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const LongerWithBetter = () => {
+// Add props to the component
+interface LongerWithBetterProps {
+  productId1?: string;
+  testId1?: string;
+  productId2?: string;
+  testId2?: string;
+}
+
+const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWithBetterProps) => {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   return (
@@ -80,21 +90,25 @@ const LongerWithBetter = () => {
       style={{ display: "block" }}
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
-            <div className="grid sm:grid-cols-2 gap-4 -mt-[52px]">
-              <Button
-                label="Get Started"
-                variant="btn-dark"
-                size="xl"
-                className="w-full"
-                link="/product/fat-loss"
-              />
-              <Button
-                label="Take the test"
-                variant="btn-light"
-                size="xl"
-                className="w-full"
-                onClick={() => setIsTestModalOpen(true)}
-              />
+            <div className="flex flex-col sm:flex-row gap-4 -mt-[52px]">
+              {productId1 && (
+                <Button
+                  label="Get Started"
+                  variant="btn-dark"
+                  size="xl"
+                  className="w-full sm:w-auto"
+                  link={`/product/${productId1}`}
+                />
+              )}
+              {testId2 && (
+                <Button
+                  label="Take the test"
+                  variant="btn-light"
+                  size="xl"
+                  className="w-full sm:w-auto"
+                  link={`/consultation?testId=${testId2}`}
+                />
+              )}
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
@@ -107,21 +121,27 @@ const LongerWithBetter = () => {
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-                Have Longer, Better Sex with Rx + Climax Control
+              Natural For Improve Testosterone, Stamina & Energy
               </h3>
-              <div className="flex gap-4">
-                <Button
-                  label="Get Started"
-                  variant="btn-dark"
-                  size="xl"
-                  onClick={() => setIsTestModalOpen(true)}
-                />
-                <Button
-                  label="Buy Now"
-                  variant="btn-light"
-                  size="xl"
-                  link="/"
-                />
+              <div className="flex flex-col sm:flex-row gap-4">
+                {testId1 && (
+                  <Button
+                    label="Get Started"
+                    variant="btn-dark"
+                    size="xl"
+                    className="w-full sm:w-auto"
+                    link={`/consultation?testId=${testId1}`}
+                  />
+                )}
+                {productId1 && (
+                  <Button
+                    label="Buy Now"
+                    variant="btn-light"
+                    size="xl"
+                    className="w-full sm:w-auto"
+                    link={`/product/${productId1}`}
+                  />
+                )}
               </div>
             </div>
             <div className="bg-dark-rackley p-6 lg:p-10 rounded-3xl">
@@ -133,21 +153,27 @@ const LongerWithBetter = () => {
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-                Have Longer, Better Sex with Rx + Climax Control
+              Last Longer Herbal Sexual Enhancer Powder
               </h3>
-              <div className="flex gap-4">
-                <Button
-                  label="Get Started"
-                  variant="btn-dark"
-                  size="xl"
-                  onClick={() => setIsTestModalOpen(true)}
-                />
-                <Button
-                  label="Buy Now"
-                  variant="btn-light"
-                  size="xl"
-                  link="/"
-                />
+              <div className="flex flex-col sm:flex-row gap-4">
+                {testId2 && (
+                  <Button
+                    label="Get Started"
+                    variant="btn-dark"
+                    size="xl"
+                    className="w-full sm:w-auto"
+                    link={`/consultation?testId=${testId2}`}
+                  />
+                )}
+                {productId2 && (
+                  <Button
+                    label="Buy Now"
+                    variant="btn-light"
+                    size="xl"
+                    className="w-full sm:w-auto"
+                    link={`/product/${productId2}`}
+                  />
+                )}
               </div>
             </div>
             <motion.div

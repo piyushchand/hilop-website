@@ -9,11 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.8.2",
+    "@types/firebase": "^2.4.32",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.18",
     "axios": "^1.9.0",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.10.0",
     "framer-motion": "^12.12.1",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
@@ -21,8 +25,10 @@
     "motion": "^12.12.1",
     "next": "15.3.2",
     "react": "^19.0.0",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
+    "react-redux": "^9.2.0",
     "swiper": "^11.2.7",
     "tailwind-merge": "^3.3.0"
   },
@@ -35,6 +41,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5.8.3"
   }
 }

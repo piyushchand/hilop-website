@@ -1,26 +1,35 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import AuthLayout from "../AuthLayout";
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'react-hot-toast';
-import { Toaster } from 'react-hot-toast';
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, isLoading, error, clearError } = useAuth();
-  const [mobileNumber, setMobileNumber] = useState('');
+  const router = useRouter();
+  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook, user } = useAuth();
+  const [mobileNumber, setMobileNumber] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
     setMobileNumber(value);
     if (error) clearError();
   };
 
+  const handleGoogleLogin = async () => {
+    await signInWithGoogle();
+  };
+  const handleFacebookLogin = async () => {
+    await signInWithFacebook();
+  };
+
   const validatePhoneNumber = (phone: string) => {
-    const cleanPhone = phone.replace(/\D/g, '');
+    const cleanPhone = phone.replace(/\D/g, "");
     return /^[6-9]\d{9}$/.test(cleanPhone) && cleanPhone.length === 10;
   };
 
@@ -28,12 +37,14 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!mobileNumber.trim()) {
-      toast.error('Please enter your mobile number');
+      toast.error("Please enter your mobile number");
       return;
     }
 
     if (!validatePhoneNumber(mobileNumber)) {
-      toast.error('Please enter a valid 10-digit Indian mobile number starting with 6-9');
+      toast.error(
+        "Please enter a valid 10-digit Indian mobile number starting with 6-9"
+      );
       return;
     }
 
@@ -42,13 +53,24 @@ export default function LoginPage() {
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message);
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         toast.error(error);
       } else {
-        toast.error('Login failed');
+        toast.error("Login failed");
       }
     }
   };
+
+  // After successful login, check for redirectAfterLogin in localStorage
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, router]);
 
   return (
     <>
@@ -71,7 +93,6 @@ export default function LoginPage() {
           <p className="font-medium mb-6 text-gray-600">
             Let&apos;s get you logged in.
           </p>
-          
 
           <form onSubmit={handleSubmit}>
             <AnimatedInput
@@ -82,24 +103,27 @@ export default function LoginPage() {
               onChange={handleInputChange}
               required
             />
-            
+
             <Button
               label={isLoading ? "Sending OTP..." : "Get OTP"}
               variant="btn-dark"
               size="xl"
               className="w-full mt-6"
-              disabled={isLoading || !mobileNumber.trim() || mobileNumber.length !== 10}
+              disabled={
+                isLoading || !mobileNumber.trim() || mobileNumber.length !== 10
+              }
               onClick={handleSubmit}
             />
           </form>
-          
+
           <div className="text-center text-sm my-4">Or login with</div>
-          
+
           <div className="flex gap-4">
-            <button 
+            <button
               type="button"
-              className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
+              onClick={handleGoogleLogin}
             >
               <Image
                 src="/images/icon/google.svg"
@@ -109,11 +133,12 @@ export default function LoginPage() {
               />
               Google
             </button>
-            
-            <button 
+
+            <button
               type="button"
-              className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
+              onClick={handleFacebookLogin}
             >
               <Image
                 src="/images/icon/facebook.svg"
