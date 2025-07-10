@@ -331,10 +331,13 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       {addresses.map((address) => (
                         <div
                           key={address._id}
-                          className="bg-gray-100 p-5 rounded-lg"
+                          className={`bg-gray-100 p-5 rounded-lg ${address.is_default ? 'border-2 border-green-600' : ''}`}
                         >
-                          <p className="font-medium text-lg mb-1">
+                          <p className="font-medium text-lg mb-1 flex items-center gap-2">
                             {address.name}
+                            {address.is_default && (
+                              <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-100 text-green-700 border border-green-600 font-semibold">Default</span>
+                            )}
                           </p>
                           <p className="text-gray-700 text-sm">
                             {address.address}
@@ -474,7 +477,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                           name="is_default"
                           checked={formData.is_default}
                           onChange={handleCheckboxChange}
-                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                          className="w-4 h-4 accent-green-600 focus:ring-primary border-gray-300 rounded"
                         />
                         <label htmlFor="is_default" className="text-sm text-gray-700">
                           Set as default address

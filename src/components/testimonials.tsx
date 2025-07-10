@@ -4,11 +4,13 @@ import Paragraph from "./animationComponents/TextVisble";
 import { Marquee } from "./animationComponents/Marquee";
 import { BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface Review {
   _id: string;
   user?: {
     name: string;
+    profile_image?: string;
   } | null;
   product: string;
   rating: number;
@@ -25,14 +27,35 @@ interface ReviewCardProps {
 
 const ReviewCard = ({ review }: ReviewCardProps) => {
   const userName = review?.user?.name || "Anonymous Customer";
+  const userImage = review?.user?.profile_image;
   const description = review?.description || "No review content available";
+  
   return (
     <div
       className={cn(
         "relative !flex sm:w-[490px] w-64 flex-col rounded-2xl border border-gray-200 bg-gray-100 p-6 hover:border-primary lg:p-10 text-center"
       )}
     >
-      <span className=" inline-block mb-10 text-gray-700">{userName}</span>
+      <div className="flex items-center justify-center gap-3 mb-10">
+        {userImage ? (
+          <Image
+            src={userImage}
+            alt={`${userName}'s profile`}
+            width={48}
+            height={48}
+            className="rounded-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold text-lg">
+            {userName.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <span className="text-gray-700 font-medium">{userName}</span>
+      </div>
       <p className="mb-10 sm:text-2xl line-clamp-6">{description}</p>
       <div className="flex items-center gap-2 text-green-800 justify-center mt-auto">
         <BadgeCheck className="text-green-800" />

@@ -42,7 +42,7 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
   return (
     <section className="mb-16 lg:mb-40">
       <div className="container">
-        <div className="grid w-full gap-6 items-start justify-between lg:grid-cols-[auto_569px] xl:grid-cols-[auto_680px] 2xl:grid-cols-[auto_745px]">
+        <div className="grid w-full gap-6 items-start justify-between grid-cols-1 lg:grid-cols-[1fr_680px] xl:grid-cols-[1fr_680px] 2xl:grid-cols-[1fr_745px]">
           <Paragraph
             align="start"
             paragraph="Frequently Asked Questions"
@@ -50,7 +50,16 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
             highlightedWord="Questions"
           />
 
-          <div className={`space-y-4 w-full ${className}`}>
+          {/* Responsive FAQ List Wrapper with fixed width at each breakpoint */}
+          <div
+            className={`space-y-4 w-full mx-auto 
+              max-w-full 
+              sm:max-w-[500px] 
+              md:max-w-[600px] 
+              lg:max-w-[680px] 
+              2xl:max-w-[745px] 
+              ${className}`}
+          >
             {items.map((item) => {
               const isOpen = activeId === item.id;
 
@@ -87,7 +96,8 @@ const FaqAccordion: React.FC<FaqAccordionProps> = ({
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="overflow-hidden"
+                        className="overflow-hidden w-full"
+                        style={{ width: "100%" }}
                       >
                         <p className="text-gray-600 px-3 sm:px-6 pb-3 sm:pb-6 pt-0">{item.answer}</p>
                       </motion.div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
@@ -8,9 +8,11 @@ import AuthLayout from "../AuthLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook } = useAuth();
+  const router = useRouter();
+  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook, user } = useAuth();
   const [mobileNumber, setMobileNumber] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +60,17 @@ export default function LoginPage() {
       }
     }
   };
+
+  // After successful login, check for redirectAfterLogin in localStorage
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, router]);
 
   return (
     <>
@@ -108,7 +121,7 @@ export default function LoginPage() {
           <div className="flex gap-4">
             <button
               type="button"
-              className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
               onClick={handleGoogleLogin}
             >
@@ -123,7 +136,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              className="text-lg py-3 px-6 w-full bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
               onClick={handleFacebookLogin}
             >

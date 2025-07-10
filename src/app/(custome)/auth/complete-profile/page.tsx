@@ -14,8 +14,8 @@ function CompleteProfileForm() {
   const searchParams = useSearchParams();
 
   const [formData, setFormData] = useState({
-    name: searchParams.get("name") || "",
-    email: searchParams.get("email") || "",
+    name: searchParams?.get("name") || "",
+    email: searchParams?.get("email") || "",
     mobile_number: "",
     birthdate: "",
   });

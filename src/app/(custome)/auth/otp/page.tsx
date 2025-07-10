@@ -22,9 +22,9 @@ function OtpPageContent() {
   const [isResending, setIsResending] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const otpType = searchParams.get('type');
-  const userId = searchParams.get('userId');
-  const mobileNumber = searchParams.get('mobile');
+  const otpType = searchParams?.get('type');
+  const userId = searchParams?.get('userId');
+  const mobileNumber = searchParams?.get('mobile');
 
   useEffect(() => {
     if (!otpType || !userId || !mobileNumber) {
@@ -76,6 +76,14 @@ function OtpPageContent() {
         setSuccess(data.message || '');
         await refreshUserData();
         setTimeout(() => {
+          if (typeof window !== "undefined") {
+            const redirectPath = localStorage.getItem("redirectAfterLogin");
+            if (redirectPath) {
+              localStorage.removeItem("redirectAfterLogin");
+              router.replace(redirectPath);
+              return;
+            }
+          }
           router.push('/');
         }, 1200);
       } else {

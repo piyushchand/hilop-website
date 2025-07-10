@@ -58,8 +58,11 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   const handleBlur = () => setIsFocused(false);
 
   const handleIconClick = () => {
-    if (type === "tel" && inputRef.current) {
+    if (inputRef.current) {
       inputRef.current.focus();
+      if (type === "date" && typeof (inputRef.current as HTMLInputElement).showPicker === 'function') {
+        (inputRef.current as HTMLInputElement).showPicker();
+      }
     }
   };
 
@@ -166,12 +169,12 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           <button
             type="button"
             onClick={handleIconClick}
-            className="text-gray-700 hover:text-green-900"
+            className=" hover:text-red-800"
           >
             {type === "date" ? (
-              <CalendarRange size={20} />
+              <CalendarRange size={20} color="currentColor" />
             ) : (
-              <Clock size={20} />
+              <Clock size={20} color="currentColor" />
             )}
           </button>
         )}

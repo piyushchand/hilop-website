@@ -4,19 +4,30 @@ import Image from "next/image";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const { user } = useAuth();
 
   const hilopLinks = [
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
-    { href: "/contact", label: "Contact Us" },
-    // { href: "/blogs", label: "Blogs" },
+    { href: "/how-it-works", label: "How it works" },
+    { href: "/blog", label: "Blog" },
+    { href: "/book-call", label: "Contact Us", authOnly: true },
     { href: "/support", label: "Help & Support" },
   ];
+
+  // Only show Contact Us if user is logged in
+  const filteredLinks = hilopLinks.filter(link => {
+    if (link.authOnly) {
+      return !!user;
+    }
+    return true;
+  });
 
   // Fetch products for dynamic footer links
   useEffect(() => {
@@ -102,13 +113,13 @@ const Footer = () => {
             <div>
               <p className="mb-4 text-base uppercase text-dark font-medium">
                 Hilop
-              </p>
-              {hilopLinks.map((link, index) => (
+              </p> 
+              {filteredLinks.map((link, index) => (
                 <Link
                   key={index}
                   href={link.href}
                   className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
-                    index !== hilopLinks.length - 1 ? "mb-4" : ""
+                    index !== filteredLinks.length - 1 ? "mb-4" : ""
                   }`}
                 >
                   {link.label}
@@ -144,9 +155,7 @@ const Footer = () => {
             </div>
 
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">
-                Contact Us
-              </p>
+
               <p className="mb-4 text-gray-600">
                 123 Herbal Lane, Nature City, Earth
               </p>
