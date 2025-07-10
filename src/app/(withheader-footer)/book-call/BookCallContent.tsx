@@ -153,13 +153,8 @@ const stats = [
   { text: "100% natural and side-effect-free solutions" },
 ];
 
-interface TimeSlot {
-  time?: string;
-  [key: string]: unknown;
-}
-
 export default function BookCall() {
-  const [services, setServices] = useState<string[]>([]);
+  // Removed services state as it's no longer used
   const [formData, setFormData] = useState({
     fullName: '',
     mobileNumber: '',
@@ -172,8 +167,18 @@ export default function BookCall() {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [bookingSlot, setBookingSlot] = useState(false);
+  // Removed bookingSlot and setBookingSlot as they are no longer used
   const [submittingBooking, setSubmittingBooking] = useState(false);
+  // Track locally booked slots per date (key: YYYY-MM-DD, value: array of slots)
+  const [bookedSlots, setBookedSlots] = useState<{ [date: string]: string[] }>({});
+
+  // Filter availableTimeSlots to hide already booked slots for the selected date
+  const year = selectedDate?.getFullYear();
+  const month = selectedDate ? String(selectedDate.getMonth() + 1).padStart(2, '0') : '';
+  const day = selectedDate ? String(selectedDate.getDate()).padStart(2, '0') : '';
+  const dateKey = selectedDate ? `${year}-${month}-${day}` : '';
+  const bookedForDate = bookedSlots[dateKey] || [];
+  const filteredTimeSlots = availableTimeSlots.filter(slot => !bookedForDate.includes(slot));
 
   // Fetch user profile data
   useEffect(() => {
@@ -228,14 +233,7 @@ export default function BookCall() {
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const year = selectedDate.getFullYear();
         const dateStr = `${day}-${month}-${year}`;
-        
-        console.log('Fetching available slots for date:', dateStr);
-        
-        // Helper to normalize slot array
-        const normalizeSlots = (arr: TimeSlot[]): string[] =>
-          arr.map((slot) => typeof slot === 'string' ? slot : slot.time || '').filter(Boolean);
-
-        // Call the local API endpoint
+        // Fetch available slots from the API
         const response = await fetch(`/api/call-bookings/available-slots?date=${dateStr}`, {
           method: 'GET',
           headers: {
@@ -244,96 +242,43 @@ export default function BookCall() {
           },
           credentials: 'include',
         });
-
-        console.log('Available slots response status:', response.status);
-
         if (response.ok) {
           const data = await response.json();
-          console.log('Available slots response:', data);
-          
+          // Normalize slots
+          const normalizeSlots = (arr: unknown[]): string[] =>
+            arr.map((slot) => typeof slot === 'string' ? slot : (typeof slot === 'object' && slot && 'time' in slot ? (slot as { time?: string }).time || '' : '')).filter(Boolean);
+          let slots: string[] = [];
           if (data.success && Array.isArray(data.data)) {
-            const slots = normalizeSlots(data.data);
-            console.log('Normalized available slots:', slots);
-            setAvailableTimeSlots(slots);
+            slots = normalizeSlots(data.data);
           } else if (Array.isArray(data)) {
-            const slots = normalizeSlots(data);
-            console.log('Normalized available slots (direct array):', slots);
-            setAvailableTimeSlots(slots);
+            slots = normalizeSlots(data);
           } else if (data.success && data.data && Array.isArray(data.data)) {
-            const slots = normalizeSlots(data.data);
-            console.log('Normalized available slots (nested):', slots);
-            setAvailableTimeSlots(slots);
+            slots = normalizeSlots(data.data);
           } else {
-            console.log('No valid available slots found in response');
-            setAvailableTimeSlots([]);
+            slots = [];
           }
+          setAvailableTimeSlots(slots);
         } else {
-          console.error('Failed to fetch available slots:', response.status);
-          const errorData = await response.json().catch(() => ({}));
-          console.error('Error response:', errorData);
           setAvailableTimeSlots([]);
         }
-              } catch (error) {
-          console.error('Error fetching available slots:', error);
-          setAvailableTimeSlots([]);
-        } finally {
-          setLoadingSlots(false);
-        }
-      };
-      fetchTimeSlots();
-  }, [selectedDate]);
-
-  const handleTimeSlotClick = async (timeSlot: string) => {
-    try {
-      if (!selectedDate) {
-        toast.error('Please select a date first.');
-        return;
-      }
-
-      setBookingSlot(true);
-      console.log('Booking time slot:', timeSlot);
-      
-      const day = String(selectedDate.getDate()).padStart(2, '0');
-      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const year = selectedDate.getFullYear();
-      const dateStr = `${day}-${month}-${year}`;
-
-      const bookingData = {
-        date: dateStr,
-        time_slot: timeSlot,
-      };
-
-      const response = await fetch('/api/call-bookings/time-slots/', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(bookingData),
-      });
-
-      console.log('Time slot booking response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Time slot booking response:', data);
-        
-        setSelectedTime(timeSlot);
-        console.log('Time slot booked successfully:', timeSlot);
-      } else {
-        console.error('Failed to book time slot:', response.status);
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', errorData);
-        toast.error('Failed to book time slot. Please try again.');
-      }
-          } catch (error) {
-        console.error('Error booking time slot:', error);
-        toast.error('Failed to book time slot. Please try again.');
+      } catch {
+        setAvailableTimeSlots([]);
       } finally {
-        setBookingSlot(false);
+        setLoadingSlots(false);
       }
     };
+    fetchTimeSlots();
+  }, [selectedDate]);
+
+const handleTimeSlotClick = (timeSlot: string) => {
+  if (!selectedDate) {
+    toast.error('Please select a date first.');
+    return;
+  }
+  setSelectedTime(timeSlot);
+  toast.success('Time slot selected successfully.');
+};
+
 
   const handleSubmit = async () => {
     try {
@@ -341,35 +286,17 @@ export default function BookCall() {
         toast.error('Please select a date and time slot.');
         return;
       }
-      
-      if (!formData.fullName.trim()) {
-        toast.error('Please enter your full name.');
-        return;
-      }
-      
-      if (!formData.mobileNumber.trim()) {
-        toast.error('Please enter your mobile number.');
-        return;
-      }
-      
       setSubmittingBooking(true);
-      
       // Format date as DD-MM-YYYY for API
       const day = String(selectedDate.getDate()).padStart(2, '0');
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const year = selectedDate.getFullYear();
       const bookingDate = `${day}-${month}-${year}`;
-      
       const bookingData = {
         booking_date: bookingDate,
-        time_slot: selectedTime,
-        fullName: formData.fullName.trim(),
-        mobileNumber: formData.mobileNumber.trim(),
-        additionalNotes: formData.additionalNotes.trim(),
-        services: services,
+        time_slot: selectedTime, // This should be the slot ID from available slots
       };
-
-      console.log('Submitting booking:', bookingData);
+      // Call the booking API
       
       const response = await fetch('/api/call-bookings/', {
         method: 'POST',
@@ -380,12 +307,15 @@ export default function BookCall() {
         credentials: 'include',
         body: JSON.stringify(bookingData),
       });
-
       const data = await response.json();
-      
       if (response.ok && data.success) {
         toast.success('Appointment booked successfully! Our team will call you soon.');
-        
+        // Add the booked slot for the selected date
+        const dateKey = `${year}-${month}-${day}`;
+        setBookedSlots(prev => ({
+          ...prev,
+          [dateKey]: [...(prev[dateKey] || []), selectedTime]
+        }));
         // Reset form
         setFormData({
           fullName: formData.fullName, // Keep name and mobile
@@ -394,19 +324,18 @@ export default function BookCall() {
           preferredTime: '',
           additionalNotes: ''
         });
-        setServices([]);
         setSelectedDate(null);
         setSelectedTime('');
       } else {
         toast.error(data.message || 'Failed to book appointment. Please try again.');
       }
-          } catch (error) {
-        console.error('Error submitting appointment:', error);
-        toast.error('Failed to submit appointment. Please try again.');
-      } finally {
-        setSubmittingBooking(false);
-      }
-    };
+    } catch (error) {
+      console.error('Error submitting appointment:', error);
+      toast.error('Failed to submit appointment. Please try again.');
+    } finally {
+      setSubmittingBooking(false);
+    }
+  };
 
   return (
     <>
@@ -491,21 +420,21 @@ export default function BookCall() {
                     }}
                     className="pb-2"
                   >
-                    {!loadingSlots && availableTimeSlots.length > 0 ? (
-                      availableTimeSlots.map((slot, idx) => (
+                    {!loadingSlots && filteredTimeSlots.length > 0 ? (
+                      filteredTimeSlots.map((slot, idx) => (
                         <SwiperSlide key={`slot-${slot.replace(/\s/g, '')}-${idx}`} className="!w-auto">
                           <button
                             type="button"
-                            disabled={bookingSlot}
+                            disabled={submittingBooking}
                             className={`rounded-xl text-xs sm:text-sm font-medium border transition-all min-w-[40px] whitespace-nowrap px-4 py-2 sm:px-6 sm:py-3
                               ${selectedTime === slot
                                 ? 'bg-[#e8f7e2] text-green-600 border-green-400 shadow font-semibold'
                                 : 'bg-[#f6f6f6] text-gray-700 border-gray-200 hover:bg-green-50'}
-                              ${bookingSlot ? 'opacity-50 cursor-not-allowed' : ''}
+                              ${submittingBooking ? 'opacity-50 cursor-not-allowed' : ''}
                               `}
                             onClick={() => handleTimeSlotClick(slot)}
                           >
-                            {bookingSlot ? 'Booking...' : slot}
+                            {submittingBooking ? 'Booking...' : slot}
                           </button>
                         </SwiperSlide>
                       ))
