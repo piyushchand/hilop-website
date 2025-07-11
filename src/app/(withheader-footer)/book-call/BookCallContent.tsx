@@ -29,9 +29,23 @@ interface CalendarProps {
 }
 
 const CustomCalendar: React.FC<CalendarProps> = ({ selected, onChange, className }) => {
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(selected ? selected.getMonth() : today.getMonth());
-  const [currentYear, setCurrentYear] = useState(selected ? selected.getFullYear() : today.getFullYear());
+  // Use null for initial state to avoid SSR/CSR mismatch
+  const [today, setToday] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<number | null>(null);
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  // Set today, currentMonth, and currentYear on client only
+  useEffect(() => {
+    const now = new Date();
+    setToday(now);
+    setCurrentMonth(selected ? selected.getMonth() : now.getMonth());
+    setCurrentYear(selected ? selected.getFullYear() : now.getFullYear());
+  }, [selected]);
+
+  if (today === null || currentMonth === null || currentYear === null) {
+    // Optionally show a loading spinner or just return null
+    return null;
+  }
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -52,6 +66,7 @@ const CustomCalendar: React.FC<CalendarProps> = ({ selected, onChange, className
   };
 
   const isToday = (d: number) => {
+    if (!today) return false;
     return (
       today.getDate() === d &&
       today.getMonth() === currentMonth &&
@@ -60,7 +75,7 @@ const CustomCalendar: React.FC<CalendarProps> = ({ selected, onChange, className
   };
 
   const isPast = (d: number) => {
-    if (!d) return true;
+    if (!d || !today) return true;
     const date = new Date(currentYear, currentMonth, d);
     return date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   };
@@ -154,7 +169,6 @@ const stats = [
 ];
 
 export default function BookCall() {
-  // Removed services state as it's no longer used
   const [formData, setFormData] = useState({
     fullName: '',
     mobileNumber: '',
@@ -165,11 +179,10 @@ export default function BookCall() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const [selectedSlotId, setSelectedSlotId] = useState<string>('');
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{time: string, id: string}>>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  // Removed bookingSlot and setBookingSlot as they are no longer used
   const [submittingBooking, setSubmittingBooking] = useState(false);
-  // Track locally booked slots per date (key: YYYY-MM-DD, value: array of slots)
   const [bookedSlots, setBookedSlots] = useState<{ [date: string]: string[] }>({});
 
   // Filter availableTimeSlots to hide already booked slots for the selected date
@@ -178,7 +191,7 @@ export default function BookCall() {
   const day = selectedDate ? String(selectedDate.getDate()).padStart(2, '0') : '';
   const dateKey = selectedDate ? `${year}-${month}-${day}` : '';
   const bookedForDate = bookedSlots[dateKey] || [];
-  const filteredTimeSlots = availableTimeSlots.filter(slot => !bookedForDate.includes(slot));
+  const filteredTimeSlots = availableTimeSlots.filter(slot => !bookedForDate.includes(slot.id));
 
   // Fetch user profile data
   useEffect(() => {
@@ -203,12 +216,10 @@ export default function BookCall() {
             }));
           }
         } else {
-          // User is not authenticated, which is fine for booking appointments
           console.log('User not authenticated, proceeding with empty form');
         }
       } catch (err) {
         console.error('Error fetching user profile:', err);
-        // Don't set error for unauthenticated users - this is expected
       } finally {
         setLoading(false);
       }
@@ -228,12 +239,13 @@ export default function BookCall() {
         setLoadingSlots(true);
         setAvailableTimeSlots([]);
         setSelectedTime('');
-        // Format date as DD-MM-YYYY (as required by the API)
+        setSelectedSlotId('');
+        
         const day = String(selectedDate.getDate()).padStart(2, '0');
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const year = selectedDate.getFullYear();
         const dateStr = `${day}-${month}-${year}`;
-        // Fetch available slots from the API
+        
         const response = await fetch(`/api/call-bookings/available-slots?date=${dateStr}`, {
           method: 'GET',
           headers: {
@@ -242,26 +254,52 @@ export default function BookCall() {
           },
           credentials: 'include',
         });
+        
         if (response.ok) {
           const data = await response.json();
-          // Normalize slots
-          const normalizeSlots = (arr: unknown[]): string[] =>
-            arr.map((slot) => typeof slot === 'string' ? slot : (typeof slot === 'object' && slot && 'time' in slot ? (slot as { time?: string }).time || '' : '')).filter(Boolean);
-          let slots: string[] = [];
+          console.log('Raw API response:', data);
+          
+          // Process slots to extract time and _id
+          const processSlots = (slots: unknown[]): Array<{time: string, id: string}> => {
+            console.log('Processing slots:', slots);
+            return slots.map(slot => {
+              console.log('Processing individual slot:', slot);
+              if (typeof slot === 'string') {
+                const result = { time: slot, id: slot.replace(/\s/g, '').toLowerCase() };
+                console.log('String slot result:', result);
+                return result;
+              } else if (slot && typeof slot === 'object' && slot !== null) {
+                const slotObj = slot as { time?: string; _id?: string };
+                console.log('Slot object:', slotObj);
+                if (slotObj._id && slotObj.time) {
+                  const result = { time: slotObj.time, id: slotObj._id };
+                  console.log('Object slot with _id result:', result);
+                  return result;
+                } else if (slotObj.time) {
+                  const result = { time: slotObj.time, id: slotObj.time.replace(/\s/g, '').toLowerCase() };
+                  console.log('Object slot without _id result:', result);
+                  return result;
+                }
+              }
+              console.log('Invalid slot, returning empty');
+              return { time: '', id: '' };
+            }).filter(slot => slot.time && slot.id);
+          };
+          
+          let processedSlots: Array<{time: string, id: string}> = [];
           if (data.success && Array.isArray(data.data)) {
-            slots = normalizeSlots(data.data);
+            processedSlots = processSlots(data.data);
           } else if (Array.isArray(data)) {
-            slots = normalizeSlots(data);
-          } else if (data.success && data.data && Array.isArray(data.data)) {
-            slots = normalizeSlots(data.data);
-          } else {
-            slots = [];
+            processedSlots = processSlots(data);
           }
-          setAvailableTimeSlots(slots);
+          
+          console.log('Processed slots:', processedSlots);
+          setAvailableTimeSlots(processedSlots);
         } else {
           setAvailableTimeSlots([]);
         }
-      } catch {
+      } catch (error) {
+        console.error('Error fetching slots:', error);
         setAvailableTimeSlots([]);
       } finally {
         setLoadingSlots(false);
@@ -270,35 +308,45 @@ export default function BookCall() {
     fetchTimeSlots();
   }, [selectedDate]);
 
-const handleTimeSlotClick = (timeSlot: string) => {
-  if (!selectedDate) {
-    toast.error('Please select a date first.');
-    return;
-  }
-  setSelectedTime(timeSlot);
-  toast.success('Time slot selected successfully.');
-};
-
+  const handleTimeSlotClick = (slot: {time: string, id: string}) => {
+    if (!selectedDate) {
+      toast.error('Please select a date first.');
+      return;
+    }
+    console.log('Selected slot:', slot);
+    console.log('Setting selectedTime to:', slot.time);
+    console.log('Setting selectedSlotId to:', slot.id);
+    setSelectedTime(slot.time);
+    setSelectedSlotId(slot.id);
+    toast.success('Time slot selected successfully.');
+  };
 
   const handleSubmit = async () => {
     try {
-      if (!selectedDate || !selectedTime) {
+      console.log('Submit handler - selectedDate:', selectedDate);
+      console.log('Submit handler - selectedTime:', selectedTime);
+      console.log('Submit handler - selectedSlotId:', selectedSlotId);
+      
+      if (!selectedDate || !selectedTime || !selectedSlotId) {
         toast.error('Please select a date and time slot.');
         return;
       }
       setSubmittingBooking(true);
-      // Format date as DD-MM-YYYY for API
+      
       const day = String(selectedDate.getDate()).padStart(2, '0');
       const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
       const year = selectedDate.getFullYear();
       const bookingDate = `${day}-${month}-${year}`;
+      
       const bookingData = {
         booking_date: bookingDate,
-        time_slot: selectedTime, // This should be the slot ID from available slots
+        time_slot: selectedSlotId, // Use the actual slot ID
       };
-      // Call the booking API
       
-      const response = await fetch('/api/call-bookings/', {
+      console.log('Sending booking data:', bookingData);
+      console.log('Selected slot ID:', selectedSlotId);
+      
+      const response = await fetch('/api/call-bookings', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -307,18 +355,19 @@ const handleTimeSlotClick = (timeSlot: string) => {
         credentials: 'include',
         body: JSON.stringify(bookingData),
       });
+      
+      console.log('Booking response:', response);
       const data = await response.json();
+      
       if (response.ok && data.success) {
         toast.success('Appointment booked successfully! Our team will call you soon.');
-        // Add the booked slot for the selected date
         const dateKey = `${year}-${month}-${day}`;
         setBookedSlots(prev => ({
           ...prev,
-          [dateKey]: [...(prev[dateKey] || []), selectedTime]
+          [dateKey]: [...(prev[dateKey] || []), selectedSlotId]
         }));
-        // Reset form
         setFormData({
-          fullName: formData.fullName, // Keep name and mobile
+          fullName: formData.fullName,
           mobileNumber: formData.mobileNumber,
           preferredDate: '',
           preferredTime: '',
@@ -326,6 +375,7 @@ const handleTimeSlotClick = (timeSlot: string) => {
         });
         setSelectedDate(null);
         setSelectedTime('');
+        setSelectedSlotId('');
       } else {
         toast.error(data.message || 'Failed to book appointment. Please try again.');
       }
@@ -386,7 +436,6 @@ const handleTimeSlotClick = (timeSlot: string) => {
             </p>
           </div>
          
-            
             {loading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -396,10 +445,6 @@ const handleTimeSlotClick = (timeSlot: string) => {
               <div className="w-full min-w-0 max-w-full sm:max-w-[388px] ms-auto bg-white rounded-3xl md:p-6 p-4">
                 <CustomCalendar selected={selectedDate} onChange={setSelectedDate} className="w-full min-w-0 max-w-full" />
                 
-                {/* Form fields for non-authenticated users */}
-
-                
-             
                 <div className="w-full mb-6">
                   <label className="block text-gray-700 mb-2 font-medium">Select Time</label>
                   {loadingSlots && (
@@ -422,19 +467,19 @@ const handleTimeSlotClick = (timeSlot: string) => {
                   >
                     {!loadingSlots && filteredTimeSlots.length > 0 ? (
                       filteredTimeSlots.map((slot, idx) => (
-                        <SwiperSlide key={`slot-${slot.replace(/\s/g, '')}-${idx}`} className="!w-auto">
+                        <SwiperSlide key={`slot-${slot.id}-${idx}`} className="!w-auto">
                           <button
                             type="button"
                             disabled={submittingBooking}
                             className={`rounded-xl text-xs sm:text-sm font-medium border transition-all min-w-[40px] whitespace-nowrap px-4 py-2 sm:px-6 sm:py-3
-                              ${selectedTime === slot
+                              ${selectedTime === slot.time
                                 ? 'bg-[#e8f7e2] text-green-600 border-green-400 shadow font-semibold'
                                 : 'bg-[#f6f6f6] text-gray-700 border-gray-200 hover:bg-green-50'}
                               ${submittingBooking ? 'opacity-50 cursor-not-allowed' : ''}
                               `}
                             onClick={() => handleTimeSlotClick(slot)}
                           >
-                            {submittingBooking ? 'Booking...' : slot}
+                            {submittingBooking ? 'Booking...' : slot.time}
                           </button>
                         </SwiperSlide>
                       ))
