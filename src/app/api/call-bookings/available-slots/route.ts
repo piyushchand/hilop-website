@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
     );
 
     const data = await response.json();
+    console.log('Booking API response:', data); // Add this line
 
     if (!response.ok) {
       // If external API fails, return mock data for testing
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Available slots error:', error);
     // Return mock data if there's a connection error
