@@ -54,8 +54,8 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
       setInchesError('Inches must be between 0 and 11');
       valid = false;
     }
-    if (pounds < 35 || pounds > 90) {
-      setPoundsError('Weight must be between 35 and 90 kg');
+    if (pounds < 35 || pounds > 635) {
+      setPoundsError('Weight must be between 35 and 635 kg');
       valid = false;
     }
     if (!valid) return;
@@ -69,7 +69,7 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
   const category = getBmiCategory(bmi ?? 0);
   const percentage = bmi ? Math.min((bmi / 40) * 100, 100) : 0;
 
-  return (
+  return (                      
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -97,7 +97,7 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
                     <AnimatedInput
                       label="Feet"
                       name="feet"
-                      type="number"
+type="number"
                       value={feet.toString()}
                       onChange={e => setFeet(Number(e.target.value))}
                       required
@@ -129,15 +129,15 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
                 />
                 {poundsError && <div className="text-red-600 text-xs mt-1">{poundsError}</div>}
               </div>
-              <div className="rounded-2xl p-6 max-w-lg w-full mx-auto flex flex-col md:flex-row gap-4 md:gap-6">
+              <div className="rounded-2xl p-6 max-w-lg w-full mx-auto flex flex-col md:flex-row gap-2 md:gap-3">
                 {/* Left side content - increase width and reduce gap */}
-                <div className="flex-1 min-w-0 md:pr-4">
+                <div className="w-fit h-fit w-full h-[48px] ">
                   <Button
                     label="Calculate"
                     variant="btn-primary"
                     size="lg"
                     onClick={handleCalculate}
-                    className="w-full h-[48px]"
+                    className="w-full h-12 md:h-[48px] text-base md:text-lg"
                   />
                 </div>
                 {/* Right side content (arrow button) - flex row, single line */}
@@ -154,31 +154,31 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
             </form>
           </div>
           {/* Result */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center items-center min-w-[220px] max-w-md mx-auto mt-8 md:mt-0">
-            <div className="relative flex flex-col items-center w-full rounded-2xl bg-gray-100 p-8">
+          <div className="w-full md:w-1/2 flex flex-col justify-center items-center min-w-[180px] max-w-md mx-auto mt-6 md:mt-0">
+            <div className="flex flex-col items-center w-full rounded-2xl bg-gray-100 p-4 md:p-8 min-h-[260px] md:min-h-[340px]">
               {/* Arc and BMI value inside */}
-              <div className="relative mb-6">
+              <div className="relative flex justify-center items-center w-full max-w-[160px] md:max-w-[220px] mx-auto mb-4 md:mb-6 mt-2">
                 <CircularProgressBar
                   percentage={percentage}
-                  size={180}
-                  strokeWidth={20}
+                  size={typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 180}
+                  strokeWidth={typeof window !== 'undefined' && window.innerWidth < 768 ? 12 : 20}
                   progressColor="text-primary"
                   trackColor="text-gray-200"
                   animationDuration={800}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <span className="text-4xl md:text-5xl font-extrabold text-primary leading-none font-sans drop-shadow-lg">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+                  <span className="text-3xl md:text-5xl font-extrabold text-primary leading-none font-sans drop-shadow-lg">
                     {bmi !== null ? bmi : '--'}
                   </span>
-                  <span className="text-base text-gray-500 font-medium mt-2">Your BMI</span>
-                  <span className="text-sm text-gray-400 font-medium mt-1">{bmi !== null ? `${Math.round(percentage)}%` : '--'}</span>
+                  <span className="text-sm md:text-base text-gray-500 font-medium mt-2">Your BMI</span>
+                  <span className="text-xs md:text-sm text-gray-400 font-medium mt-1">{bmi !== null ? `${Math.round(percentage)}%` : '--'}</span>
                 </div>
               </div>
               {/* Category highlight */}
               {bmi !== null && (
-                <div className="flex items-center gap-3 bg-primary/10 rounded-full px-5 py-2 mb-4 shadow transition-all duration-300 whitespace-nowrap">
+                <div className="flex items-center gap-3 bg-primary/10 rounded-full px-3 md:px-5 py-2 mb-3 md:mb-4 shadow transition-all duration-300 whitespace-nowrap">
                   <CheckCircle className="text-primary" size={20} />
-                  <span className="text-base font-bold text-dark font-sans whitespace-nowrap">{category.label}</span>
+                  <span className="text-sm md:text-base font-bold text-dark font-sans whitespace-nowrap">{category.label}</span>
                   <span className="ml-auto text-dark/70 font-semibold whitespace-nowrap">{bmiRanges[category.index].range}</span>
                 </div>
               )}
@@ -189,10 +189,10 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({ isOpen, onClose
                   return (
                     <div
                       key={r.label}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${isActive ? 'bg-black text-white font-bold' : ''} whitespace-nowrap`}
+                      className={`flex items-center gap-3 px-2 md:px-3 py-2 rounded-lg transition-all ${isActive ? 'bg-black text-white font-bold' : ''} whitespace-nowrap`}
                     >
-                      <span className={`inline-block w-3 h-3 rounded-full ${isActive ? '' : ''}`} style={{ background: r.color }}></span>
-                      <span className={`${isActive ? 'text-white' : 'text-dark'} text-sm font-medium font-sans whitespace-nowrap`}>{r.label}</span>
+                      <span className={`inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full`} style={{ background: r.color }}></span>
+                      <span className={`${isActive ? 'text-white' : 'text-dark'} text-xs md:text-sm font-medium font-sans whitespace-nowrap`}>{r.label}</span>
                       <span className={`ml-auto ${isActive ? 'text-white' : 'text-dark/70'} text-xs font-semibold font-sans whitespace-nowrap`}>{r.range}</span>
                     </div>
                   );
