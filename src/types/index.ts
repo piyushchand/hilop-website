@@ -54,7 +54,7 @@ export interface ProductApiResponse {
 // Treatment Plan type for /treatment-plans/user API
 export interface TreatmentPlan {
   _id: string;
-  name: string;
+  name: MultilingualText | string;
   image?: string;
   dosage: string;
   total_doses: number;

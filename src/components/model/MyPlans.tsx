@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import Modal from "../animationComponents/animated-model";
 import CircularProgressBar from "../animationComponents/CircularProgressBar";
 import ArrowButton from "../uiFramework/ArrowButton";
+import { getText } from "@/utils/getText";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type MyPlansModalProps = {
   isOpen: boolean;
@@ -17,14 +19,21 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
   const [plans, setPlans] = useState<TreatmentPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (!isOpen) return;
     setLoading(true);
     setError(null);
     getUserTreatmentPlans()
-      .then(setPlans)
-      .catch((err) => setError(err.message || "Failed to load plans"))
+      .then((plans) => {
+        console.log('Received plans in component:', plans);
+        setPlans(plans);
+      })
+      .catch((err) => {
+        console.error('Error loading plans:', err);
+        setError(err.message || "Failed to load plans");
+      })
       .finally(() => setLoading(false));
   }, [isOpen]);
 
@@ -70,33 +79,42 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
                 key={plan._id}
                 className="bg-gray-100 p-4 rounded-lg mb-4 last:mb-0 border border-gray-200"
               >
-                <div className="mb-4 flex flex-col lg:flex-row lg:items-center gap-4">
-                  <Image
-                    src={plan.image || "/images/product.png"}
-                    width={128}
-                    height={128}
-                    alt={plan.name}
-                    className="object-cover w-24 h-24 sm:w-32 sm:h-32 rounded-lg flex-shrink-0"
-                  />
-                  <div className="flex justify-between w-full items-start gap-4 flex-col sm:flex-row">
-                    <div className="order-2 sm:order-1">
-                      <p className="text-lg md:text-xl font-medium mb-2">{plan.name}</p>
-                      <p className="font-medium text-gray-600 mb-1">
+                <div className="mb-4 relative">
+                  <div className="absolute top-2 right-6 z-10">
+                    <CircularProgressBar
+                      percentage={(() => {
+                        const completed = plan.completed_doses || 0;
+                        const total = plan.total_doses || 1;
+                        const percentage = Math.round((completed / total) * 100);
+                        return Math.min(percentage, 100);
+                      })()}
+                      size={48}
+                      strokeWidth={3}
+                      progressColor="text-green-500"
+                      trackColor="text-gray-300"
+                      animationDuration={2000}
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 pr-12">
+                    <Image
+                      src={plan.image || "/images/product.png"}
+                      width={128}
+                      height={128}
+                      alt={getText(plan.name, language)}
+                      className="object-cover w-16 h-16 sm:w-20 sm:h-20 rounded-lg flex-shrink-0 bg-white"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-lg font-medium mb-2">{getText(plan.name, language)}</p>
+                      <p className="font-medium text-gray-600 mb-1 text-sm">
                         Dosage: <span className="text-gray-900 font-bold">{plan.dosage}</span>
                       </p>
-                      <p className="text-gray-600">
-                        <span className="text-gray-900 font-bold">{plan.completed_doses}</span>/{plan.total_doses} doses completed
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0 order-1 sm:order-2">
-                      <CircularProgressBar
-                        percentage={Math.round((plan.completed_doses / plan.total_doses) * 100)}
-                        size={48}
-                        strokeWidth={2}
-                        progressColor="text-green-500"
-                        trackColor="text-gray-300"
-                        animationDuration={2000}
-                      />
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-gray-600">
+                          <span className="text-gray-900 font-bold">{plan.completed_doses || 0}</span>/{plan.total_doses || 0} doses completed 
+                        </span>
+
+                     
+                      </div>
                     </div>
                   </div>
                 </div>

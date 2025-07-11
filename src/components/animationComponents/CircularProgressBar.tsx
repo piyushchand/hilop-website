@@ -52,7 +52,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   return (
     <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center`}>
       <svg
-        className="transform -rotate-90" // Rotate to start progress from the top
+        className="transform -rotate-90 absolute" // Rotate to start progress from the top
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
@@ -83,6 +83,13 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           }}
         />
       </svg>
+      
+      {/* Percentage text in center */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`text-xs font-semibold ${progressColor}`}>
+          {Math.round(animatedPercentage)}%
+        </span>
+      </div>
     </div>
   );
 };
