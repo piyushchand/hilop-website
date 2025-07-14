@@ -278,7 +278,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   return (
     <Modal
-      className="max-w-xl w-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
+      className="max-w-lg w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
       isOpen={isOpen}
       onClose={() => {
         handleCancel();

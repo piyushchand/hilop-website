@@ -209,6 +209,8 @@ const Footer = () => {
             &copy; {currentYear} Hilop Health, Inc. All rights reserved.
           </p>
           <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-gray-400">
+                       <span className="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+
             <Link href="/terms" className="text-gray-400 hover:text-white">
               Terms & Conditions
             </Link>
@@ -216,10 +218,7 @@ const Footer = () => {
             <Link href="/privacy" className="text-gray-400 hover:text-white">
               Privacy Policy
             </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
-            <Link href="/sitemap" className="text-gray-400 hover:text-white">
-              Sitemap
-            </Link>
+         
           </div>
         </div>
       </div>

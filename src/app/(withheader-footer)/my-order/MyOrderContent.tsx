@@ -232,7 +232,6 @@ export default function MyOrder() {
           </div>
         )}
 
-        {/* Swiper Filter - Only show when there are orders */}
         {orders.length > 0 && (
           <Swiper
             spaceBetween={16}
@@ -300,7 +299,7 @@ export default function MyOrder() {
                             {item.name}
                           </p>
                           <p className="text-base font-medium text-dark">
-                            Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
+                            Qty: {item.quantity} {item.price ? `× ${item.price.toFixed(2)}` : ''}
                           </p>
                         </div>
                       </div>
@@ -314,7 +313,7 @@ export default function MyOrder() {
                     </span>
                     <div className="text-right">
                       <p className="text-lg font-semibold text-dark">
-                        ${order.total ? order.total.toFixed(2) : '0.00'}
+                        {order.total ? order.total.toFixed(2) : '0.00'}
                       </p>
                     </div>
                   </div>
