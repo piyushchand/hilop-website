@@ -4,7 +4,7 @@ import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
-import { OurProcess } from "@/components/ourProcess";
+// import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ParallaxText from "@/components/velocityScroll";
 import { WhyChoose } from "@/components/whyChoose";
@@ -250,7 +250,7 @@ export default function Home() {
       <LoseWeight testId={DEFAULT_TEST_ID} productId={weightLossProduct?._id} />
       <Testimonials />
       <WhyChoose />
-      <OurProcess />
+      {/* <OurProcess /> */}
       <Blogs />
       <FaqAccordion items={homepagefaqdata} className="mx-auto" />
     </>

@@ -39,29 +39,10 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
 
   return (
     <Modal
-      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-12"
+      className="max-w-lg w-full h-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
       isOpen={isOpen}
       onClose={onClose}
     >
-      <div className="relative md:col-span-5 col-span-12 w-full flex-col hidden md:flex min-h-fit ">
-        <div className="absolute inset-0 bg-gradient-to-b from-dark via-transparent to-dark opacity-70 z-10"></div>
-        <Image
-          src="/images/modal-2.jpg"
-          alt="Doctor recommending plan"
-          fill
-          className="object-cover w-full h-full z-0 md:block hidden"
-          priority
-        />
-        <div className="relative z-20 flex flex-col h-full p-6 text-white">
-          <p className="text-xl md:text-2xl font-semibold mb-4">My plans</p>
-          <div className="mt-auto">
-            <p className="font-medium mb-3">
-              Your doctor recommended Treatment plan
-            </p>
-            <ArrowButton href="/prescription" label="View Prescriptions" theme="light" size="lg" />
-          </div>
-        </div>
-      </div>
       <div className="md:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
         <h2 className="text-xl md:text-2xl font-semibold p-6 border-b border-gray-200 text-gray-800 flex-shrink-0">
           My Plans & Kit Guide

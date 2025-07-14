@@ -67,29 +67,15 @@ const Footer = () => {
     label: product.name
   }));
   return (
-    <footer className="pb-4 pt-20 bg-white relative">
-      <Image
-        src="/images/footer/leaf-1.png"
-        width={167}
-        height={211}
-        alt="mobile app mockup"
-        className="absolute bottom-9 left-0 max-w-[167px] w-1/6"
-      />
-      <Image
-        src="/images/footer/leaf-2.png"
-        width={126}
-        height={148}
-        alt="mobile app mockup"
-        className="absolute top-1 end-0 max-w-[126px] w-1/6"
-      />
-      <div className="container relative">
+    <footer className="relative bg-gray-950 text-white pt-12 pb-8 overflow-hidden">
+      <div className="relative z-10 container mx-auto px-4">
         <div className="grid md:grid-cols-[362px_auto] md:gap-10 gap-6 mb-4">
-          <div className="px-4 pt-4 border border-gray-200 rounded-lg order-2 md:order-1 bg-white">
-            <div className="p-4 bg-gray-100 rounded-lg flex items-center gap-4 mb-4 justify-between">
+          <div className="px-4 pt-4 border border-gray-900 rounded-lg order-2 md:order-1 ">
+            <div className="p-4 bg-gray-900 rounded-lg flex items-center gap-4 mb-4 justify-between">
               <h2 className="text-lg md:text-xl">
                 <span className="text-primary">Total care.</span>
                 <br />
-                Totally different.
+               <span className="text-white/80"> Totally different.</span>
               </h2>
               <Image
                 src="/images/footer/qrcode.svg"
@@ -100,7 +86,7 @@ const Footer = () => {
               />
             </div>
             <div className="flex items-center gap-4 justify-between">
-              <p className="text-gray-800">Download the Application</p>
+              <p className="text-gray-200">Download the Application</p>
               <Image
                 src="/images/footer/footer-mobile.png"
                 width={164}
@@ -111,14 +97,14 @@ const Footer = () => {
           </div>
           <div className="grid grid-cols-2 xl:grid-cols-4 md:gap-x-6 gap-x-4 gap-y-6 order-1 md:order-2">
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">
+              <p className="mb-4 text-base uppercase text-gray-400 font-medium">
                 Hilop
               </p> 
               {filteredLinks.map((link, index) => (
                 <Link
                   key={index}
                   href={link.href}
-                  className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
+                  className={`block text-gray-400 hover:text-white transition-all duration-300 ${
                     index !== filteredLinks.length - 1 ? "mb-4" : ""
                   }`}
                 >
@@ -128,7 +114,7 @@ const Footer = () => {
             </div>
 
             <div>
-              <p className="mb-4 text-base uppercase text-dark font-medium">
+              <p className="mb-4 text-base uppercase text-gray-400 font-medium">
                 Product
               </p>
               {productsLoading ? (
@@ -142,7 +128,7 @@ const Footer = () => {
                   <Link
                     key={index}
                     href={link.href}
-                    className={`block text-gray-600 hover:text-dark transition-all duration-300 ${
+                    className={`block text-gray-400 hover:text-white transition-all duration-300 ${
                       index !== productLinks.length - 1 ? "mb-4" : ""
                     }`}
                   >
@@ -156,25 +142,25 @@ const Footer = () => {
 
             <div>
 
-              <p className="mb-4 text-gray-600">
+              <p className="mb-4 text-gray-400">
                 123 Herbal Lane, Nature City, Earth
               </p>
               <a
                 href="tel:+12345678900"
-                className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300"
+                className="mb-4 block text-gray-400 hover:text-white transition-all duration-300"
               >
                 +1 (234) 567-8900
               </a>
               <a
                 href="mailto:info@hilop.com"
-                className="mb-4 block text-gray-600 hover:text-dark transition-all duration-300"
+                className="mb-4 block text-gray-400 hover:text-white transition-all duration-300"
               >
                 info@hilop.com
               </a>
 
               <div className="flex gap-3 mt-2">
                 <Link
-                  className="social-icon"
+                  className="social-icon text-gray-400 hover:text-white"
                   href="https://www.instagram.com/think.novus/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -183,7 +169,7 @@ const Footer = () => {
                   <Instagram />
                 </Link>
                 <Link
-                  className="social-icon"
+                  className="social-icon text-gray-400 hover:text-white"
                   href="https://www.facebook.com/thinknovus.official/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -192,7 +178,7 @@ const Footer = () => {
                   <Facebook />
                 </Link>
                 <Link
-                  className="social-icon"
+                  className="social-icon text-gray-400 hover:text-white"
                   href="https://x.com/thinknovus"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -204,26 +190,39 @@ const Footer = () => {
             </div>
           </div>
         </div>
+        
+      {/* Large background logo just above copyright/links */}
+      <div className="w-full flex justify-center items-center mt-12 mb-2 pointer-events-none select-none">
+        <Image
+          src="foteer-logo.svg"
+          alt="Hilop Logo"
+          width={1200}
+          height={300}
+          className="opacity-10 w-[80vw] max-w-6xl mx-auto"
+          style={{ filter: 'grayscale(1) brightness(0.7)' }}
+          priority
+        />
+      </div>
 
-        <div className="grid md:grid-cols-[298px_auto] items-center pt-4 border-t border-gray-200 gap-3">
-          <p className="text-center md:text-left text-gray-600 text-sm">
+        <div className="grid md:grid-cols-[298px_auto] items-center pt-4 border-t border-gray-800 gap-3">
+          <p className="text-center md:text-left text-gray-500 text-sm">
             &copy; {currentYear} Hilop Health, Inc. All rights reserved.
           </p>
-          <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-white">
-            <Link href="/terms" className="text-gray-600 hover:underline">
+          <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-gray-400">
+                       <span className="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+
+            <Link href="/terms" className="text-gray-400 hover:text-white">
               Terms & Conditions
             </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <Link href="/privacy" className="text-gray-600 hover:underline">
+            <span className="w-1.5 h-1.5 rounded-full bg-gray-700"></span>
+            <Link href="/privacy" className="text-gray-400 hover:text-white">
               Privacy Policy
             </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <Link href="/sitemap" className="text-gray-600 hover:underline">
-              Sitemap
-            </Link>
+         
           </div>
         </div>
       </div>
+
     </footer>
   );
 };

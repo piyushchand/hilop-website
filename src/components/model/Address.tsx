@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Modal from "../animationComponents/animated-model";
-import Image from "next/image";
 import { Pen, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "../uiFramework/Button";
@@ -279,28 +278,17 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   return (
     <Modal
-      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-12"
+      className="max-w-lg w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
       isOpen={isOpen}
       onClose={() => {
         handleCancel();
         onClose();
       }}
     >
-      <div className="sm:col-span-5 hidden sm:block relative min-h-fit">
-        <Image
-          src="/images/modal-3.jpg"
-          fill
-          alt="model image"
-          className="object-cover w-full h-full"
-        />
-      </div>
-
-      <div className="sm:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
-        <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
-          {getModalTitle()}
-        </h2>
-
-        <div className="flex flex-col gap-6 overflow-y-auto p-6">
+      <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200 text-center">
+        {getModalTitle()}
+      </h2>
+      <div className="flex-1 flex flex-col gap-6 overflow-y-auto p-6">
           {isLoading && viewMode === "list" ? (
             <div className="py-10 text-center">
               <p className="text-gray-500">Loading addresses...</p>
@@ -525,7 +513,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
             </>
           )}
         </div>
-      </div>
-    </Modal>
+      </Modal>
   );
 }

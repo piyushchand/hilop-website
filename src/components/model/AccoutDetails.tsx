@@ -408,19 +408,11 @@ export default function AccountDetailsModal({
 
   return (
     <Modal
-      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-12"
+      className="max-w-lg w-full h-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
       isOpen={isOpen}
       onClose={handleCancel}
     >
-      <div className="sm:col-span-5 hidden sm:block relative min-h-fit">
-        <Image
-          src="/images/modal-1.jpg"
-          fill
-          alt="model image 1"
-          className="object-cover w-full h-full"
-        />
-      </div>
-      <div className="sm:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
+      <div className="w-full flex flex-col">
         <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
           Edit Account Details
         </h2>
