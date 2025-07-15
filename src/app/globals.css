@@ -284,3 +284,10 @@ font-size: 40px;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+.hilop-mobile-input-wrapper input {
+  padding-left: 3rem !important;
+}
+.hilop-mobile-input-wrapper label {
+  margin-left: 2.5rem !important;
+}

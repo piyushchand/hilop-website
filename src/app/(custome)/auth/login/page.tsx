@@ -95,14 +95,18 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit}>
-            <AnimatedInput
-              label="Mobile number"
-              name="mobile_number"
-              type="tel"
-              value={mobileNumber}
-              onChange={handleInputChange}
-              required
-            />
+            <div className="relative hilop-mobile-input-wrapper">
+              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+              <AnimatedInput
+                label="Mobile number"
+                name="mobile_number"
+                type="tel"
+                value={mobileNumber}
+                onChange={handleInputChange}
+                required
+                placeholder="9876543210"
+              />
+            </div>
 
             <Button
               label={isLoading ? "Sending OTP..." : "Get OTP"}

@@ -19,6 +19,7 @@ interface AnimatedInputProps {
   required?: boolean;
   readOnly?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
 }
 
 const formatIndianNumber = (num: string) => {
@@ -33,6 +34,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   required = false,
   readOnly = false,
   onChange,
+  placeholder,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState(initialValue);
@@ -124,23 +126,25 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
 
   return (
     <div className="relative">
-      <motion.label
-        htmlFor={name}
-        className={`
-          absolute left-3 top-1/2 -translate-y-1/2 
-          bg-white px-1 transition-all duration-200 pointer-events-none
-          ${isFocused || inputValue ? "top-1 text-xs" : "text-base"}
-          ${isFocused ? "text-green-800" : "text-gray-600/80"}
-        `}
-        animate={{
-          top: isFocused || inputValue ? "0.10rem" : "50%",
-          fontSize: isFocused || inputValue ? "0.75rem" : "1rem",
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </motion.label>
+      {label && (
+        <motion.label
+          htmlFor={name}
+          className={`
+            absolute left-3 top-1/2 -translate-y-1/2 
+            bg-white px-1 transition-all duration-200 pointer-events-none
+            ${isFocused || inputValue ? "top-1 text-xs" : "text-base"}
+            ${isFocused ? "text-green-800" : "text-gray-600/80"}
+          `}
+          animate={{
+            top: isFocused || inputValue ? "0.10rem" : "50%",
+            fontSize: isFocused || inputValue ? "0.75rem" : "1rem",
+          }}
+          transition={{ duration: 0.2 }}
+        >
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </motion.label>
+      )}
 
       <div
         className="flex items-center bg-white rounded-lg border-2 overflow-hidden 
@@ -159,7 +163,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           onClick={type === "tel" ? handleTelClick : undefined}
           required={required}
           readOnly={readOnly}
-          placeholder={label}
+          placeholder={placeholder ?? label}
           className={`
             w-full px-3 py-4 bg-none outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
             text-gray-900 placeholder-transparent leading-[24px] appearance-none
