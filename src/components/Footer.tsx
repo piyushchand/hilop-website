@@ -192,7 +192,7 @@ const Footer = () => {
         </div>
         
       {/* Large background logo just above copyright/links */}
-      <div className="w-full flex justify-center items-center mt-12 mb-2 pointer-events-none select-none">
+      <div className="w-full mt-12 mb-2 ">
         <Image
           src="foteer-logo.svg"
           alt="Hilop Logo"
