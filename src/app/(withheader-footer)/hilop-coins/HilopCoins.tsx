@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
-import Button from "@/components/uiFramework/Button";
+// import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
 import FaqAccordion from "@/components/FaqAccordion";
 import MobileApproch from "@/components/Mobileapproch";
-import { BadgeCheck, Copy } from "lucide-react";
+import { BadgeCheck,  } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const homepagefaqdata = [
@@ -63,15 +63,15 @@ const hilopRules = [
 ];
 
 export default function HilopCoins() {
-  const [copied, setCopied] = useState<boolean>(false);
+  const [copied, ] = useState<boolean>(false);
   const { user, isLoading, isInitialized } = useAuth();
-  const referralLink = "https://hilop.com/refer/user123";
+  // const referralLink = "https://hilop.com/refer/user123";
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // const handleCopy = async () => {
+  //   await navigator.clipboard.writeText(referralLink);
+  //   setCopied(true);
+  //   setTimeout(() => setCopied(false), 2000);
+  // };
 
   // Show loading or fallback if user data is not ready
   if (!isInitialized || isLoading) {
@@ -87,7 +87,7 @@ export default function HilopCoins() {
 
   return (
     <>
-      <section className="w-full  lg:mb-40 mb-20">
+      <section className="w-full  ">
         <div className="lg:py-20 py-10 bg-cover bg-center bg-greenleaf">
           <div className="container">
             <h1 className="text-5xl 2xl:text-6xl font-semibold mb-3">
@@ -131,38 +131,7 @@ export default function HilopCoins() {
         </div>
       </section>
 
-      <section className="container lg:mb-40 mb-20">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="p-6 bg-white rounded-3xl">
-            <h2 className="text-2xl font-medium md:mb-6 mb-4">
-              Earn Rewards and Enjoy Discounts!
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Once you collect 2000 coins, you&apos;ll receive a 20% discount on your
-              next order!
-            </p>
-            <p className="text-gray-600 mb-7">
-              After the order is placed using the discount, your coin balance
-              will reset to 0, and you can start collecting again for more
-              rewards!
-            </p>
-            <Button label="Order Now" variant="btn-dark" size="xl" />
-          </div>
-          <div className="p-6 bg-white rounded-3xl">
-            <h2 className="text-2xl font-medium md:mb-6 mb-4">
-              Referral Bonus: 20% Discount!
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Refer a friend today! When they complete their first order,
-              you&apos;ll unlock a 20% discount on your next purchase.
-            </p>
-            <p className="text-gray-600 mb-7">
-              It&apos;s simple — share, refer, and save!
-            </p>
-            <Button label="Rafer a friend" variant="btn-primary" size="xl" />
-          </div>
-        </div>
-      </section>
+    
       <section className="lg:mb-40 mb-20 bg-white py-10 lg:py-20">
         <div className="container">
           <h2 className="text-5xl 2xl:text-6xl font-semibold mb-5 text-center">
@@ -213,7 +182,6 @@ export default function HilopCoins() {
                 </span>{' '}
                 Forgot to take a dose? We&apos;ll remind you again later!
               </p>
-              <Button label="Claim my Dose" variant="btn-dark" size="xl" />
             </div>
             <div className="lg:col-span-4 p-6 bg-gray-100 rounded-3xl border-t-6 border-amber-400">
               <Image
@@ -230,28 +198,14 @@ export default function HilopCoins() {
                 on your next purchase!
               </p>
               <div className="relative">
-              <div className="flex items-center bg-white border border-gray-200 rounded-full px-5 py-4 w-full">
-                <input
-                  type="text"
-                  value={referralLink}
-                  readOnly
-                  className="bg-transparent outline-none text-gray-600 w-full cursor-default"
-                />
-                <button
-                  onClick={handleCopy}
-                  className="ml-2 text-gray-600 hover:text-black transition-colors duration-100"
-                  aria-label="Copy to clipboard"
-                >
-                  <Copy className="w-5 h-5" />
-                </button>
-              </div>
+
               {copied && (
                 <p className="text-sm text-green-500 end-0 mt-1 absolute">
                   Copied to clipboard!
                 </p>
               )}
               </div>
-              <Button label="Share" variant="btn-primary" size="xl" className="mt-7" />
+              {/* <Button label="Share" variant="btn-primary" size="xl" className="mt-7" /> */}
             </div>
             <div className="lg:col-span-12 p-6 bg-gray-100 rounded-3xl">
               <h2 className="text-2xl font-medium md:mb-6 mb-4">
