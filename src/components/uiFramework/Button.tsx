@@ -55,7 +55,14 @@ const Button = ({
       'bg-primary border border-primary text-white hover:bg-green-800 hover:border-green-800',
   };
 
-  const commonClasses = `btn-tn relative cursor-pointer flex w-fit justify-center items-center overflow-hidden rounded-full transition-colors duration-500 ease-in-out ${variantClasses[variant] || ''} ${getSizeClasses()} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`;
+const commonClasses = `
+  btn-tn relative cursor-pointer flex w-fit max-w-sm justify-center items-center
+  overflow-hidden rounded-full transition-colors duration-500 ease-in-out
+  ${variantClasses[variant] || ''}
+  ${getSizeClasses()}
+  ${className}
+  ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+`.trim();
 
   if (link && newTab) {
     return (

@@ -50,9 +50,9 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   const dashOffset = circumference - (animatedPercentage / 100) * circumference;
 
   return (
-    <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center`}>
+    <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center top-2`}>
       <svg
-        className="transform -rotate-90" // Rotate to start progress from the top
+        className="transform -rotate-90 absolute" // Rotate to start progress from the top
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
@@ -83,6 +83,13 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           }}
         />
       </svg>
+      
+      {/* Percentage text in center */}
+      <div className=" inset-0 flex items-center justify-center h-[133px]">
+        <span className={`text-xs font-semibold ${progressColor}`}>
+          {Math.round(animatedPercentage)}%
+        </span>
+      </div>
     </div>
   );
 };
