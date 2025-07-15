@@ -68,11 +68,11 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
           </div>
         </div>
       </div>
-      <div className="md:col-span-7 col-span-12 max-h-[85vh] flex flex-col">
+      <div className="md:col-span-7 col-span-12 max-h-[85vh] flex flex-col ">
         <h2 className="text-xl md:text-2xl font-semibold p-6 border-b border-gray-200 text-gray-800 flex-shrink-0">
           My Plans & Kit Guide
         </h2>
-        <div className="flex flex-col gap-6 overflow-y-auto p-6">
+        <div className="flex flex-col gap-6  p-6">
           {loading ? (
             <div className="text-center py-10 text-gray-500">
               Loading your plans...
@@ -87,7 +87,7 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
             plans.map((plan) => (
               <div
                 key={plan._id}
-                className="bg-gray-100 p-4 rounded-lg mb-4 last:mb-0 border border-gray-200"
+                className="bg-gray-100 p-4 rounded-lg last:mb-0 border border-gray-200"
               >
                 <div className="mb-4 relative">
                   <div className="absolute bottom-0 right-4 z-10 ">
