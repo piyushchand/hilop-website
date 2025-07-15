@@ -24,34 +24,11 @@ export default function RegisterPage() {
     birthdate: "",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [countryCode, setCountryCode] = useState("+91");
+  // const [countryCode, setCountryCode] = useState("+91");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const countryBoxRef = useRef<HTMLDivElement>(null);
 
-  // Country codes list
-  const countryCodes = [
-    { code: "+91", label: "India" },
-    { code: "+1", label: "USA" },
-    { code: "+44", label: "UK" },
-    { code: "+61", label: "Australia" },
-    { code: "+81", label: "Japan" },
-    { code: "+971", label: "UAE" },
-    { code: "+49", label: "Germany" },
-    { code: "+33", label: "France" },
-    { code: "+7", label: "Russia" },
-    { code: "+86", label: "China" },
-    { code: "+880", label: "Bangladesh" },
-    { code: "+92", label: "Pakistan" },
-    { code: "+94", label: "Sri Lanka" },
-    { code: "+977", label: "Nepal" },
-    { code: "+966", label: "Saudi Arabia" },
-    { code: "+20", label: "Egypt" },
-    { code: "+34", label: "Spain" },
-    { code: "+39", label: "Italy" },
-    { code: "+55", label: "Brazil" },
-    { code: "+62", label: "Indonesia" },
-  ];
-
+ 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -158,7 +135,7 @@ export default function RegisterPage() {
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        mobile_number: `${countryCode}${formData.mobile_number.trim()}`,
+        mobile_number: `${formData.mobile_number.trim()}`,
         birthdate: formData.birthdate,
       };
 
@@ -223,42 +200,11 @@ export default function RegisterPage() {
             />
 
             <div className="flex items-stretch gap-2 relative">
-              {/* Country code dropdown */}
-              <div
-                ref={countryBoxRef}
-                className={`flex items-center border border-gray-300 rounded-xl bg-white text-gray-700 font-medium text-base px-4 select-none transition-all duration-200 relative w-[75px] h-12 ${dropdownOpen ? "border-green-500 ring-2 ring-green-100" : ""}`}
-                tabIndex={0}
-                onClick={() => setDropdownOpen((open) => !open)}
-                aria-haspopup="listbox"
-                aria-expanded={dropdownOpen}
-              >
-                {countryCode}
-                {dropdownOpen && (
-                  <ul
-                    className="absolute left-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-auto"
-                    role="listbox"
-                  >
-                    {countryCodes.map((c) => (
-                      <li
-                        key={c.code}
-                        className={`px-4 py-2 cursor-pointer hover:bg-green-50 ${countryCode === c.code ? "bg-green-100 font-semibold" : ""}`}
-                        onClick={e => {
-                          e.stopPropagation();
-                          setCountryCode(c.code);
-                          setDropdownOpen(false);
-                        }}
-                        role="option"
-                        aria-selected={countryCode === c.code}
-                      >
-                        {c.label} <span className="text-gray-500">{c.code}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+            
               {/* Mobile input field */}
               <div className="flex-1 h-12">
-                <div className="h-full">
+                <div className="h-full relative hilop-mobile-input-wrapper">
+                  <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
                   <AnimatedInput
                     label="Mobile number"
                     name="mobile_number"
@@ -266,6 +212,7 @@ export default function RegisterPage() {
                     value={formData.mobile_number}
                     onChange={handleInputChange}
                     required
+                    placeholder="9876543210"
                   />
                 </div>
               </div>

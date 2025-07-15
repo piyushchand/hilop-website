@@ -50,7 +50,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   const dashOffset = circumference - (animatedPercentage / 100) * circumference;
 
   return (
-    <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center`}>
+    <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center top-2`}>
       <svg
         className="transform -rotate-90 absolute" // Rotate to start progress from the top
         width={size}

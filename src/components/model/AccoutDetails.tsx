@@ -435,11 +435,20 @@ export default function AccountDetailsModal({
 
   return (
     <Modal
-      className="max-w-lg w-full h-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg flex flex-col"
-      isOpen={isOpen}
+      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-1 sm:grid-cols-12" isOpen={isOpen}
       onClose={handleCancel}
     >
-      <div className="w-full flex flex-col overflow-auto">
+      {/* Left column: Image (desktop only) */}
+      <div className="sm:col-span-5 hidden sm:block relative min-h-fit h-full">
+        <Image
+          src="/images/modal-1.jpg"
+          fill
+          alt="model image"
+          className="object-cover w-full h-full"
+        />
+      </div>
+      {/* Right column: Form */}
+      <div className="sm:col-span-7 col-span-1 w-full flex flex-col overflow-auto bg-white">
         <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
           Edit Account Details
         </h2>
@@ -509,20 +518,26 @@ export default function AccountDetailsModal({
           </div>
 
           <div>
-            <AnimatedInput
-              label="Mobile number"
-              name="mobile_number"
-              type="tel"
-              value={formData.mobile_number}
-              onChange={handleInputChange}
-              required
-            />
+            <div className="relative hilop-mobile-input-wrapper">
+              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+              <AnimatedInput
+                label="Mobile number"
+                name="mobile_number"
+                type="tel"
+                value={formData.mobile_number}
+                onChange={handleInputChange}
+                required
+                placeholder="9876543210"
+              />
+            </div>
             {errors.mobile_number && (
               <div className="text-red-500 text-sm mt-1">
                 {errors.mobile_number}
               </div>
             )}
           </div>
+
+          <div>
 
           <AnimatedInput
             label="Date of Birth"
@@ -533,9 +548,9 @@ export default function AccountDetailsModal({
             required
           />
           {errors.birthdate && (
-            <div className="text-red-500 text-sm mt-1">{errors.birthdate}</div>
+            <div className="text-red-500 text-sm">{errors.birthdate}</div>
           )}
-
+</div>
           <div>
             <label className="block text-gray-700 font-medium mb-1" htmlFor="gender-select">
               Gender <span className="text-red-500">*</span>
