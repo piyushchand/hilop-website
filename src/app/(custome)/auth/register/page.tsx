@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import Image from "next/image";
 import AuthLayout from "../AuthLayout";
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'react-hot-toast';
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-hot-toast";
 
 interface FormData {
   name: string;
@@ -18,59 +18,112 @@ interface FormData {
 export default function RegisterPage() {
   const { register, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    mobile_number: '',
-    birthdate: '',
+    name: "",
+    email: "",
+    mobile_number: "",
+    birthdate: "",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [countryCode, setCountryCode] = useState("+91");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const countryBoxRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const processedValue = name === 'mobile_number' 
-      ? value.replace(/\D/g, '').slice(0, 10)
-      : value;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: processedValue
-    }));
-    
-    if (error) clearError();
-  }, [error, clearError]);
+  // Country codes list
+  const countryCodes = [
+    { code: "+91", label: "India" },
+    { code: "+1", label: "USA" },
+    { code: "+44", label: "UK" },
+    { code: "+61", label: "Australia" },
+    { code: "+81", label: "Japan" },
+    { code: "+971", label: "UAE" },
+    { code: "+49", label: "Germany" },
+    { code: "+33", label: "France" },
+    { code: "+7", label: "Russia" },
+    { code: "+86", label: "China" },
+    { code: "+880", label: "Bangladesh" },
+    { code: "+92", label: "Pakistan" },
+    { code: "+94", label: "Sri Lanka" },
+    { code: "+977", label: "Nepal" },
+    { code: "+966", label: "Saudi Arabia" },
+    { code: "+20", label: "Egypt" },
+    { code: "+34", label: "Spain" },
+    { code: "+39", label: "Italy" },
+    { code: "+55", label: "Brazil" },
+    { code: "+62", label: "Indonesia" },
+  ];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        countryBoxRef.current &&
+        !countryBoxRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      const processedValue =
+        name === "mobile_number"
+          ? value.replace(/\D/g, "").slice(0, 10)
+          : value;
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: processedValue,
+      }));
+
+      if (error) clearError();
+    },
+    [error, clearError]
+  );
 
   const validateForm = useCallback(() => {
     const errors: string[] = [];
 
     if (!formData.name.trim()) {
-      errors.push('Name is required');
+      errors.push("Name is required");
     } else if (formData.name.length < 2) {
-      errors.push('Name must be at least 2 characters long');
+      errors.push("Name must be at least 2 characters long");
     }
 
     if (!formData.email.trim()) {
-      errors.push('Email is required');
+      errors.push("Email is required");
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        errors.push('Please enter a valid email address');
+        errors.push("Please enter a valid email address");
       }
     }
 
     const mobileNumber = formData.mobile_number.trim();
     if (!mobileNumber) {
-      errors.push('Mobile number is required');
+      errors.push("Mobile number is required");
     } else if (mobileNumber.length !== 10) {
-      errors.push('Please enter a valid 10-digit mobile number');
+      errors.push("Please enter a valid 10-digit mobile number");
     } else {
       const phoneRegex = /^[6-9]\d{9}$/;
       if (!phoneRegex.test(mobileNumber)) {
-        errors.push('Please enter a valid Indian mobile number starting with 6-9');
+        errors.push(
+          "Please enter a valid Indian mobile number starting with 6-9"
+        );
       }
     }
 
     if (!formData.birthdate) {
-      errors.push('Date of birth is required');
+      errors.push("Date of birth is required");
     } else {
       const birthDate = new Date(formData.birthdate);
       const today = new Date();
@@ -80,32 +133,32 @@ export default function RegisterPage() {
         age--;
       }
       if (age < 18) {
-        errors.push('You must be at least 18 years old to register');
+        errors.push("You must be at least 18 years old to register");
       }
     }
 
     if (!agreedToTerms) {
-      errors.push('Please agree to Terms & Conditions');
+      errors.push("Please agree to Terms & Conditions");
     }
 
     if (errors.length > 0) {
-      throw new Error(errors.join('\n'));
+      throw new Error(errors.join("\n"));
     }
   }, [formData, agreedToTerms]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
-    
+
     clearError();
-  
+
     try {
       validateForm();
-  
+
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        mobile_number: `91${formData.mobile_number.trim()}`,
+        mobile_number: `${countryCode}${formData.mobile_number.trim()}`,
         birthdate: formData.birthdate,
       };
 
@@ -114,7 +167,7 @@ export default function RegisterPage() {
       if (err instanceof Error) {
         toast.error(err.message);
       } else {
-        toast.error('Registration failed. Please try again.');
+        toast.error("Registration failed. Please try again.");
       }
     }
   };
@@ -138,11 +191,13 @@ export default function RegisterPage() {
         <p className="font-medium mb-6 text-gray-600">
           Join us to get started with your health journey.
         </p>
-        
+
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            {error.split('\n').map((err, index) => (
-              <p key={index} className="text-red-600 text-sm">{err}</p>
+            {error.split("\n").map((err, index) => (
+              <p key={index} className="text-red-600 text-sm">
+                {err}
+              </p>
             ))}
           </div>
         )}
@@ -157,25 +212,65 @@ export default function RegisterPage() {
               onChange={handleInputChange}
               required
             />
-            
-            <AnimatedInput 
-              label="Email" 
-              name="email" 
-              type="email" 
+
+            <AnimatedInput
+              label="Email"
+              name="email"
+              type="email"
               value={formData.email}
               onChange={handleInputChange}
               required
             />
-            
-            <AnimatedInput
-              label="Mobile number"
-              name="mobile_number"
-              type="tel"
-              value={formData.mobile_number}
-              onChange={handleInputChange}
-              required
-            />
-            
+
+            <div className="flex items-stretch gap-2 relative">
+              {/* Country code dropdown */}
+              <div
+                ref={countryBoxRef}
+                className={`flex items-center border border-gray-300 rounded-xl bg-white text-gray-700 font-medium text-base px-4 select-none transition-all duration-200 relative w-[75px] h-12 ${dropdownOpen ? "border-green-500 ring-2 ring-green-100" : ""}`}
+                tabIndex={0}
+                onClick={() => setDropdownOpen((open) => !open)}
+                aria-haspopup="listbox"
+                aria-expanded={dropdownOpen}
+              >
+                {countryCode}
+                {dropdownOpen && (
+                  <ul
+                    className="absolute left-0 top-full mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-auto"
+                    role="listbox"
+                  >
+                    {countryCodes.map((c) => (
+                      <li
+                        key={c.code}
+                        className={`px-4 py-2 cursor-pointer hover:bg-green-50 ${countryCode === c.code ? "bg-green-100 font-semibold" : ""}`}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setCountryCode(c.code);
+                          setDropdownOpen(false);
+                        }}
+                        role="option"
+                        aria-selected={countryCode === c.code}
+                      >
+                        {c.label} <span className="text-gray-500">{c.code}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              {/* Mobile input field */}
+              <div className="flex-1 h-12">
+                <div className="h-full">
+                  <AnimatedInput
+                    label="Mobile number"
+                    name="mobile_number"
+                    type="tel"
+                    value={formData.mobile_number}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
             <AnimatedInput
               label="Date of Birth"
               name="birthdate"
@@ -185,7 +280,7 @@ export default function RegisterPage() {
               required
             />
           </div>
-          
+
           <label className="mb-4 flex cursor-pointer items-start">
             <input
               type="checkbox"
@@ -195,17 +290,20 @@ export default function RegisterPage() {
               disabled={isLoading}
             />
             <span className="text-sm text-gray-600 font-medium">
-              By registering, you agree to our{' '}
+              By registering, you agree to our{" "}
               <a href="/terms" className="underline text-dark hover:underline">
                 Terms & Conditions
-              </a>
-              {' '}and{' '}
-              <a href="/privacy" className="underline text-dark hover:underline">
+              </a>{" "}
+              and{" "}
+              <a
+                href="/privacy"
+                className="underline text-dark hover:underline"
+              >
                 Privacy Policy
               </a>
             </span>
           </label>
-          
+
           <Button
             label={isLoading ? "Creating Account..." : "Create Account"}
             variant="btn-dark"
@@ -215,11 +313,11 @@ export default function RegisterPage() {
             onClick={handleSubmit}
           />
         </form>
-        
+
         <div className="text-center text-sm my-4">Or register with</div>
-        
+
         <div className="flex gap-4">
-          <button 
+          <button
             type="button"
             className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}
@@ -232,8 +330,8 @@ export default function RegisterPage() {
             />
             Google
           </button>
-          
-          <button 
+
+          <button
             type="button"
             className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}

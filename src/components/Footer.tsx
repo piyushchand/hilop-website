@@ -22,7 +22,7 @@ const Footer = () => {
   ];
 
   // Only show Contact Us if user is logged in
-  const filteredLinks = hilopLinks.filter(link => {
+  const filteredLinks = hilopLinks.filter((link) => {
     if (link.authOnly) {
       return !!user;
     }
@@ -38,16 +38,16 @@ const Footer = () => {
           console.warn("API URL is not set in environment variables");
           return;
         }
-        
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/products?lang=en`,
           { cache: "no-store" }
         );
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch products");
         }
-        
+
         const result = await response.json();
         if (result.success) {
           setProducts(result.data);
@@ -62,9 +62,9 @@ const Footer = () => {
     fetchProducts();
   }, []);
 
-  const productLinks = products.map(product => ({
+  const productLinks = products.map((product) => ({
     href: `/product/${product._id}`,
-    label: product.name
+    label: product.name,
   }));
   return (
     <footer className="relative bg-zinc-950 text-white pt-12 pb-8 overflow-hidden">
@@ -75,7 +75,7 @@ const Footer = () => {
               <h2 className="text-lg md:text-xl">
                 <span className="text-primary">Total care.</span>
                 <br />
-               <span className="text-zinc-900"> Totally different.</span>
+                <span className="text-zinc-900"> Totally different.</span>
               </h2>
               <Image
                 src="/images/footer/qrcode.svg"
@@ -99,7 +99,7 @@ const Footer = () => {
             <div>
               <p className="mb-4 text-base uppercase text-zinc-400 font-medium">
                 Hilop
-              </p> 
+              </p>
               {filteredLinks.map((link, index) => (
                 <Link
                   key={index}
@@ -141,7 +141,6 @@ const Footer = () => {
             </div>
 
             <div>
-
               <p className="mb-4 text-zinc-400">
                 123 Herbal Lane, Nature City, Earth
               </p>
@@ -190,26 +189,26 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        
-      {/* Large background logo just above copyright/links */}
-      <div className="w-full mt-12 mb-2 ">
-        <Image
-          src="foteer-logo.svg"
-          alt="Hilop Logo"
-          width={1200}
-          height={300}
-          className="opacity-10 w-[80vw] max-w-6xl mx-auto"
-          style={{ filter: 'grayscale(1) brightness(0.7)' }}
-          priority
-        />
-      </div>
+
+        {/* Large background logo just above copyright/links */}
+        <div className="w-full mt-12 mb-2 ">
+          <Image
+            src="foteer-logo.svg"
+            alt="Hilop Logo"
+            width={1200}
+            height={300}
+            className="opacity-10 w-[80vw] max-w-6xl mx-auto"
+            style={{ filter: "grayscale(1) brightness(0.7)" }}
+            priority
+          />
+        </div>
 
         <div className="grid md:grid-cols-[298px_auto] items-center pt-4 border-t border-zinc-800 gap-3">
           <p className="text-center md:text-left text-zinc-500 text-sm">
             &copy; {currentYear} Hilop Health, Inc. All rights reserved.
           </p>
           <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-zinc-400">
-                       <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
 
             <Link href="/terms" className="text-zinc-400 hover:text-white">
               Terms & Conditions
@@ -218,11 +217,9 @@ const Footer = () => {
             <Link href="/privacy" className="text-zinc-400 hover:text-white">
               Privacy Policy
             </Link>
-         
           </div>
         </div>
       </div>
-
     </footer>
   );
 };
