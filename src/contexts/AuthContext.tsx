@@ -303,10 +303,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         if (
           data.message &&
-          data.message.includes("Please provide a mobile number")
+          data.message.toLowerCase().includes("mobile number")
         ) {
           const { displayName, email } = result.user;
-          router.push(
+          router.replace(
             `/auth/complete-profile?name=${encodeURIComponent(
               displayName || ""
             )}&email=${encodeURIComponent(email || "")}`
@@ -314,13 +314,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           throw new Error(data.message || "Google Sign-In failed");
         }
-        return; // Stop execution after handling the error
+        return;
       }
 
+      // If backend returns success but user is missing mobile_number or birthdate, force complete-profile
+      const userObj = data.data?.user;
+      if (!userObj || !userObj.mobile_number || !userObj.birthdate) {
+        const { displayName, email } = result.user;
+        router.replace(
+          `/auth/complete-profile?name=${encodeURIComponent(
+            displayName || ""
+          )}&email=${encodeURIComponent(email || "")}`
+        );
+        return;
+      }
+
+      // If user is authenticated and profile is complete, fetch user data and redirect to home
       const userFetched = await refreshUserData();
       if (userFetched) {
         toast.success("Signed in with Google successfully!");
-        router.push("/");
+        router.replace("/");
       } else {
         throw new Error("Failed to fetch user data after Google Sign-In");
       }

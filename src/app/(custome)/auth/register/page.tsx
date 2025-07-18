@@ -24,7 +24,6 @@ export default function RegisterPage() {
     birthdate: "",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  // const [countryCode, setCountryCode] = useState("+91");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const countryBoxRef = useRef<HTMLDivElement>(null);
 
@@ -135,7 +134,7 @@ export default function RegisterPage() {
       const registrationData = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        mobile_number: `${formData.mobile_number.trim()}`,
+        mobile_number: `91${formData.mobile_number.trim()}`,
         birthdate: formData.birthdate,
       };
 

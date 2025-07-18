@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import AuthLayout from "../AuthLayout";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
@@ -8,17 +8,30 @@ import Button from "@/components/uiFramework/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
 import { Suspense } from "react";
+import { useRouter } from "next/navigation";
 
 function CompleteProfileForm() {
-  const { register, isLoading, error, clearError } = useAuth();
+  const { isLoading, error, clearError } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Initialize with empty strings for hydration match
   const [formData, setFormData] = useState({
-    name: searchParams?.get("name") || "",
-    email: searchParams?.get("email") || "",
+    name: "",
+    email: "",
     mobile_number: "",
     birthdate: "",
   });
+
+  // Set name/email from searchParams on client only
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      name: searchParams?.get("name") || "",
+      email: searchParams?.get("email") || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,10 +68,52 @@ function CompleteProfileForm() {
     }
 
     try {
-      await register({
-        ...formData,
-        mobile_number: `91${formData.mobile_number}`,
+      const registerResult = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          mobile_number: `91${formData.mobile_number}`,
+        }),
       });
+      const registerData = await registerResult.json();
+      if (!registerResult.ok) {
+        if (
+          registerData.message &&
+          registerData.message.toLowerCase().includes("user with this email or mobile number already exists")
+        ) {
+          // User already exists: send OTP for login and redirect to OTP page (type=login)
+          const loginResponse = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile_number: `91${formData.mobile_number}` }),
+          });
+          const loginData = await loginResponse.json();
+          if (!loginResponse.ok || !loginData.data?.user_id) {
+            toast.error("Failed to send OTP. Please try logging in.");
+            router.replace("/auth/login");
+            return;
+          }
+          router.replace(
+            `/auth/otp?type=login&userId=${loginData.data.user_id}&mobile=91${formData.mobile_number}`
+          );
+          return;
+        } else {
+          toast.error(registerData.message || "Registration failed");
+          return;
+        }
+      }
+
+      // New user: use user_id from register API and type=register for OTP
+      if (registerData.data?.user_id) {
+        router.replace(
+          `/auth/otp?type=register&userId=${registerData.data.user_id}&mobile=91${formData.mobile_number}`
+        );
+        return;
+      }
+      // Fallback: if no user_id, show error
+      toast.error("Registration succeeded but user ID missing. Please try logging in.");
+      router.replace("/auth/login");
     } catch {
       // Errors are handled by the useAuth hook and displayed via toast
     }
@@ -114,7 +169,7 @@ function CompleteProfileForm() {
                 !formData.mobile_number.trim() ||
                 !formData.birthdate
               }
-              onClick={handleSubmit}
+              type="submit"
             />
           </form>
         </div>
