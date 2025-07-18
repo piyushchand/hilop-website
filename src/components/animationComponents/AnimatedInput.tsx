@@ -20,6 +20,7 @@ interface AnimatedInputProps {
   readOnly?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const formatIndianNumber = (num: string) => {
@@ -35,6 +36,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   readOnly = false,
   onChange,
   placeholder,
+  disabled = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState(initialValue);
@@ -164,6 +166,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           required={required}
           readOnly={readOnly}
           placeholder={placeholder ?? label}
+          disabled={disabled}
           className={`
             w-full px-3 py-4 bg-none outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
             text-gray-900 placeholder-transparent leading-[24px] appearance-none

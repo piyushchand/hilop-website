@@ -87,7 +87,7 @@ export default function HilopCoins() {
 
   return (
     <>
-      <section className="w-full  ">
+      <section className="w-full  bg-white">
         <div className="lg:py-20 py-10 bg-cover bg-center bg-greenleaf">
           <div className="container">
             <h1 className="text-5xl 2xl:text-6xl font-semibold mb-3">

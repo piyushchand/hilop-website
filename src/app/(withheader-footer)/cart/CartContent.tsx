@@ -557,20 +557,18 @@ export default function Cart() {
     cart && cart.coupon_discount ? cart.coupon_discount : 0;
   // Get the selected plan object (works for both guests and logged-in users)
   let selectedPlan: SubscriptionPlan | null = null;
-  if (user) {
-    if (cart && cart.selected_plan && cart.selected_plan.id) {
-      const planId = cart.selected_plan.id;
-      selectedPlan = plans.find((p) => p._id === planId) || null;
-    }
+  let subscriptionDiscount = 0;
+  if (cart && cart.selected_plan?.discount && cart.selected_plan.discount > 0) {
+    // Always use backend discount if present
+    subscriptionDiscount = Math.round((cart.subtotal * cart.selected_plan.discount) / 100);
+    // Try to match the plan for display purposes
+    selectedPlan = plans.find((p) => p._id === cart.selected_plan?.id) || null;
   } else if (selectedPlanId) {
     selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
+    if (selectedPlan && selectedPlan.discount > 0) {
+      subscriptionDiscount = Math.round((cart?.subtotal || 0) * selectedPlan.discount / 100);
+    }
   }
-
-  // Calculate subscription discount for both guests and logged-in users
-  const subscriptionDiscount =
-    selectedPlan && cart && selectedPlan.discount > 0
-      ? Math.round((cart.subtotal * selectedPlan.discount) / 100)
-      : 0;
 
   // Final total calculation for both guests and logged-in users
   const finalTotal = cart

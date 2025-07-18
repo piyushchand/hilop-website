@@ -15,6 +15,7 @@ interface ButtonProps {
   className?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 const Button = ({
@@ -26,6 +27,7 @@ const Button = ({
   onClick,
   className = '',
   disabled = false,
+  type = 'button',
 }: ButtonProps) => {
   const getSizeClasses = () => {
     switch (size) {
@@ -76,7 +78,6 @@ const commonClasses = `
       </Link>
     );
   }
-  // 📌 If `link` and `newTab` is false → use Next.js <Link>
   if (link) {
     return (
       <Link
@@ -93,6 +94,7 @@ const commonClasses = `
       onClick={onClick}
       className={commonClasses}
       disabled={disabled}
+      type={type}
     >
       <span className="btn-tn-lable-1">{label}</span>
       <span className="btn-tn-lable-2 absolute">{label}</span>
