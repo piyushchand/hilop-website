@@ -435,7 +435,7 @@ export default function AccountDetailsModal({
 
   return (
     <Modal
-      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-auto shadow-lg" isOpen={isOpen}
+      className="max-w-sm w-full h-full max-h-[85vh] rounded-lg overflow-auto shadow-lg" isOpen={isOpen}
       onClose={handleCancel}
     >
       {/* Left column: Image (desktop only) */}
