@@ -386,7 +386,7 @@ export default function MyOrder() {
                               Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Total: ${item.total ? item.total.toFixed(2) : '0.00'}
+                              Total: ₹{item.total ? item.total.toFixed(2) : '0.00'}
                             </p>
                           </div>
                         </div>

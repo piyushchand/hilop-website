@@ -22,14 +22,17 @@ function OtpPageContent() {
   const [isResending, setIsResending] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const otpType = searchParams?.get('type');
-  const userId = searchParams?.get('userId');
-  const mobileNumber = searchParams?.get('mobile');
+  // Always get params directly from searchParams
+  const otpType = searchParams?.get('type') || '';
+  const userId = searchParams?.get('userId') || '';
+  const mobileNumber = searchParams?.get('mobile') || '';
 
   useEffect(() => {
     if (!otpType || !userId || !mobileNumber) {
       toast.error('Invalid OTP verification link');
-      router.replace(otpType === 'register' ? '/auth/register' : '/auth/login');
+      setTimeout(() => {
+        router.replace(otpType === 'register' ? '/auth/register' : '/auth/login');
+      }, 2000);
     }
   }, [otpType, userId, mobileNumber, router]);
 
@@ -127,16 +130,16 @@ function OtpPageContent() {
     }
   };
 
-  const getPageTitle = () => otpType === 'register' ? 'Complete Registration' : 'Login Verification';
-
-  const getPageDescription = () => {
+  // Memoized page title/description to avoid SSR/CSR mismatch
+  const pageTitle = otpType === 'register' ? 'Complete Registration' : 'Login Verification';
+  const pageDescription = (() => {
     const formattedMobile = mobileNumber
-      ? `+${mobileNumber.slice(0, 2)} ${mobileNumber.slice(2, 7)} ${mobileNumber.slice(7)}`
+      ? `+91 ${mobileNumber.slice(0, 2)} ${mobileNumber.slice(2, 7)} ${mobileNumber.slice(7)}`
       : '';
     return otpType === 'register'
       ? `We have sent an OTP code to ${formattedMobile} to complete your registration.`
       : `We have sent an OTP code to ${formattedMobile} to verify your login.`;
-  };
+  })();
 
   return (
     <AuthLayout
@@ -161,8 +164,8 @@ function OtpPageContent() {
       }
     >
       <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
-        <h2 className="text-3xl font-semibold mb-2">{getPageTitle()}</h2>
-        <p className="font-medium mb-6 text-gray-600">{getPageDescription()}</p>
+        <h2 className="text-3xl font-semibold mb-2">{pageTitle}</h2>
+        <p className="font-medium mb-6 text-gray-600">{pageDescription}</p>
 
         {success && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">

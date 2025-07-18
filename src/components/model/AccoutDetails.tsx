@@ -435,18 +435,11 @@ export default function AccountDetailsModal({
 
   return (
     <Modal
-      className="max-w-6xl w-full h-full max-h-[85vh] rounded-lg overflow-hidden shadow-lg grid grid-cols-1 sm:grid-cols-12" isOpen={isOpen}
+      className="max-w-sm w-full h-full max-h-[85vh] rounded-lg overflow-auto shadow-lg" isOpen={isOpen}
       onClose={handleCancel}
     >
       {/* Left column: Image (desktop only) */}
-      <div className="sm:col-span-5 hidden sm:block relative min-h-fit h-full">
-        <Image
-          src="/images/modal-1.jpg"
-          fill
-          alt="model image"
-          className="object-cover w-full h-full"
-        />
-      </div>
+    
       {/* Right column: Form */}
       <div className="sm:col-span-7 col-span-1 w-full flex flex-col overflow-auto bg-white">
         <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
@@ -518,8 +511,8 @@ export default function AccountDetailsModal({
           </div>
 
           <div>
-            <div className="relative hilop-mobile-input-wrapper">
-              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+            <div className="relative hilop-mobile-input-wrapper [&_input:focus]:outline-none [&_input:focus]:ring-0 [&_input:focus]:border-gray-300">
+              <span className="absolute left-3 top-4 translate-y-[10%]  text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
               <AnimatedInput
                 label="Mobile number"
                 name="mobile_number"
@@ -528,8 +521,11 @@ export default function AccountDetailsModal({
                 onChange={handleInputChange}
                 required
                 placeholder="9876543210"
+                disabled={true}
               />
             </div>
+
+
             {errors.mobile_number && (
               <div className="text-red-500 text-sm mt-1">
                 {errors.mobile_number}
@@ -539,18 +535,18 @@ export default function AccountDetailsModal({
 
           <div>
 
-          <AnimatedInput
-            label="Date of Birth"
-            name="birthdate"
-            type="date"
-            value={formData.birthdate}
-            onChange={handleInputChange}
-            required
-          />
-          {errors.birthdate && (
-            <div className="text-red-500 text-sm">{errors.birthdate}</div>
-          )}
-</div>
+            <AnimatedInput
+              label="Date of Birth"
+              name="birthdate"
+              type="date"
+              value={formData.birthdate}
+              onChange={handleInputChange}
+              required
+            />
+            {errors.birthdate && (
+              <div className="text-red-500 text-sm">{errors.birthdate}</div>
+            )}
+          </div>
           <div>
             <label className="block text-gray-700 font-medium mb-1" htmlFor="gender-select">
               Gender <span className="text-red-500">*</span>
