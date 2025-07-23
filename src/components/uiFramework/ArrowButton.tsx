@@ -123,7 +123,7 @@ const ArrowButton: React.FC<ArrowButtonProps> = ({
   return (
     <button 
       onClick={onClick} 
-      className={`w-fit h-fit ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`w-fit h-fit ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       disabled={disabled}
     >
       {buttonContent}

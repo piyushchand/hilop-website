@@ -30,7 +30,6 @@ function CompleteProfileForm() {
       name: searchParams?.get("name") || "",
       email: searchParams?.get("email") || "",
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
