@@ -258,7 +258,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language]);
+  }, [params?.id, language, hideLoading, showLoading]);
 
   // Buy Now handler
   const handleBuyNow = useCallback(async () => {

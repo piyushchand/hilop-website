@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -58,35 +58,38 @@ export default function Support() {
     fetchCategories();
   }, []);
 
-  const performSearch = useCallback(
-    debounce(async (query: string) => {
-      if (query.trim().length > 1) {
-        setIsSearching(true);
-        setLoadingFaqs(false);
-        setSelectedCategoryId(null);
-        try {
-          const response = await searchSupport(query);
-          if (response.success) {
-            setSearchResults(response.data);
-          }
-        } catch (error) {
-          console.error("Failed to perform search:", error);
-        } finally {
-          setIsSearching(false);
+  const debouncedSearch = useMemo(() => debounce(async (query: string) => {
+    if (query.trim().length > 1) {
+      setIsSearching(true);
+      setLoadingFaqs(false);
+      setSelectedCategoryId(null);
+      try {
+        const response = await searchSupport(query);
+        if (response.success) {
+          setSearchResults(response.data);
         }
-      } else {
-        setSearchResults([]);
-        if (categories.length > 0 && !selectedCategoryId) {
-          setSelectedCategoryId(categories[0]._id);
-        }
+      } catch (error) {
+        console.error("Failed to perform search:", error);
+      } finally {
+        setIsSearching(false);
       }
-    }, 500),
-    [categories, selectedCategoryId]
-  );
+    } else {
+      setSearchResults([]);
+      if (categories.length > 0 && !selectedCategoryId) {
+        setSelectedCategoryId(categories[0]._id);
+      }
+    }
+  }, 500), [categories, selectedCategoryId]);
 
   useEffect(() => {
-    performSearch(searchTerm);
-  }, [searchTerm, performSearch]);
+    debouncedSearch(searchTerm);
+    // Cleanup on unmount
+    return () => {
+      if (debouncedSearch.cancel) {
+        debouncedSearch.cancel();
+      }
+    };
+  }, [searchTerm, debouncedSearch]);
 
   useEffect(() => {
     if (!selectedCategoryId || isSearching || searchTerm.trim() !== "") return;
@@ -115,7 +118,7 @@ export default function Support() {
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    performSearch.flush();
+    debouncedSearch.flush();
   };
 
   const getText = (obj: { en: string; hi: string }) => obj?.[language] || obj?.en || "";

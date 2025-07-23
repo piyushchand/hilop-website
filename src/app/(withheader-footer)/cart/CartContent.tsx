@@ -144,24 +144,47 @@ interface PaymentSuccessModalProps {
   onClose: () => void;
 }
 
-const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({ show, orderSummary, onClose }) => {
+const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
+  show,
+  orderSummary,
+  onClose,
+}) => {
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
         <div className="mb-4">
-          <Image src="/images/icon/verify.svg" width={64} height={64} alt="Success" className="mx-auto mb-2" />
-          <h2 className="text-2xl font-bold text-green-700 mb-2">Payment Successful!</h2>
-          <p className="text-gray-700 mb-2">Your order has been placed successfully.</p>
+          <Image
+            src="/images/icon/verify.svg"
+            width={64}
+            height={64}
+            alt="Success"
+            className="mx-auto mb-2"
+          />
+          <h2 className="text-2xl font-bold text-green-700 mb-2">
+            Payment Successful!
+          </h2>
+          <p className="text-gray-700 mb-2">
+            Your order has been placed successfully.
+          </p>
         </div>
         {orderSummary && (
           <div className="mb-4 text-left bg-gray-50 rounded-lg p-4">
             <h3 className="font-semibold mb-2">Order Summary</h3>
             <div className="text-sm text-gray-800">
-              <div><b>Order ID:</b> {orderSummary._id || orderSummary.order_id}</div>
-              <div><b>Order Number:</b> {orderSummary.order_number}</div>
-              <div><b>Total:</b> ₹{orderSummary.total?.toFixed(2) || orderSummary.total_amount}</div>
-              <div><b>Status:</b> {orderSummary.status}</div>
+              <div>
+                <b>Order ID:</b> {orderSummary._id || orderSummary.order_id}
+              </div>
+              <div>
+                <b>Order Number:</b> {orderSummary.order_number}
+              </div>
+              <div>
+                <b>Total:</b> ₹
+                {orderSummary.total?.toFixed(2) || orderSummary.total_amount}
+              </div>
+              <div>
+                <b>Status:</b> {orderSummary.status}
+              </div>
             </div>
           </div>
         )}
@@ -210,7 +233,9 @@ export default function Cart() {
 
   // State for payment confirmation modal
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
-  const [lastOrderSummary, setLastOrderSummary] = useState<OrderSummary | null>(null);
+  const [lastOrderSummary, setLastOrderSummary] = useState<OrderSummary | null>(
+    null
+  );
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -273,11 +298,13 @@ export default function Cart() {
     if (user && typeof window !== "undefined") {
       // 1. Merge guest cart into user cart if present
       const guestCartRaw = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('guestCart='));
+        .split("; ")
+        .find((row) => row.startsWith("guestCart="));
       if (guestCartRaw) {
         try {
-          const guestCart = JSON.parse(decodeURIComponent(guestCartRaw.split('=')[1]));
+          const guestCart = JSON.parse(
+            decodeURIComponent(guestCartRaw.split("=")[1])
+          );
           if (Array.isArray(guestCart) && guestCart.length > 0) {
             // For each item in guest cart, add to user cart
             Promise.all(
@@ -295,7 +322,8 @@ export default function Cart() {
               })
             ).then(() => {
               // Clear guest cart cookie
-              document.cookie = "guestCart=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              document.cookie =
+                "guestCart=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
               fetchCart();
             });
           }
@@ -380,7 +408,10 @@ export default function Cart() {
               await fetch(`/api/cart/${item.product_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quantity: months, months_quantity: months }),
+                body: JSON.stringify({
+                  quantity: months,
+                  months_quantity: months,
+                }),
               });
             }
           })
@@ -560,19 +591,26 @@ export default function Cart() {
   let subscriptionDiscount = 0;
   if (cart && cart.selected_plan?.discount && cart.selected_plan.discount > 0) {
     // Always use backend discount if present
-    subscriptionDiscount = Math.round((cart.subtotal * cart.selected_plan.discount) / 100);
+    subscriptionDiscount = Math.round(
+      (cart.subtotal * cart.selected_plan.discount) / 100
+    );
     // Try to match the plan for display purposes
     selectedPlan = plans.find((p) => p._id === cart.selected_plan?.id) || null;
   } else if (selectedPlanId) {
     selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
     if (selectedPlan && selectedPlan.discount > 0) {
-      subscriptionDiscount = Math.round((cart?.subtotal || 0) * selectedPlan.discount / 100);
+      subscriptionDiscount = Math.round(
+        ((cart?.subtotal || 0) * selectedPlan.discount) / 100
+      );
     }
   }
 
   // Final total calculation for both guests and logged-in users
   const finalTotal = cart
-    ? cart.subtotal - (cart.coin_discount ?? 0) - subscriptionDiscount - (cart.coupon_discount ?? 0)
+    ? cart.subtotal -
+      (cart.coin_discount ?? 0) -
+      subscriptionDiscount -
+      (cart.coupon_discount ?? 0)
     : 0;
 
   // Fetch purchased products from new API
@@ -630,7 +668,6 @@ export default function Cart() {
   const buyAgainProducts = purchasedProducts.filter(
     (p) => !cartProductIds.includes(p._id)
   );
-
   // Handle checkout
   const handleCheckout = async () => {
     if (!user) {
@@ -640,6 +677,7 @@ export default function Cart() {
       router.push("/auth/login");
       return;
     }
+
     if (!cart || cart.items.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -647,20 +685,20 @@ export default function Cart() {
 
     setCheckoutLoading(true);
     try {
-      // Use the address selected in the UI (component state) for payment
       if (!selectedAddress || !selectedAddress._id) {
         toast.error("No address selected. Please select a delivery address.");
         setCheckoutLoading(false);
         return;
       }
+
       const address = selectedAddress;
-      // Always use 'shipping_address_id' for backend, never 'address_id'
       const paymentRequestData = {
         shipping_address_id: address._id,
         total_amount: finalTotal,
       };
-      // Double-check: log the request body to ensure correct key
+
       console.log("Sending payment request data:", paymentRequestData);
+
       const paymentResponse = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: {
@@ -672,137 +710,317 @@ export default function Cart() {
       });
 
       console.log("Payment response status:", paymentResponse.status);
-
       const paymentData = await paymentResponse.json();
       console.log("Payment API Response:", paymentData);
 
-        if (paymentResponse.ok && paymentData.success) {
-          toast.success("Payment order created successfully!");
-          const paymentInfo = paymentData.data || paymentData;
-          // Support both possible backend response shapes
-          const razorpayOrderId =
-            paymentInfo.razorpay_order_id || paymentInfo.order_id;
-          const amountPaise =
-            paymentInfo.amount ||
-            (typeof paymentInfo.total_amount === "number"
-              ? paymentInfo.total_amount * 100
-              : undefined);
-          const razorpayKey =
-            paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-          const currency = paymentInfo.currency || "INR";
+      if (paymentResponse.ok && paymentData.success) {
+        toast.success("Payment order created successfully!");
+        const paymentInfo = paymentData.data || paymentData;
 
-        
+        const razorpayOrderId =
+          paymentInfo.razorpay_order_id || paymentInfo.order_id;
+        const amountPaise =
+          paymentInfo.amount ||
+          (typeof paymentInfo.total_amount === "number"
+            ? paymentInfo.total_amount * 100
+            : undefined);
+        const razorpayKey =
+          paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        const currency = paymentInfo.currency || "INR";
 
-          // Defensive: Check for required fields from backend or fallback
-          if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-            toast.error(
-              "Payment gateway error: Missing order details. Please try again or contact support."
-            );
-            setCheckoutLoading(false);
-            return;
-          }
-
-          // Ensure Razorpay script is loaded before using window.Razorpay
-          const scriptLoaded = await loadRazorpayScript();
-          if (!scriptLoaded || typeof window.Razorpay !== "function") {
-            toast.error(
-              "Failed to load Razorpay payment gateway. Please try again."
-            );
-            setCheckoutLoading(false);
-            return;
-          }
-
-          // Use backend's amount (in paise) and key
-          const options = {
-            key: razorpayKey, // Use backend-provided key or fallback
-            amount: amountPaise, // Amount in paise from backend or fallback
-            currency,
-            name: "Hilop",
-            description: "Order Payment",
-            order_id: razorpayOrderId,
-            handler: async function (response: {
-              razorpay_payment_id: string;
-              razorpay_order_id: string;
-              razorpay_signature: string;
-            }) {
-              // Call backend to verify payment
-              try {
-                setCheckoutLoading(true); // Show loading while processing
-                const verifyRes = await fetch("/api/payment/verify", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature,
-                    // test_mode: true,
-                  }),
-                });
-                const verifyData = await verifyRes.json();
-                console.log("Payment verify response:", verifyData);
-                if (verifyData.success) {
-                  // Optionally fetch the latest order summary
-                  const orderId = verifyData.order_id || (verifyData.data && verifyData.data.order_id);
-                  let orderSummary: OrderSummary | null = null;
-                  if (orderId) {
-                    try {
-                      const orderRes = await fetch(`/api/orders/${orderId}`);
-                      if (orderRes.ok) {
-                        const orderData = await orderRes.json();
-                        orderSummary = orderData.data || null;
-                      }
-                    } catch {}
-                  }
-                  setLastOrderSummary(orderSummary);
-                  setShowPaymentSuccess(true);
-                  await fetch("/api/cart", { credentials: "include" });
-                  await fetch("/api/orders", { credentials: "include" });
-                  setCheckoutLoading(false);
-                  // Do not redirect immediately; wait for user to close modal
-                  return;
-                  // Wait for backend to process order, then refresh cart and orders
-                } else {
-                  setCheckoutLoading(false);
-                  toast.error(
-                    verifyData.message ||
-                      "Payment verification failed. Please contact support."
-                  );
-                }
-              } catch {
-                setCheckoutLoading(false);
-                toast.error(
-                  "Payment verification failed. Please contact support."
-                );
-              }
-            },
-            prefill: {},
-            theme: {
-              color: "#0f5132",
-            },
-          };
-
-          // TypeScript: window.Razorpay is now guaranteed to be a function
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const rzp = new (window.Razorpay as any)(options);
-          rzp.open();
+        if (!amountPaise || !razorpayOrderId || !razorpayKey) {
+          toast.error(
+            "Payment gateway error: Missing order details. Please try again or contact support."
+          );
           setCheckoutLoading(false);
           return;
-        } else {
-          console.error("Payment API Error Status:", paymentResponse.status);
-          console.error("Payment API Error Response:", paymentData);
-          toast.error(
-            paymentData.message ||
-              `Failed to create payment order (${paymentResponse.status})`
-          );
         }
-      } catch (error) {
-        console.error("Checkout error:", error);
-        toast.error("Checkout failed. Please try again.");
-      } finally {
+
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded || typeof window.Razorpay !== "function") {
+          toast.error(
+            "Failed to load Razorpay payment gateway. Please try again."
+          );
+          setCheckoutLoading(false);
+          return;
+        }
+
+        const options = {
+          key: razorpayKey,
+          amount: amountPaise,
+          currency,
+          name: "Hilop",
+          description: "Order Payment",
+          order_id: razorpayOrderId,
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
+            try {
+              setCheckoutLoading(true);
+              const verifyRes = await fetch("/api/payment/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              console.log("Payment verify response:", verifyData);
+
+              if (verifyData.success) {
+                const orderId =
+                  verifyData.order_id ||
+                  (verifyData.data && verifyData.data.order_id);
+                let orderSummary: OrderSummary | null = null;
+
+                if (orderId) {
+                  try {
+                    const orderRes = await fetch(`/api/orders/${orderId}`);
+                    if (orderRes.ok) {
+                      const orderData = await orderRes.json();
+                      orderSummary = orderData.data || null;
+                    }
+                  } catch {}
+                }
+
+                setLastOrderSummary(orderSummary);
+                setShowPaymentSuccess(true);
+                await fetch("/api/cart", { credentials: "include" });
+                await fetch("/api/orders", { credentials: "include" });
+                setCheckoutLoading(false);
+                return;
+              } else {
+                setCheckoutLoading(false);
+                toast.error(
+                  verifyData.message ||
+                    "Payment verification failed. Please contact support."
+                );
+              }
+            } catch {
+              setCheckoutLoading(false);
+              toast.error(
+                "Payment verification failed. Please contact support."
+              );
+            }
+          },
+
+          prefill: {
+            name: user?.name || "",
+            email: user?.email || "",
+            contact: user?.mobile_number || "",
+          },
+
+          theme: {
+            color: "#0f5132",
+          },
+        };
+
+        // Add RazorpayInstance type for TypeScript
+        // Only covers the constructor and open() method used here
+        interface RazorpayInstance {
+          open(): void;
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rzp = new (window.Razorpay as unknown as {
+          new (options: Record<string, unknown>): RazorpayInstance;
+        })(options);
+        rzp.open();
         setCheckoutLoading(false);
+        return;
+      } else {
+        console.error("Payment API Error Status:", paymentResponse.status);
+        console.error("Payment API Error Response:", paymentData);
+        toast.error(
+          paymentData.message ||
+            `Failed to create payment order (${paymentResponse.status})`
+        );
       }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Checkout failed. Please try again.");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
+
+  // Handle checkout
+  // const handleCheckout = async () => {
+  //   if (!user) {
+  //     if (typeof window !== "undefined") {
+  //       localStorage.setItem("redirectAfterLogin", "/cart");
+  //     }
+  //     router.push("/auth/login");
+  //     return;
+  //   }
+  //   if (!cart || cart.items.length === 0) {
+  //     toast.error("Your cart is empty");
+  //     return;
+  //   }
+
+  //   setCheckoutLoading(true);
+  //   try {
+  //     // Use the address selected in the UI (component state) for payment
+  //     if (!selectedAddress || !selectedAddress._id) {
+  //       toast.error("No address selected. Please select a delivery address.");
+  //       setCheckoutLoading(false);
+  //       return;
+  //     }
+  //     const address = selectedAddress;
+  //     // Always use 'shipping_address_id' for backend, never 'address_id'
+  //     const paymentRequestData = {
+  //       shipping_address_id: address._id,
+  //       total_amount: finalTotal,
+  //     };
+  //     // Double-check: log the request body to ensure correct key
+  //     console.log("Sending payment request data:", paymentRequestData);
+  //     const paymentResponse = await fetch("/api/payment/create-order", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Accept: "application/json",
+  //       },
+  //       credentials: "include",
+  //       body: JSON.stringify(paymentRequestData),
+  //     });
+
+  //     console.log("Payment response status:", paymentResponse.status);
+
+  //     const paymentData = await paymentResponse.json();
+  //     console.log("Payment API Response:", paymentData);
+
+  //     if (paymentResponse.ok && paymentData.success) {
+  //       toast.success("Payment order created successfully!");
+  //       const paymentInfo = paymentData.data || paymentData;
+  //       // Support both possible backend response shapes
+  //       const razorpayOrderId =
+  //         paymentInfo.razorpay_order_id || paymentInfo.order_id;
+  //       const amountPaise =
+  //         paymentInfo.amount ||
+  //         (typeof paymentInfo.total_amount === "number"
+  //           ? paymentInfo.total_amount * 100
+  //           : undefined);
+  //       const razorpayKey =
+  //         paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  //       const currency = paymentInfo.currency || "INR";
+
+  //       // Defensive: Check for required fields from backend or fallback
+  //       if (!amountPaise || !razorpayOrderId || !razorpayKey) {
+  //         toast.error(
+  //           "Payment gateway error: Missing order details. Please try again or contact support."
+  //         );
+  //         setCheckoutLoading(false);
+  //         return;
+  //       }
+
+  //       // Ensure Razorpay script is loaded before using window.Razorpay
+  //       const scriptLoaded = await loadRazorpayScript();
+  //       if (!scriptLoaded || typeof window.Razorpay !== "function") {
+  //         toast.error(
+  //           "Failed to load Razorpay payment gateway. Please try again."
+  //         );
+  //         setCheckoutLoading(false);
+  //         return;
+  //       }
+
+  //       // Use backend's amount (in paise) and key
+  //       const options = {
+  //         key: razorpayKey, // Use backend-provided key or fallback
+  //         amount: amountPaise, // Amount in paise from backend or fallback
+  //         currency,
+  //         name: "Hilop",
+  //         description: "Order Payment",
+  //         order_id: razorpayOrderId,
+  //         handler: async function (response: {
+  //           razorpay_payment_id: string;
+  //           razorpay_order_id: string;
+  //           razorpay_signature: string;
+  //         }) {
+  //           // Call backend to verify payment
+  //           try {
+  //             setCheckoutLoading(true); // Show loading while processing
+  //             const verifyRes = await fetch("/api/payment/verify", {
+  //               method: "POST",
+  //               headers: { "Content-Type": "application/json" },
+  //               credentials: "include",
+  //               body: JSON.stringify({
+  //                 razorpay_payment_id: response.razorpay_payment_id,
+  //                 razorpay_order_id: response.razorpay_order_id,
+  //                 razorpay_signature: response.razorpay_signature,
+  //                 // test_mode: true,
+  //               }),
+  //             });
+  //             const verifyData = await verifyRes.json();
+  //             console.log("Payment verify response:", verifyData);
+  //             if (verifyData.success) {
+  //               // Optionally fetch the latest order summary
+  //               const orderId =
+  //                 verifyData.order_id ||
+  //                 (verifyData.data && verifyData.data.order_id);
+  //               let orderSummary: OrderSummary | null = null;
+  //               if (orderId) {
+  //                 try {
+  //                   const orderRes = await fetch(`/api/orders/${orderId}`);
+  //                   if (orderRes.ok) {
+  //                     const orderData = await orderRes.json();
+  //                     orderSummary = orderData.data || null;
+  //                   }
+  //                 } catch {}
+  //               }
+  //               setLastOrderSummary(orderSummary);
+  //               setShowPaymentSuccess(true);
+  //               await fetch("/api/cart", { credentials: "include" });
+  //               await fetch("/api/orders", { credentials: "include" });
+  //               setCheckoutLoading(false);
+  //               // Do not redirect immediately; wait for user to close modal
+  //               return;
+  //               // Wait for backend to process order, then refresh cart and orders
+  //             } else {
+  //               setCheckoutLoading(false);
+  //               toast.error(
+  //                 verifyData.message ||
+  //                   "Payment verification failed. Please contact support."
+  //               );
+  //             }
+  //           } catch {
+  //             setCheckoutLoading(false);
+  //             toast.error(
+  //               "Payment verification failed. Please contact support."
+  //             );
+  //           }
+  //         },
+  //         prefill: {},
+  //         theme: {
+  //           color: "#0f5132",
+  //         },
+  //       };
+
+  //       // TypeScript: window.Razorpay is now guaranteed to be a function
+  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //       const rzp = new (window.Razorpay as any)(options);
+  //       rzp.open();
+  //       setCheckoutLoading(false);
+  //       return;
+  //     } else {
+  //       console.error("Payment API Error Status:", paymentResponse.status);
+  //       console.error("Payment API Error Response:", paymentData);
+  //       toast.error(
+  //         paymentData.message ||
+  //           `Failed to create payment order (${paymentResponse.status})`
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Checkout error:", error);
+  //     toast.error("Checkout failed. Please try again.");
+  //   } finally {
+  //     setCheckoutLoading(false);
+  //   }
+  // };
 
   // Modified handlePlanClick to support guests and update UI
   const handlePlanClick = async (planId: string) => {
@@ -825,7 +1043,10 @@ export default function Cart() {
                   await fetch(`/api/cart/${item.product_id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ quantity: months, months_quantity: months }),
+                    body: JSON.stringify({
+                      quantity: months,
+                      months_quantity: months,
+                    }),
                   });
                 }
               })
@@ -852,7 +1073,8 @@ export default function Cart() {
       cart.items[0].name.hi?.toLowerCase() === "boldrise");
 
   // Helper to extract pincode (zipcode) from address
-  const getPincode = (address: Address | null) => (address && address.zipcode ? address.zipcode : "------");
+  const getPincode = (address: Address | null) =>
+    address && address.zipcode ? address.zipcode : "------";
 
   // Helper to format phone number
   const formatPhone = (phone: string) => {
@@ -873,13 +1095,14 @@ export default function Cart() {
   };
 
   // Move fetchAddresses out of useEffect so it can be called from handleAddressModalClose
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!user) return;
     try {
       const res = await fetch("/api/v1/addresses", { credentials: "include" });
       const data = await res.json();
       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-        const def = data.data.find((a: Address) => a.is_default) || data.data[0];
+        const def =
+          data.data.find((a: Address) => a.is_default) || data.data[0];
         setSelectedAddress(def);
       } else {
         setSelectedAddress(null);
@@ -887,11 +1110,11 @@ export default function Cart() {
     } finally {
       // setAddressLoading(false); // Removed as per edit hint
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchAddresses();
-  }, [user]);
+  }, [user, fetchAddresses]);
 
   return (
     <>
@@ -912,7 +1135,7 @@ export default function Cart() {
         tabIndex={0}
         role="button"
         aria-label="Change address"
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             if (user) {
               setAddressModalOpen(true);
@@ -928,7 +1151,13 @@ export default function Cart() {
         <div className="container flex items-center gap-4 relative min-h-[64px]">
           {/* Illustration */}
           <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 md:h-16 md:w-16">
-            <Image src="/images/adresss.svg" alt="Address Banner" width={64} height={64} className="object-contain h-12 w-12 md:h-16 md:w-16" />
+            <Image
+              src="/images/adresss.svg"
+              alt="Address Banner"
+              width={64}
+              height={64}
+              className="object-contain h-12 w-12 md:h-16 md:w-16"
+            />
           </div>
           {/* Address Info */}
           <div className="flex-1 min-w-0">
@@ -943,12 +1172,20 @@ export default function Cart() {
               </div>
             )}
             <div className="text-gray-700 text-sm md:text-base truncate">
-              {selectedAddress ? selectedAddress.address : "No address found. Please add a delivery address."}
-              {selectedAddress && selectedAddress.city && ", " + selectedAddress.city}
-              {selectedAddress && selectedAddress.state && ", " + selectedAddress.state}
+              {selectedAddress
+                ? selectedAddress.address
+                : "No address found. Please add a delivery address."}
+              {selectedAddress &&
+                selectedAddress.city &&
+                ", " + selectedAddress.city}
+              {selectedAddress &&
+                selectedAddress.state &&
+                ", " + selectedAddress.state}
             </div>
             {selectedAddress && (
-              <div className="text-gray-500 text-xs md:text-sm mt-0.5">{formatPhone(selectedAddress.phone_number)}</div>
+              <div className="text-gray-500 text-xs md:text-sm mt-0.5">
+                {formatPhone(selectedAddress.phone_number)}
+              </div>
             )}
           </div>
           {/* Dropdown/Caret for address selection */}
@@ -958,7 +1195,7 @@ export default function Cart() {
             aria-label="Change address"
             tabIndex={0}
             type="button"
-            onClick={e => {
+            onClick={(e) => {
               e.preventDefault();
               if (user) {
                 setAddressModalOpen(true);
@@ -975,12 +1212,19 @@ export default function Cart() {
         </div>
       </div>
       {/* Address Modal */}
-      <AddresssModal isOpen={addressModalOpen} onClose={handleAddressModalClose} />
+      <AddresssModal
+        isOpen={addressModalOpen}
+        onClose={handleAddressModalClose}
+      />
       <section className="w-full bg-gray-100 mb-16 lg:mb-40">
         <div className="container   relative">
           <div className="flex flex-col lg:flex-row gap-10">
             {/* Left Section */}
-            <div className={`w-full ${cart && cart.items.length > 0 ? 'lg:w-2/3' : ''}`}> 
+            <div
+              className={`w-full ${
+                cart && cart.items.length > 0 ? "lg:w-2/3" : ""
+              }`}
+            >
               {/* Choose Your Subscription Plan */}
               {!isOnlyBoldRise && cart && cart.items.length > 0 && (
                 <div className="bg-white p-6 rounded-3xl mb-6 overflow-hidden">
@@ -1076,7 +1320,7 @@ export default function Cart() {
                         Loading purchased products...
                       </div>
                     ) : buyAgainProducts.length > 0 ? (
-<div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-6 w-full max-w-md mx-auto">
+                      <div className="bg-white rounded-lg sm:rounded-xl md:rounded-2xl border border-gray-200 p-3 sm:p-4 md:p-6 mt-6 w-full max-w-md mx-auto">
                         <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-3 sm:mb-4 pb-2 border-b border-gray-200 text-center">
                           Buy Again
                         </h3>
@@ -1103,7 +1347,9 @@ export default function Cart() {
                                 {item.orderDate && (
                                   <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
                                     Last ordered:{" "}
-                                    {new Date(item.orderDate).toLocaleDateString()}
+                                    {new Date(
+                                      item.orderDate
+                                    ).toLocaleDateString()}
                                   </p>
                                 )}
                               </div>
@@ -1218,8 +1464,11 @@ export default function Cart() {
               </div>
 
               {/* Buy Again Section (only show if cart is NOT empty) */}
-              {cart && cart.items.length > 0 && !cartLoading && !cartError && (
-                purchasedLoading ? (
+              {cart &&
+                cart.items.length > 0 &&
+                !cartLoading &&
+                !cartError &&
+                (purchasedLoading ? (
                   <div className="text-gray-500 py-4 text-center">
                     Loading purchased products...
                   </div>
@@ -1251,13 +1500,20 @@ export default function Cart() {
                               </p>
                               {item.orderDate && (
                                 <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                                  Last ordered: {new Date(item.orderDate).toLocaleDateString()}
+                                  Last ordered:{" "}
+                                  {new Date(
+                                    item.orderDate
+                                  ).toLocaleDateString()}
                                 </p>
                               )}
                             </div>
                             <div className="flex-shrink-0 ml-2">
                               <Button
-                                label={addNowLoading[item._id] ? "Adding..." : "+ Add Now"}
+                                label={
+                                  addNowLoading[item._id]
+                                    ? "Adding..."
+                                    : "+ Add Now"
+                                }
                                 variant="btn-primary"
                                 size="sm"
                                 className="min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm"
@@ -1276,8 +1532,7 @@ export default function Cart() {
                       ))}
                     </div>
                   </div>
-                ) : null
-              )}
+                ) : null)}
             </div>
 
             {/* Right Section: Only show if cart has items */}
@@ -1333,7 +1588,7 @@ export default function Cart() {
                             disabled={couponLoading}
                           />
                           <button
-                            className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300 disabled:opacity-50"
+                            className="ml-2 bg-transparant hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded transition-all duration-300 disabled:opacity-50 cursor-pointer"
                             onClick={() => applyCoupon(couponCode)}
                             disabled={!couponCode.trim() || couponLoading}
                           >
@@ -1408,7 +1663,9 @@ export default function Cart() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-600">Discount from Coins</span>
+                        <span className="text-gray-600">
+                          Discount from Coins
+                        </span>
                         <span className="text-green-500 text-lg">
                           -₹{formatPrice(cart.coin_discount ?? 0)}
                         </span>
@@ -1440,9 +1697,8 @@ export default function Cart() {
                           <span className="font-medium text-primary">
                             Selected Plan:
                           </span>{" "}
-                          {getText(selectedPlan.name, language)} (
                           {selectedPlan.months} month
-                          {selectedPlan.months > 1 ? "s" : ""})
+                          {selectedPlan.months > 1 ? "s" : ""}
                         </div>
                       )}
                     </div>
@@ -1456,15 +1712,16 @@ export default function Cart() {
       {/* Fixed Bottom Bar */}
       <div className="fixed z-50 bottom-0 left-0 w-full bg-white gap-2 md:gap-4 border-t border-gray-200 p-4 flex flex-col sm:flex-row justify-end items-center lg:px-20 px-4">
         <div className="flex items-center">
-          {cart && (
+          {cart && finalTotal > 0 && (
             <>
               <span className="text-xl md:text-2xl font-bold text-green-600 mr-2">
                 ₹{formatPrice(finalTotal)}
               </span>
-              <span className="text-gray-500 line-through">
-                {" "}
-                ₹{formatPrice(cart.subtotal)}
-              </span>
+              {cart.subtotal > finalTotal && (
+                <span className="text-gray-500 line-through">
+                  ₹{formatPrice(cart.subtotal)}
+                </span>
+              )}
             </>
           )}
         </div>

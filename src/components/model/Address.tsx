@@ -220,22 +220,55 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     setFormData(initialAddressFormState);
     setViewMode("list");
   };
+function showDeleteConfirmation(onConfirm: () => void) {
+  toast.custom((t) => (
+    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 w-[320px]">
+      <h3 className="text-sm font-semibold mb-2">Are you sure?</h3>
+      <p className="text-gray-700 text-sm mb-4">
+        Do you really want to remove this address?
+      </p>
+      <div className="flex justify-end gap-2">
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          // className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
+          className="px-3.5 py-2 flex bg-gray-100 text-black hover:bg-gray-200 transition-all duration-200 border rounded-full items-center cursor-pointer text-sm"
+
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            toast.dismiss(t.id);
+            onConfirm(); // Trigger delete logic
+          }}
+          // className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+          className="px-3.5 py-2 flex bg-red-100/50 text-red-700 hover:bg-red-700 hover:text-white transition-all duration-200 border border-red-700 rounded-full items-center cursor-pointer text-sm"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  ),
+    {
+      position: "top-center",
+      duration: Infinity,
+      id: "delete-confirm", 
+    });
+}
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!window.confirm("Are you sure you want to remove this address?")) {
-      return;
-    }
-    
+  // move logic to a confirm wrapper
+  showDeleteConfirmation(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/addresses/${addressId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Include cookies for authentication
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -245,23 +278,24 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       }
 
       toast.success("Address removed successfully");
-      
-      // Update local state
+
       setAddresses((prevAddresses) =>
         prevAddresses.filter((addr) => addr._id !== addressId)
       );
-      
-      // If the deleted address was being edited, go back to list
+
       if (viewMode === "editForm" && formData._id === addressId) {
         handleCancel();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete address");
-      toast.error(err instanceof Error ? err.message : "Failed to delete address");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete address";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  });
+};
 
   const getModalTitle = () => {
     if (viewMode === "addForm") return "Add New Address";
@@ -436,13 +470,13 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         value={formData.state || ""}
                         onChange={handleInputChange}
                       />
-                      <AnimatedInput
+                      {/* <AnimatedInput
                         label="Country"
                         name="country"
                         type="text"
                         value={formData.country || ""}
                         onChange={handleInputChange}
-                      />
+                      /> */}
                       <AnimatedInput
                         label="Zipcode"
                         name="zipcode"
