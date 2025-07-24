@@ -14,6 +14,9 @@ import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import AddresssModal from "@/components/model/Address";
 import Button from "@/components/uiFramework/Button";
+import PaymentOption from "@/components/model/PaymentOption";
+import { setCartCount } from "@/store/cartSlice";
+import { useDispatch } from "react-redux";
 
 // Add Razorpay type declaration for TypeScript
 declare global {
@@ -50,13 +53,26 @@ interface CartProduct {
   months_quantity: number;
   item_total: number;
 }
-
+interface EligibleItem {
+  product_id: string;
+  name: {
+    en: string;
+    hi: string;
+  };
+  quantity_in_cart: number;
+  quantity_needed: number;
+  quantity_used: number;
+  item_subtotal: number;
+}
 interface CartPlan {
-  id: string;
+  _id: string;
   name: string;
   months: number;
   discount: number;
-  discount_type: string;
+  discount_type: 'fixed' | 'percentage';
+  eligible_subtotal: number;
+  discount_amount: number;
+  eligible_items: EligibleItem[];
 }
 
 interface CartData {
@@ -73,6 +89,7 @@ interface CartData {
   total_price: number;
   item_count: number;
   auto_added_products: unknown;
+  available_plans:CartPlan[];
 }
 
 interface Coupon {
@@ -152,7 +169,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
   if (!show) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
+      <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center flex flex-col items-center justify-center">
         <div className="mb-4">
           <Image
             src="/images/icon/verify.svg"
@@ -222,9 +239,11 @@ export default function Cart() {
     [key: string]: boolean;
   }>({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [PaymentOptionModelOpen, setPaymentOptionModelOpen] = useState(false);
   const { language } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
+  const dispatch = useDispatch();
 
   // Address state
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
@@ -244,6 +263,91 @@ export default function Cart() {
   // // Debug: Log Razorpay Key to verify environment variable is set
   // console.log("Razorpay Key:", process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 
+  // Move fetchCart above handlePlanSelection so it can be used in its dependency array
+  const fetchCart = useCallback(async () => {
+    setCartLoading(true);
+    try {
+      const res = await fetch("/api/cart");
+      if (res.status === 401) {
+        toast.error("Please log in first");
+        setCartLoading(false);
+        return;
+      }
+      const data = await res.json();
+      if (!data.success) throw new Error("Invalid cart data");
+      setCart((prev) => {
+        if (data.data.plan) {
+          setSelectedPlanId(data.data.plan._id);
+          return { ...data.data };
+        } else if (prev && prev.selected_plan) {
+          return { ...data.data, selected_plan: prev.selected_plan };
+        } else {
+          return { ...data.data }
+        }
+      });
+      const totalQuantity = data?.data?.items?.reduce(
+        (acc: number, item: CartProduct) => acc + (item.quantity || 0),
+        0
+      );
+      dispatch(setCartCount(totalQuantity))
+      setAppliedCoupon(data.data.coupon || null);
+    } catch (err) {
+      setCartError((err as Error).message);
+    } finally {
+      setCartLoading(false);
+    }
+  }, [dispatch]);
+
+  // Move handlePlanSelection above the useEffect that uses it and wrap in useCallback
+  const handlePlanSelection = useCallback(async (planId: string) => {
+    if (planId === selectedPlanId || planLoading) return;
+
+    setPlanLoading(true);
+    try {
+      // Find the selected plan's months
+      // const plan = plans.find((p) => p._id === planId);
+      // const months = plan ? plan.months : 1;
+
+      // 1. Update the plan in the backend (for logged-in users)
+      const res = await fetch("/api/cart/plan", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_id: planId }),
+      });
+      if (res.status === 401) {
+        toast.error("Please log in first");
+        setPlanLoading(false);
+        return;
+      }
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.message || "Failed to update plan");
+      }
+      setSelectedPlanId(planId);
+      // 2. Update all cart items' quantity to match plan months
+      if (cart && cart.items.length > 0) {
+        const _plan = cart.available_plans.find((p) => p._id === planId);
+        const eligibleProductMap: Record<string, number> = {};
+        if (_plan) {
+          _plan.eligible_items?.forEach((item:EligibleItem) => {
+            eligibleProductMap[item.product_id] = item.quantity_needed;
+          });
+        }
+      }
+      // 3. Refresh cart
+      await fetchCart();
+      toast.success("Plan and quantities updated");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update plan");
+      // Revert selection on error
+      // if (cart?.selected_plan) {
+      //   setSelectedPlanId(cart.selected_plan._id);
+      // }
+    } finally {
+      setPlanLoading(false);
+    }
+  }, [selectedPlanId, planLoading, cart, fetchCart]);
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -262,35 +366,6 @@ export default function Cart() {
     };
     fetchPlans();
   }, [API_URL, cart?.items?.length]);
-
-  const fetchCart = useCallback(async () => {
-    setCartLoading(true);
-    try {
-      const res = await fetch("/api/cart");
-      if (res.status === 401) {
-        toast.error("Please log in first");
-        setCartLoading(false);
-        return;
-      }
-      const data = await res.json();
-      if (!data.success) throw new Error("Invalid cart data");
-      setCart((prev) => {
-        if (data.data.selected_plan) {
-          setSelectedPlanId(data.data.selected_plan.id);
-          return { ...data.data };
-        } else if (prev && prev.selected_plan) {
-          return { ...data.data, selected_plan: prev.selected_plan };
-        } else {
-          return { ...data.data };
-        }
-      });
-      setAppliedCoupon(data.data.coupon || null);
-    } catch (err) {
-      setCartError((err as Error).message);
-    } finally {
-      setCartLoading(false);
-    }
-  }, []);
 
   // On mount, if redirected from login, restore selected plan from localStorage
   useEffect(() => {
@@ -345,91 +420,12 @@ export default function Cart() {
         setSelectedPlanId(planId);
       }
     }
-  }, [user]);
+  }, [user, handlePlanSelection, selectedPlanId, fetchCart]);
 
   // Always fetch cart when user changes (after login, logout, etc.)
   useEffect(() => {
     fetchCart();
   }, [fetchCart, user]);
-
-  // Address state
-  // useEffect(() => {
-  //   const fetchAddresses = async () => {
-  //     if (!user) return;
-  //     try {
-  //       const res = await fetch("/api/v1/addresses", { credentials: "include" });
-  //       const data = await res.json();
-  //       if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-  //         // Prefer default address, else first
-  //         const def = data.data.find((a: Address) => a.is_default) || data.data[0];
-  //         setSelectedAddress(def);
-  //       } else {
-  //         setSelectedAddress(null);
-  //       }
-  //     } finally {
-  //       // setAddressLoading(false); // Removed as per edit hint
-  //     }
-  //   };
-  //   fetchAddresses();
-  // }, [user]);
-
-  const handlePlanSelection = async (planId: string) => {
-    if (planId === selectedPlanId || planLoading) return;
-
-    setPlanLoading(true);
-    try {
-      // Find the selected plan's months
-      const plan = plans.find((p) => p._id === planId);
-      const months = plan ? plan.months : 1;
-
-      // 1. Update the plan in the backend (for logged-in users)
-      const res = await fetch("/api/cart/plan", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_id: planId }),
-      });
-      if (res.status === 401) {
-        toast.error("Please log in first");
-        setPlanLoading(false);
-        return;
-      }
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.message || "Failed to update plan");
-      }
-      setSelectedPlanId(planId);
-      // 2. Update all cart items' quantity to match plan months
-      if (cart && cart.items.length > 0) {
-        // For each product, update quantity
-        await Promise.all(
-          cart.items.map(async (item) => {
-            // Only update if quantity is different
-            if (item.quantity !== months) {
-              await fetch(`/api/cart/${item.product_id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  quantity: months,
-                  months_quantity: months,
-                }),
-              });
-            }
-          })
-        );
-      }
-      // 3. Refresh cart
-      await fetchCart();
-      toast.success("Plan and quantities updated");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update plan");
-      // Revert selection on error
-      if (cart?.selected_plan) {
-        setSelectedPlanId(cart.selected_plan.id);
-      }
-    } finally {
-      setPlanLoading(false);
-    }
-  };
 
   const updateCartItem = async (item: CartProduct, newQty: number) => {
     if (newQty < 1) return;
@@ -595,7 +591,7 @@ export default function Cart() {
       (cart.subtotal * cart.selected_plan.discount) / 100
     );
     // Try to match the plan for display purposes
-    selectedPlan = plans.find((p) => p._id === cart.selected_plan?.id) || null;
+    selectedPlan = plans.find((p) => p._id === cart.selected_plan?._id) || null;
   } else if (selectedPlanId) {
     selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
     if (selectedPlan && selectedPlan.discount > 0) {
@@ -668,362 +664,9 @@ export default function Cart() {
   const buyAgainProducts = purchasedProducts.filter(
     (p) => !cartProductIds.includes(p._id)
   );
-  // Handle checkout
-  const handleCheckout = async () => {
-    if (!user) {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("redirectAfterLogin", "/cart");
-      }
-      router.push("/auth/login");
-      return;
-    }
 
-    if (!cart || cart.items.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
 
-    setCheckoutLoading(true);
-    try {
-      if (!selectedAddress || !selectedAddress._id) {
-        toast.error("No address selected. Please select a delivery address.");
-        setCheckoutLoading(false);
-        return;
-      }
-
-      const address = selectedAddress;
-      const paymentRequestData = {
-        shipping_address_id: address._id,
-        total_amount: finalTotal,
-      };
-
-      console.log("Sending payment request data:", paymentRequestData);
-
-      const paymentResponse = await fetch("/api/payment/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(paymentRequestData),
-      });
-
-      console.log("Payment response status:", paymentResponse.status);
-      const paymentData = await paymentResponse.json();
-      console.log("Payment API Response:", paymentData);
-
-      if (paymentResponse.ok && paymentData.success) {
-        toast.success("Payment order created successfully!");
-        const paymentInfo = paymentData.data || paymentData;
-
-        const razorpayOrderId =
-          paymentInfo.razorpay_order_id || paymentInfo.order_id;
-        const amountPaise =
-          paymentInfo.amount ||
-          (typeof paymentInfo.total_amount === "number"
-            ? paymentInfo.total_amount * 100
-            : undefined);
-        const razorpayKey =
-          paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-        const currency = paymentInfo.currency || "INR";
-
-        if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-          toast.error(
-            "Payment gateway error: Missing order details. Please try again or contact support."
-          );
-          setCheckoutLoading(false);
-          return;
-        }
-
-        const scriptLoaded = await loadRazorpayScript();
-        if (!scriptLoaded || typeof window.Razorpay !== "function") {
-          toast.error(
-            "Failed to load Razorpay payment gateway. Please try again."
-          );
-          setCheckoutLoading(false);
-          return;
-        }
-
-        const options = {
-          key: razorpayKey,
-          amount: amountPaise,
-          currency,
-          name: "Hilop",
-          description: "Order Payment",
-          order_id: razorpayOrderId,
-          handler: async function (response: {
-            razorpay_payment_id: string;
-            razorpay_order_id: string;
-            razorpay_signature: string;
-          }) {
-            try {
-              setCheckoutLoading(true);
-              const verifyRes = await fetch("/api/payment/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                }),
-              });
-
-              const verifyData = await verifyRes.json();
-              console.log("Payment verify response:", verifyData);
-
-              if (verifyData.success) {
-                const orderId =
-                  verifyData.order_id ||
-                  (verifyData.data && verifyData.data.order_id);
-                let orderSummary: OrderSummary | null = null;
-
-                if (orderId) {
-                  try {
-                    const orderRes = await fetch(`/api/orders/${orderId}`);
-                    if (orderRes.ok) {
-                      const orderData = await orderRes.json();
-                      orderSummary = orderData.data || null;
-                    }
-                  } catch {}
-                }
-
-                setLastOrderSummary(orderSummary);
-                setShowPaymentSuccess(true);
-                await fetch("/api/cart", { credentials: "include" });
-                await fetch("/api/orders", { credentials: "include" });
-                setCheckoutLoading(false);
-                return;
-              } else {
-                setCheckoutLoading(false);
-                toast.error(
-                  verifyData.message ||
-                    "Payment verification failed. Please contact support."
-                );
-              }
-            } catch {
-              setCheckoutLoading(false);
-              toast.error(
-                "Payment verification failed. Please contact support."
-              );
-            }
-          },
-
-          prefill: {
-            name: user?.name || "",
-            email: user?.email || "",
-            contact: user?.mobile_number || "",
-          },
-
-          theme: {
-            color: "#0f5132",
-          },
-        };
-
-        // Add RazorpayInstance type for TypeScript
-        // Only covers the constructor and open() method used here
-        interface RazorpayInstance {
-          open(): void;
-        }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rzp = new (window.Razorpay as unknown as {
-          new (options: Record<string, unknown>): RazorpayInstance;
-        })(options);
-        rzp.open();
-        setCheckoutLoading(false);
-        return;
-      } else {
-        console.error("Payment API Error Status:", paymentResponse.status);
-        console.error("Payment API Error Response:", paymentData);
-        toast.error(
-          paymentData.message ||
-            `Failed to create payment order (${paymentResponse.status})`
-        );
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Checkout failed. Please try again.");
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
-  // Handle checkout
-  // const handleCheckout = async () => {
-  //   if (!user) {
-  //     if (typeof window !== "undefined") {
-  //       localStorage.setItem("redirectAfterLogin", "/cart");
-  //     }
-  //     router.push("/auth/login");
-  //     return;
-  //   }
-  //   if (!cart || cart.items.length === 0) {
-  //     toast.error("Your cart is empty");
-  //     return;
-  //   }
-
-  //   setCheckoutLoading(true);
-  //   try {
-  //     // Use the address selected in the UI (component state) for payment
-  //     if (!selectedAddress || !selectedAddress._id) {
-  //       toast.error("No address selected. Please select a delivery address.");
-  //       setCheckoutLoading(false);
-  //       return;
-  //     }
-  //     const address = selectedAddress;
-  //     // Always use 'shipping_address_id' for backend, never 'address_id'
-  //     const paymentRequestData = {
-  //       shipping_address_id: address._id,
-  //       total_amount: finalTotal,
-  //     };
-  //     // Double-check: log the request body to ensure correct key
-  //     console.log("Sending payment request data:", paymentRequestData);
-  //     const paymentResponse = await fetch("/api/payment/create-order", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //       },
-  //       credentials: "include",
-  //       body: JSON.stringify(paymentRequestData),
-  //     });
-
-  //     console.log("Payment response status:", paymentResponse.status);
-
-  //     const paymentData = await paymentResponse.json();
-  //     console.log("Payment API Response:", paymentData);
-
-  //     if (paymentResponse.ok && paymentData.success) {
-  //       toast.success("Payment order created successfully!");
-  //       const paymentInfo = paymentData.data || paymentData;
-  //       // Support both possible backend response shapes
-  //       const razorpayOrderId =
-  //         paymentInfo.razorpay_order_id || paymentInfo.order_id;
-  //       const amountPaise =
-  //         paymentInfo.amount ||
-  //         (typeof paymentInfo.total_amount === "number"
-  //           ? paymentInfo.total_amount * 100
-  //           : undefined);
-  //       const razorpayKey =
-  //         paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  //       const currency = paymentInfo.currency || "INR";
-
-  //       // Defensive: Check for required fields from backend or fallback
-  //       if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-  //         toast.error(
-  //           "Payment gateway error: Missing order details. Please try again or contact support."
-  //         );
-  //         setCheckoutLoading(false);
-  //         return;
-  //       }
-
-  //       // Ensure Razorpay script is loaded before using window.Razorpay
-  //       const scriptLoaded = await loadRazorpayScript();
-  //       if (!scriptLoaded || typeof window.Razorpay !== "function") {
-  //         toast.error(
-  //           "Failed to load Razorpay payment gateway. Please try again."
-  //         );
-  //         setCheckoutLoading(false);
-  //         return;
-  //       }
-
-  //       // Use backend's amount (in paise) and key
-  //       const options = {
-  //         key: razorpayKey, // Use backend-provided key or fallback
-  //         amount: amountPaise, // Amount in paise from backend or fallback
-  //         currency,
-  //         name: "Hilop",
-  //         description: "Order Payment",
-  //         order_id: razorpayOrderId,
-  //         handler: async function (response: {
-  //           razorpay_payment_id: string;
-  //           razorpay_order_id: string;
-  //           razorpay_signature: string;
-  //         }) {
-  //           // Call backend to verify payment
-  //           try {
-  //             setCheckoutLoading(true); // Show loading while processing
-  //             const verifyRes = await fetch("/api/payment/verify", {
-  //               method: "POST",
-  //               headers: { "Content-Type": "application/json" },
-  //               credentials: "include",
-  //               body: JSON.stringify({
-  //                 razorpay_payment_id: response.razorpay_payment_id,
-  //                 razorpay_order_id: response.razorpay_order_id,
-  //                 razorpay_signature: response.razorpay_signature,
-  //                 // test_mode: true,
-  //               }),
-  //             });
-  //             const verifyData = await verifyRes.json();
-  //             console.log("Payment verify response:", verifyData);
-  //             if (verifyData.success) {
-  //               // Optionally fetch the latest order summary
-  //               const orderId =
-  //                 verifyData.order_id ||
-  //                 (verifyData.data && verifyData.data.order_id);
-  //               let orderSummary: OrderSummary | null = null;
-  //               if (orderId) {
-  //                 try {
-  //                   const orderRes = await fetch(`/api/orders/${orderId}`);
-  //                   if (orderRes.ok) {
-  //                     const orderData = await orderRes.json();
-  //                     orderSummary = orderData.data || null;
-  //                   }
-  //                 } catch {}
-  //               }
-  //               setLastOrderSummary(orderSummary);
-  //               setShowPaymentSuccess(true);
-  //               await fetch("/api/cart", { credentials: "include" });
-  //               await fetch("/api/orders", { credentials: "include" });
-  //               setCheckoutLoading(false);
-  //               // Do not redirect immediately; wait for user to close modal
-  //               return;
-  //               // Wait for backend to process order, then refresh cart and orders
-  //             } else {
-  //               setCheckoutLoading(false);
-  //               toast.error(
-  //                 verifyData.message ||
-  //                   "Payment verification failed. Please contact support."
-  //               );
-  //             }
-  //           } catch {
-  //             setCheckoutLoading(false);
-  //             toast.error(
-  //               "Payment verification failed. Please contact support."
-  //             );
-  //           }
-  //         },
-  //         prefill: {},
-  //         theme: {
-  //           color: "#0f5132",
-  //         },
-  //       };
-
-  //       // TypeScript: window.Razorpay is now guaranteed to be a function
-  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //       const rzp = new (window.Razorpay as any)(options);
-  //       rzp.open();
-  //       setCheckoutLoading(false);
-  //       return;
-  //     } else {
-  //       console.error("Payment API Error Status:", paymentResponse.status);
-  //       console.error("Payment API Error Response:", paymentData);
-  //       toast.error(
-  //         paymentData.message ||
-  //           `Failed to create payment order (${paymentResponse.status})`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Checkout error:", error);
-  //     toast.error("Checkout failed. Please try again.");
-  //   } finally {
-  //     setCheckoutLoading(false);
-  //   }
-  // };
-
-  // Modified handlePlanClick to support guests and update UI
-  const handlePlanClick = async (planId: string) => {
+ const handlePlanClick = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
     const plan = plans.find((p) => p._id === planId);
     const months = plan ? plan.months : 1;
@@ -1115,7 +758,179 @@ export default function Cart() {
   useEffect(() => {
     fetchAddresses();
   }, [user, fetchAddresses]);
+  
+  // Payment modal handlers
+  const handleOnlinePayment = async () => {
+    setCheckoutLoading(true);
+    try {
+      if (!user) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("redirectAfterLogin", "/cart");
+        }
+        router.push("/auth/login");
+        return;
+      }
+      if (!cart || cart.items.length === 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+      if (!selectedAddress || !selectedAddress._id) {
+        toast.error("No address selected. Please select a delivery address.");
+        setCheckoutLoading(false);
+        return;
+      }
+      const address = selectedAddress;
+      const paymentRequestData = {
+        shipping_address_id: address._id,
+        total_amount: finalTotal,
+      };
+      const paymentResponse = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(paymentRequestData),
+      });
+      const paymentData = await paymentResponse.json();
+      if (paymentResponse.ok && paymentData.success) {
+        toast.success("Payment order created successfully!");
+        const paymentInfo = paymentData.data || paymentData;
+        const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
+        const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === "number" ? paymentInfo.total_amount * 100 : undefined);
+        const razorpayKey = paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        const currency = paymentInfo.currency || "INR";
+        if (!amountPaise || !razorpayOrderId || !razorpayKey) {
+          toast.error("Payment gateway error: Missing order details. Please try again or contact support.");
+          setCheckoutLoading(false);
+          return;
+        }
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded || typeof window.Razorpay !== "function") {
+          toast.error("Failed to load Razorpay payment gateway. Please try again.");
+          setCheckoutLoading(false);
+          return;
+        }
+        const options = {
+          key: razorpayKey,
+          amount: amountPaise,
+          currency,
+          name: "Hilop",
+          description: "Order Payment",
+          order_id: razorpayOrderId,
+          handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string; }) {
+            try {
+              setCheckoutLoading(true);
+              const verifyRes = await fetch("/api/payment/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                const orderId = verifyData.order_id || (verifyData.data && verifyData.data.order_id);
+                let orderSummary: OrderSummary | null = null;
+                if (orderId) {
+                  try {
+                    const orderRes = await fetch(`/api/orders/${orderId}`);
+                    if (orderRes.ok) {
+                      const orderData = await orderRes.json();
+                      orderSummary = orderData.data || null;
+                    }
+                  } catch {}
+                }
+                setLastOrderSummary(orderSummary);
+                setShowPaymentSuccess(true);
+                await fetch("/api/cart", { credentials: "include" });
+                await fetch("/api/orders", { credentials: "include" });
+                setCheckoutLoading(false);
+                setPaymentOptionModelOpen(false);
+                return;
+              } else {
+                setCheckoutLoading(false);
+                toast.error(verifyData.message || "Payment verification failed. Please contact support.");
+              }
+            } catch {
+              setCheckoutLoading(false);
+              toast.error("Payment verification failed. Please contact support.");
+            }
+          },
+          prefill: {
+            name: user?.name || "",
+            email: user?.email || "",
+            contact: user?.mobile_number || "",
+          },
+          theme: {
+            color: "#0f5132",
+          },
+        };
+        interface RazorpayInstance { open(): void; }
+        const rzp = new (window.Razorpay as unknown as { new (options: Record<string, unknown>): RazorpayInstance; })(options);
+        rzp.open();
+        setCheckoutLoading(false);
+        setPaymentOptionModelOpen(false);
+        return;
+      } else {
+        toast.error(paymentData.message || `Failed to create payment order (${paymentResponse.status})`);
+      }
+    } catch (error) {
+      console.log("COD response status:", error);
+      toast.error("Checkout failed. Please try again.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
+  const handleCashOnDelivery = async () => {
+    if (!user) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("redirectAfterLogin", "/cart");
+      }
+      router.push("/auth/login");
+      return;
+    }
+    if (!selectedAddress || !selectedAddress._id) {
+      toast.error("No address selected. Please select a delivery address.");
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          shipping_address_id: selectedAddress._id,
+          payment_method: "cod",
+          notes: "Please call before delivery",
+        }),
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        toast.success("Order placed successfully with Cash on Delivery!");
+        setPaymentOptionModelOpen(false);
+        router.push("/my-order");
+      } else {
+        toast.error(data.message || "Failed to place COD order.");
+      }
+    } catch {
+      toast.error("Failed to place COD order. Please try again.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+  
+  
+  
   return (
     <>
       <Toaster position="bottom-right" />
@@ -1434,7 +1249,7 @@ export default function Cart() {
                           >
                             <motion.button
                               whileHover={{ scale: 1.2 }}
-                              className="px-3 py-1 text-gray-600 "
+                              className="px-3 py-1 text-gray-600 cursor-pointer"
                               onClick={() =>
                                 updateCartItem(item, item.quantity - 1)
                               }
@@ -1447,7 +1262,7 @@ export default function Cart() {
                             </span>
                             <motion.button
                               whileHover={{ scale: 1.2 }}
-                              className="px-3 py-1 text-gray-600 "
+                              className="px-3 py-1 text-gray-600 cursor-pointer"
                               onClick={() =>
                                 updateCartItem(item, item.quantity + 1)
                               }
@@ -1726,11 +1541,12 @@ export default function Cart() {
           )}
         </div>
         <ArrowButton
-          label={checkoutLoading ? "Processing..." : "Place Order"}
+          label={checkoutLoading ? "Processing..." : "Pre-Book Now"}
           theme="dark"
           className="w-fit"
           size="lg"
-          onClick={handleCheckout}
+          // onClick={handleCheckout}
+          onClick={() => setPaymentOptionModelOpen(true)}
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
@@ -1741,6 +1557,13 @@ export default function Cart() {
           setShowPaymentSuccess(false);
           window.location.href = "/my-order";
         }}
+      />
+      <PaymentOption
+        isOpen={PaymentOptionModelOpen}
+        onClose={() => setPaymentOptionModelOpen(false)}
+        onOnlinePayment={handleOnlinePayment}
+        onCashOnDelivery={handleCashOnDelivery}
+        loading={checkoutLoading}
       />
     </>
   );

@@ -50,7 +50,7 @@ const initialAddressFormState: AddressFormState = {
   landmark: "",
   city: "",
   state: "",
-  country: "",
+  country: "India",
   zipcode: "",
   is_default: false,
 };
@@ -137,7 +137,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       landmark: address.landmark || "",
       city: address.city || "",
       state: address.state || "",
-      country: address.country || "",
+      country: "India",
       zipcode: address.zipcode || "",
       is_default: address.is_default || false,
     });
@@ -188,7 +188,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
           landmark: formData.landmark,
           city: formData.city,
           state: formData.state,
-          country: formData.country,
+          country: "India",
           zipcode: formData.zipcode,
           is_default: formData.is_default,
         }),
@@ -474,8 +474,9 @@ function showDeleteConfirmation(onConfirm: () => void) {
                         label="Country"
                         name="country"
                         type="text"
-                        value={formData.country || ""}
+                        value={formData.country = "India"}
                         onChange={handleInputChange}
+                        readOnly
                       /> */}
                       <AnimatedInput
                         label="Zipcode"
