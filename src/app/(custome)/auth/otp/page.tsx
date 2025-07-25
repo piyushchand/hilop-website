@@ -44,6 +44,18 @@ function OtpPageContent() {
     setCanResend(true);
   }, [timer]);
 
+  useEffect(() => {
+    const handleEnterKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && otp.length === 6) {
+        e.preventDefault();
+        const form = document.getElementById('otp-form') as HTMLFormElement;
+        form?.requestSubmit();
+      }
+    };
+  
+    window.addEventListener('keydown', handleEnterKey);
+    return () => window.removeEventListener('keydown', handleEnterKey);
+  }, [otp]);
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -149,7 +161,7 @@ function OtpPageContent() {
             <>
               Already have an account?{' '}
               <a href="/auth/login" className="hover:underline text-green-800 font-semibold cursor-pointer">
-                Log in
+                Log inotp
               </a>
             </>
           ) : (
@@ -173,7 +185,7 @@ function OtpPageContent() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} id="otp-form">
           <OTPInput
             value={otp}
             onChange={handleOtpChange}

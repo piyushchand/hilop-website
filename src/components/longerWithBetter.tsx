@@ -135,7 +135,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 )}
                 {productId1 && (
                   <Button
-                    label="Buy Now"
+                    label="Pre-Book"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -167,7 +167,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 )}
                 {productId2 && (
                   <Button
-                    label="Buy Now"
+                    label="Pre-Book"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"

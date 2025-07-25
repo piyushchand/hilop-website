@@ -408,7 +408,7 @@ export default function ProductPage() {
                 link={product.test_id ? `/consultation?testId=${product.test_id}` : '/consultation'}
               />
               <Button
-                label={addToCartLoading ? "Adding..." : "Buy Now"}
+                label={addToCartLoading ? "Adding..." : "Pre-Book"}
                 variant="btn-dark"
                 size="xl"
                 onClick={handleBuyNow}
@@ -662,7 +662,7 @@ export default function ProductPage() {
               size="xl"
               link={`/product/${productId}`}
             />
-            <Button label="Buy Now" variant="btn-light" size="xl" />
+            <Button label="Pre-Book" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>
