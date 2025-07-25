@@ -206,10 +206,6 @@ export default function ProductPage() {
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const router = useRouter();
 
-  const handleThumbsSwiper = useCallback((swiper: SwiperType) => {
-    // Add custom class to swiper-wrapper
-  }, []);
-
   useEffect(() => {
     const productId = params?.id as string;
     if (!productId) {
@@ -441,7 +437,6 @@ export default function ProductPage() {
 
             <Swiper
               onSwiper={(swiper) => {
-                handleThumbsSwiper(swiper);
                 setThumbsSwiper(swiper);
               }}
               spaceBetween={16}
