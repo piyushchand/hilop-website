@@ -31,6 +31,16 @@ interface Question {
   image?: string;
 }
 
+type AnswerPayload = {
+  test_result_id: string | null;
+  test_id: string | null;
+  question_id: string;
+  answer_id: string;
+  height?: string;
+  weight?: string;
+  bmi_value?: number;
+};
+
 function AssessmentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -126,7 +136,10 @@ function AssessmentPageContent() {
     setSelectedOption(null);
   };
 
-  const handleOptionClick = async (answerId: string) => {
+  const handleOptionClick = async (
+    answerId: string,
+    bmiPayload?: { height: string; weight: string; bmi_value: number }
+  ) => {
     setSelectedOption(answerId);
     if (!testStarted) {
       // First answer: start the test
@@ -149,16 +162,22 @@ function AssessmentPageContent() {
     } else {
       // Subsequent answers: submit answer
       const isLastQuestion = currentStep === questions.length - 1;
+      const body: AnswerPayload = {
+        test_result_id: testResultId,
+        test_id: selectedTestId,
+        question_id: currentQuestion._id,
+        answer_id: answerId,
+      };
+      if (bmiPayload) {
+        body.height = bmiPayload.height;
+        body.weight = bmiPayload.weight;
+        body.bmi_value = bmiPayload.bmi_value;
+      }
       const res = await fetch('/api/consultation/answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          test_result_id: testResultId,
-          test_id: selectedTestId,
-          question_id: currentQuestion._id,
-          answer_id: answerId,
-        }),
+        body: JSON.stringify(body),
       });
       await res.json();
       if (isLastQuestion && testResultId) {
@@ -198,19 +217,19 @@ function AssessmentPageContent() {
     }
   };
 
-  const calculateBmi = () => {
+  const handleBmiSubmit = () => {
     const h = parseFloat(height);
     const w = parseFloat(weight);
     if (h > 0 && w > 0) {
       const heightInMeters = heightUnit === "cm" ? h / 100 : (h * 30.48) / 100;
       const finalBmi = w / (heightInMeters * heightInMeters);
       setBmi(finalBmi);
+      handleOptionClick(currentQuestion.answers[0]._id, {
+        height,
+        weight,
+        bmi_value: finalBmi,
+      });
     }
-  };
-
-  const handleBmiSubmit = () => {
-    calculateBmi();
-    proceedToNextStep();
   };
 
   const currentQuestion = questions[currentStep];
