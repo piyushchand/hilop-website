@@ -17,6 +17,7 @@ import Button from "@/components/uiFramework/Button";
 import PaymentOption from "@/components/model/PaymentOption";
 import { setCartCount } from "@/store/cartSlice";
 import { useDispatch } from "react-redux";
+import OrderSuccessful from "@/components/model/OrderSuccessful";
 
 // Add Razorpay type declaration for TypeScript
 declare global {
@@ -155,67 +156,73 @@ type OrderSummary = {
   status?: string;
 };
 
-interface PaymentSuccessModalProps {
-  show: boolean;
-  orderSummary: OrderSummary | null;
-  onClose: () => void;
-}
+// interface PaymentSuccessModalProps {
+//   src: string;
+//   title: string;
+//   description: string;
+//   show: boolean;
+//   orderSummary: OrderSummary | null;
+//   onClose: () => void;
+// }
 
-const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
-  show,
-  orderSummary,
-  onClose,
-}) => {
-  if (!show) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center flex flex-col items-center justify-center">
-        <div className="mb-4">
-          <Image
-            src="/images/icon/verify.svg"
-            width={64}
-            height={64}
-            alt="Success"
-            className="mx-auto mb-2"
-          />
-          <h2 className="text-2xl font-bold text-green-700 mb-2">
-            Payment Successful!
-          </h2>
-          <p className="text-gray-700 mb-2">
-            Your order has been placed successfully.
-          </p>
-        </div>
-        {orderSummary && (
-          <div className="mb-4 text-left bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold mb-2">Order Summary</h3>
-            <div className="text-sm text-gray-800">
-              <div>
-                <b>Order ID:</b> {orderSummary._id || orderSummary.order_id}
-              </div>
-              <div>
-                <b>Order Number:</b> {orderSummary.order_number}
-              </div>
-              <div>
-                <b>Total:</b> ₹
-                {orderSummary.total?.toFixed(2) || orderSummary.total_amount}
-              </div>
-              <div>
-                <b>Status:</b> {orderSummary.status}
-              </div>
-            </div>
-          </div>
-        )}
-        <Button
-          label="Go to My Orders"
-          variant="btn-dark"
-          size="xl"
-          className="w-full mt-2"
-          onClick={onClose}
-        />
-      </div>
-    </div>
-  );
-};
+// const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
+//   src,
+//   title,
+//   description,
+//   show,
+//   orderSummary,
+//   onClose,
+// }) => {
+//   if (!show) return null;
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+//       <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center flex flex-col items-center justify-center">
+//         <div className="mb-4">
+//           <Image
+//             src={src}
+//             width={64}
+//             height={64}
+//             alt="Success"
+//             className="mx-auto mb-2"
+//           />
+//           <h2 className="text-2xl font-bold text-green-700 mb-2">
+//             {title}
+//           </h2>
+//           <p className="text-gray-700 mb-2">
+//             {description}
+//           </p>
+//         </div>
+//         {orderSummary && (
+//           <div className="mb-4 text-left bg-gray-50 rounded-lg p-4">
+//             <h3 className="font-semibold mb-2">Order Summary</h3>
+//             <div className="text-sm text-gray-800">
+//               <div>
+//                 <b>Order ID:</b> {orderSummary._id || orderSummary.order_id}
+//               </div>
+//               <div>
+//                 <b>Order Number:</b> {orderSummary.order_number}
+//               </div>
+//               <div>
+//                 <b>Total:</b> ₹
+//                 {orderSummary.total?.toFixed(2) || orderSummary.total_amount}
+//               </div>
+//               <div>
+//                 <b>Status:</b> {orderSummary.status}
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//         <Button
+//           label="Go to My Orders"
+//           variant="btn-dark"
+//           size="xl"
+//           className="w-full mt-2"
+//           onClick={onClose}
+//         />
+//       </div>
+//     </div>
+//   );
+// };
 
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -255,6 +262,7 @@ export default function Cart() {
   const [lastOrderSummary, setLastOrderSummary] = useState<OrderSummary | null>(
     null
   );
+  const [orderSuccessTitle, setOrderSuccessTitle] = useState<string>("Payment Successful!");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -795,7 +803,7 @@ export default function Cart() {
       });
       const paymentData = await paymentResponse.json();
       if (paymentResponse.ok && paymentData.success) {
-        toast.success("Payment order created successfully!");
+        // toast.success("Payment order created successfully!");
         const paymentInfo = paymentData.data || paymentData;
         const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
         const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === "number" ? paymentInfo.total_amount * 100 : undefined);
@@ -846,6 +854,7 @@ export default function Cart() {
                   } catch {}
                 }
                 setLastOrderSummary(orderSummary);
+                setOrderSuccessTitle("Payment Successful!");
                 setShowPaymentSuccess(true);
                 await fetch("/api/cart", { credentials: "include" });
                 await fetch("/api/orders", { credentials: "include" });
@@ -887,7 +896,7 @@ export default function Cart() {
     }
   };
 
-  const handleCashOnDelivery = async () => {
+ const handleCashOnDelivery = async () => {
     if (!user) {
       if (typeof window !== "undefined") {
         localStorage.setItem("redirectAfterLogin", "/cart");
@@ -895,11 +904,14 @@ export default function Cart() {
       router.push("/auth/login");
       return;
     }
+
     if (!selectedAddress || !selectedAddress._id) {
       toast.error("No address selected. Please select a delivery address.");
       return;
     }
+
     setCheckoutLoading(true);
+
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -914,11 +926,16 @@ export default function Cart() {
           notes: "Please call before delivery",
         }),
       });
+
       const data = await response.json();
+
       if (response.ok && data.success) {
         toast.success("Order placed successfully with Cash on Delivery!");
         setPaymentOptionModelOpen(false);
-        router.push("/my-order");
+
+        setLastOrderSummary(data.order);
+        setOrderSuccessTitle("Order Successful!");
+        setShowPaymentSuccess(true); 
       } else {
         toast.error(data.message || "Failed to place COD order.");
       }
@@ -1545,12 +1562,14 @@ export default function Cart() {
           theme="dark"
           className="w-fit"
           size="lg"
-          // onClick={handleCheckout}
           onClick={() => setPaymentOptionModelOpen(true)}
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
-      <PaymentSuccessModal
+      <OrderSuccessful
+        src="/images/icon/verify.svg"
+        title={orderSuccessTitle}
+        description="Your order has been placed successfully."
         show={showPaymentSuccess}
         orderSummary={lastOrderSummary}
         onClose={() => {

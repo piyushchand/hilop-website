@@ -231,7 +231,7 @@ function showDeleteConfirmation(onConfirm: () => void) {
         <button
           onClick={() => toast.dismiss(t.id)}
           // className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
-          className="px-3.5 py-2 flex bg-gray-100 text-black hover:bg-gray-200 transition-all duration-200 border rounded-full items-center cursor-pointer text-sm"
+          className="px-3.5 py-2 flex bg-gray-100 text-black hover:bg-gray-200 transition-all border rounded-full duration-200 items-center cursor-pointer text-sm"
 
         >
           Cancel
@@ -251,7 +251,7 @@ function showDeleteConfirmation(onConfirm: () => void) {
   ),
     {
       position: "top-center",
-      duration: Infinity,
+      duration: 2000,
       id: "delete-confirm", 
     });
 }
@@ -316,6 +316,7 @@ function showDeleteConfirmation(onConfirm: () => void) {
       isOpen={isOpen}
       onClose={() => {
         handleCancel();
+        toast.dismiss();
         onClose();
       }}
     >

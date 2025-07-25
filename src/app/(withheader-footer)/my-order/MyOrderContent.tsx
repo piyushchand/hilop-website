@@ -9,6 +9,7 @@ import Image from "next/image";
 import Modal from "@/components/animationComponents/animated-model";
 import { OrderService, Order } from "@/services/orderService";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import {toast,  Toaster} from "react-hot-toast";
 
 // Types for the component
 type OrderStatus = "processing" | "delivered" | "cancelled" | "shipped" | "pending";
@@ -134,10 +135,10 @@ export default function MyOrder() {
             window.URL.revokeObjectURL(url);
             
             console.log('PDF downloaded successfully:', result.data.filename);
-            alert('Invoice downloaded successfully!');
+            toast.success('Invoice downloaded successfully!');
           } catch (base64Error) {
             console.error('Error converting base64 to PDF:', base64Error);
-            alert('Error processing PDF data. Please try again.');
+            toast.error('Error processing PDF data. Please try again.');
           }
         } else {
           console.error('No PDF data found in response:', result.data);
@@ -206,6 +207,7 @@ export default function MyOrder() {
 
   if (loading) {
     return (
+      <>
       <section className="w-full bg-gray-100 mb-16 lg:mb-40">
         <div className="container lg:mt-20 mt-10">
           <h1 className="text-5xl 2xl:text-6xl font-semibold mb-6 lg:mb-10">
@@ -216,163 +218,80 @@ export default function MyOrder() {
           </div>
         </div>
       </section>
+      </>
     );
   }
 
   return (
-    <section className="w-full bg-gray-100 mb-16 lg:mb-40">
-      <div className="container lg:mt-20 mt-10">
-        <h1 className="text-5xl 2xl:text-6xl font-semibold mb-6 lg:mb-10">
-          My Orders
-        </h1>
+    <>
+      <Toaster position="bottom-right" />
+      <section className="w-full bg-gray-100 mb-16 lg:mb-40">
+        <div className="container lg:mt-20 mt-10">
+          <h1 className="text-5xl 2xl:text-6xl font-semibold mb-6 lg:mb-10">
+            My Orders
+          </h1>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        {orders.length > 0 && (
-          <Swiper
-            spaceBetween={16}
-            slidesPerView="auto"
-            className="mb-8"
-            centeredSlides={false}
-          >
-            {availableStatuses.map((status) => (
-              <SwiperSlide key={status} className="!w-fit">
-                <Button
-                  onClick={() => {
-                    setActiveFilter(status);
-                    setVisibleCount(4);
-                  }}
-                  className="w-full"
-                  label={`${status.charAt(0).toUpperCase() + status.slice(1)}${status !== "All" ? ` (${getStatusCount(status)})` : ''}`}
-                  variant={activeFilter === status ? "btn-primary" : "btn-light"}
-                  size="xl"
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        )}
-
-        {/* Orders Grid */}
-        {visibleOrders.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {visibleOrders.map((order) => (
-                <div
-                  key={order._id}
-                  onClick={() => handleOrderClick(order)}
-                  className="bg-white rounded-lg border border-gray-200 transition-shadow cursor-pointer hover:shadow-lg flex flex-col"
-                >
-                  <div className="flex px-5 py-3 justify-between items-center border-b border-gray-200">
-                    <div>
-                      <h3 className="text-lg font-medium text-dark mb-1">
-                        {order.order_number}
-                      </h3>
-                      <p className="text-gray-700">
-                        Order ID: {order._id.slice(-8)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-lg text-gray-800 font-medium">
-                        {formatDate(order.createdAt)}
-                      </p>
-                      <p className="text-gray-700 text-end">
-                        {formatTime(order.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-5 flex flex-col gap-2">
-                    {order.items.map((item, i) => (
-                      <div key={i} className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200">
-                        <Image
-                          src={item.image || "/images/placeholder.svg"}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="w-20 h-20 rounded-lg object-cover bg-gray-200"
-                        />
-                        <div>
-                          <p className="text-lg text-gray-700 mb-1 line-clamp-2">
-                            {item.name}
-                          </p>
-                          <p className="text-base font-medium text-dark">
-                            Qty: {item.quantity} {item.price ? `× ${item.price.toFixed(2)}` : ''}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-5 border-t border-gray-200 flex justify-between items-center mt-auto">
-                    <span
-                      className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(order.status)}`}
-                    >
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </span>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-dark">
-                        {order.total ? order.total.toFixed(2) : '0.00'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
             </div>
+          )}
 
-            {visibleOrders.length < filteredOrders.length && (
-              <div className="mt-8 flex justify-center">
-                <Button
-                  label="Show More"
-                  onClick={handleShowMore}
-                  variant="btn-dark"
-                  size="xl"
-                  className="text-center"
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <p className="text-center text-gray-500 py-20">
-            No orders found for &ldquo;{activeFilter}&rdquo;.
-          </p>
-        )}
+          {orders.length > 0 && (
+            <Swiper
+              spaceBetween={16}
+              slidesPerView="auto"
+              className="mb-8"
+              centeredSlides={false}
+            >
+              {availableStatuses.map((status) => (
+                <SwiperSlide key={status} className="!w-fit">
+                  <Button
+                    onClick={() => {
+                      setActiveFilter(status);
+                      setVisibleCount(4);
+                    }}
+                    className="w-full"
+                    label={`${status.charAt(0).toUpperCase() + status.slice(1)}${status !== "All" ? ` (${getStatusCount(status)})` : ''}`}
+                    variant={activeFilter === status ? "btn-primary" : "btn-light"}
+                    size="xl"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
 
-        {/* Order Detail Modal */}
-        {modalOrder && (
-          <Modal
-            className="max-w-sm w-full h-fit rounded-lg overflow-hidden shadow-lg"
-            isOpen={!!modalOrder}
-            onClose={() => setModalOrder(null)}
-          >
-            {modalLoading ? (
-              <div className="p-8 flex justify-center">
-                <LoadingSpinner isVisible={true} />
-              </div>
-            ) : (
-              <>
-                <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
-                  {modalOrder.order_number}
-                </h2>
-                <div className="max-h-[70vh] overflow-y-auto">
-                  {/* Order Info */}
-                  <div className="p-6 flex items-center justify-between border-gray-200">
-                    <p className="text-gray-700 text-sm">
-                      Order ID: {modalOrder._id.slice(-8)}
-                    </p>
-                    <p className="text-gray-700 text-sm">{formatDate(modalOrder.createdAt)}</p>
-                  </div>
-
-                  {/* Items */}
-                  <div className="px-6 border-gray-200">
-                    <h3 className="font-medium text-dark text-lg mb-3">Order Items</h3>
-                    <div className="flex flex-col gap-3">
-                      {modalOrder.items.map((item, i) => (
-                        <div
-                          key={i}
-                          className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200"
-                        >
+          {/* Orders Grid */}
+          {visibleOrders.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                {visibleOrders.map((order) => (
+                  <div
+                    key={order._id}
+                    onClick={() => handleOrderClick(order)}
+                    className="bg-white rounded-lg border border-gray-200 transition-shadow cursor-pointer hover:shadow-lg flex flex-col"
+                  >
+                    <div className="flex px-5 py-3 justify-between items-center border-b border-gray-200">
+                      <div>
+                        <h3 className="text-lg font-medium text-dark mb-1">
+                          {order.order_number}
+                        </h3>
+                        <p className="text-gray-700">
+                          Order ID: {order._id.slice(-8)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-lg text-gray-800 font-medium">
+                          {formatDate(order.createdAt)}
+                        </p>
+                        <p className="text-gray-700 text-end">
+                          {formatTime(order.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-5 flex flex-col gap-2">
+                      {order.items.map((item, i) => (
+                        <div key={i} className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200">
                           <Image
                             src={item.image || "/images/placeholder.svg"}
                             alt={item.name}
@@ -380,78 +299,165 @@ export default function MyOrder() {
                             height={80}
                             className="w-20 h-20 rounded-lg object-cover bg-gray-200"
                           />
-                          <div className="flex-1">
-                            <p className="text-lg text-dark font-medium mb-1 line-clamp-2">{item.name}</p>
-                            <p className="text-md mb-1 text-gray-600">
-                              Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
+                          <div>
+                            <p className="text-lg text-gray-700 mb-1 line-clamp-2">
+                              {item.name}
                             </p>
-                            <p className="text-sm text-gray-600">
-                              Total: ₹{item.total ? item.total.toFixed(2) : '0.00'}
+                            <p className="text-base font-medium text-dark">
+                              Qty: {item.quantity} {item.price ? `× ${item.price.toFixed(2)}` : ''}
                             </p>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Shipping Address */}
-                  {modalOrder.shipping_address && (
-                    <div className="p-6 border-b border-gray-200">
-                      <h3 className="font-medium text-dark text-lg mb-3">Shipping Address</h3>
-                        <p className="text-gray-600 mt-2">{formatAddress(modalOrder.shipping_address)}</p>
-                    </div>
-                  )}
-
-                  {/* Order Summary */}
-                  <div className="p-6 bg-gray-100 flex flex-col gap-3">
-                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                      <p className="text-dark">Subtotal</p>
-                      <p className="text-gray-600 font-medium">
-                        ${modalOrder.subtotal ? modalOrder.subtotal.toFixed(2) : '0.00'}
-                      </p>
-                    </div>
-                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                      <p className="text-dark">Shipping Fee</p>
-                      <p className="text-gray-600 font-medium">
-                        ${modalOrder.shipping_fee ? modalOrder.shipping_fee.toFixed(2) : '0.00'}
-                      </p>
-                    </div>
-                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                      <p className="text-dark">Tax</p>
-                      <p className="text-gray-600 font-medium">
-                        ${modalOrder.tax ? modalOrder.tax.toFixed(2) : '0.00'}
-                      </p>
-                    </div>
-                    {(modalOrder.hilop_coins_discount || 0) > 0 && (
-                      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                        <p className="text-dark">Hilop Coins Discount</p>
-                        <p className="text-green-800 font-medium">
-                          -${(modalOrder.hilop_coins_discount || 0).toFixed(2)}
+                    <div className="p-5 border-t border-gray-200 flex justify-between items-center mt-auto">
+                      <span
+                        className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(order.status)}`}
+                      >
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
+                      <div className="text-right">
+                        <p className="text-lg font-semibold text-dark">
+                          {order.total ? order.total.toFixed(2) : '0.00'}
                         </p>
                       </div>
-                    )}
-                    <div className="flex justify-between items-center pt-3">
-                      <p className="text-dark font-semibold text-lg">Total Amount</p>
-                      <Button
-                        label={`$${modalOrder.total ? modalOrder.total.toFixed(2) : '0.00'}`}
-                        variant="btn-dark"
-                        size="xl"
-                      />
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {visibleOrders.length < filteredOrders.length && (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    label="Show More"
+                    onClick={handleShowMore}
+                    variant="btn-dark"
+                    size="xl"
+                    className="text-center"
+                  />
                 </div>
-                <button
-                  onClick={() => handleDownloadInvoice(modalOrder._id)}
-                  disabled={invoiceDownloading}
-                  className="text-green-800 hover:underline p-6 text-center font-semibold block border-t border-gray-200 w-full bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {invoiceDownloading ? 'Downloading...' : 'Download invoice'}
-                </button>
-              </>
-            )}
-          </Modal>
-        )}
-      </div>
-    </section>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-gray-500 py-20">
+              No orders found for &ldquo;{activeFilter}&rdquo;.
+            </p>
+          )}
+
+          {/* Order Detail Modal */}
+          {modalOrder && (
+            <Modal
+              className="max-w-sm w-full h-fit rounded-lg overflow-hidden shadow-lg"
+              isOpen={!!modalOrder}
+              onClose={() => setModalOrder(null)}
+            >
+              {modalLoading ? (
+                <div className="p-8 flex justify-center">
+                  <LoadingSpinner isVisible={true} />
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
+                    {modalOrder.order_number}
+                  </h2>
+                  <div className="max-h-[70vh] overflow-y-auto">
+                    {/* Order Info */}
+                    <div className="p-6 flex items-center justify-between border-gray-200">
+                      <p className="text-gray-700 text-sm">
+                        Order ID: {modalOrder._id.slice(-8)}
+                      </p>
+                      <p className="text-gray-700 text-sm">{formatDate(modalOrder.createdAt)}</p>
+                    </div>
+
+                    {/* Items */}
+                    <div className="px-6 border-gray-200">
+                      <h3 className="font-medium text-dark text-lg mb-3">Order Items</h3>
+                      <div className="flex flex-col gap-3">
+                        {modalOrder.items.map((item, i) => (
+                          <div
+                            key={i}
+                            className="flex gap-4 items-center border-b last:border-0 pb-3 last:pb-0 border-gray-200"
+                          >
+                            <Image
+                              src={item.image || "/images/placeholder.svg"}
+                              alt={item.name}
+                              width={80}
+                              height={80}
+                              className="w-20 h-20 rounded-lg object-cover bg-gray-200"
+                            />
+                            <div className="flex-1">
+                              <p className="text-lg text-dark font-medium mb-1 line-clamp-2">{item.name}</p>
+                              <p className="text-md mb-1 text-gray-600">
+                                Qty: {item.quantity} {item.price ? `× $${item.price.toFixed(2)}` : ''}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Total: ₹{item.total ? item.total.toFixed(2) : '0.00'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Shipping Address */}
+                    {modalOrder.shipping_address && (
+                      <div className="p-6 border-b border-gray-200">
+                        <h3 className="font-medium text-dark text-lg mb-3">Shipping Address</h3>
+                          <p className="text-gray-600 mt-2">{formatAddress(modalOrder.shipping_address)}</p>
+                      </div>
+                    )}
+
+                    {/* Order Summary */}
+                    <div className="p-6 bg-gray-100 flex flex-col gap-3">
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <p className="text-dark">Subtotal</p>
+                        <p className="text-gray-600 font-medium">
+                          ${modalOrder.subtotal ? modalOrder.subtotal.toFixed(2) : '0.00'}
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <p className="text-dark">Shipping Fee</p>
+                        <p className="text-gray-600 font-medium">
+                          ${modalOrder.shipping_fee ? modalOrder.shipping_fee.toFixed(2) : '0.00'}
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <p className="text-dark">Tax</p>
+                        <p className="text-gray-600 font-medium">
+                          ${modalOrder.tax ? modalOrder.tax.toFixed(2) : '0.00'}
+                        </p>
+                      </div>
+                      {(modalOrder.hilop_coins_discount || 0) > 0 && (
+                        <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                          <p className="text-dark">Hilop Coins Discount</p>
+                          <p className="text-green-800 font-medium">
+                            -${(modalOrder.hilop_coins_discount || 0).toFixed(2)}
+                          </p>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center pt-3">
+                        <p className="text-dark font-semibold text-lg">Total Amount</p>
+                        <Button
+                          label={`$${modalOrder.total ? modalOrder.total.toFixed(2) : '0.00'}`}
+                          variant="btn-dark"
+                          size="xl"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDownloadInvoice(modalOrder._id)}
+                    disabled={invoiceDownloading}
+                    className="text-green-800 hover:underline p-6 text-center font-semibold block border-t border-gray-200 w-full bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {invoiceDownloading ? 'Downloading...' : 'Download invoice'}
+                  </button>
+                </>
+              )}
+            </Modal>
+          )}
+        </div>
+      </section>
+    </>
   );
 }

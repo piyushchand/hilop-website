@@ -206,11 +206,6 @@ export default function ProductPage() {
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const router = useRouter();
 
-  const handleThumbsSwiper = useCallback((swiper: SwiperType) => {
-    // Add custom class to swiper-wrapper
-    swiper.wrapperEl.classList.add("justify-center");
-  }, []);
-
   useEffect(() => {
     const productId = params?.id as string;
     if (!productId) {
@@ -442,7 +437,6 @@ export default function ProductPage() {
 
             <Swiper
               onSwiper={(swiper) => {
-                handleThumbsSwiper(swiper);
                 setThumbsSwiper(swiper);
               }}
               spaceBetween={16}
@@ -454,7 +448,7 @@ export default function ProductPage() {
               {imagesToShow.map((image: string, index: number) => (
                 <SwiperSlide
                   key={index}
-                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300"
+                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
                 >
                   <Image
                     src={getSafeImage(image)}

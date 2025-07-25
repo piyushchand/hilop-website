@@ -1,8 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Modal from "../animationComponents/animated-model";
-import { CreditCard, HandCoins, Landmark} from "lucide-react";
-
+import { CreditCard, HandCoins, Landmark } from "lucide-react";
 
 interface PaymentOptionProps {
   isOpen: boolean;
@@ -12,7 +11,14 @@ interface PaymentOptionProps {
   loading?: boolean;
 }
 
-const PaymentOption: React.FC<PaymentOptionProps> = ({ isOpen, onClose, onOnlinePayment, onCashOnDelivery, loading }) => {
+const PaymentOption: React.FC<PaymentOptionProps> = ({
+  isOpen,
+  onClose,
+  onOnlinePayment,
+  onCashOnDelivery,
+  loading,
+}) => {
+
   return (
     <Modal
       isOpen={isOpen}
@@ -26,7 +32,6 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({ isOpen, onClose, onOnline
       </div>
       <div className="overflow-y-auto flex-1 w-full">
         <div className="px-4 py-4 space-y-6">
-
           <div>
             <button
               onClick={onOnlinePayment}
@@ -57,7 +62,6 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({ isOpen, onClose, onOnline
               <h3 className="text-base font-semibold">Cash on Delivery</h3>
             </button>
           </div>
-
         </div>
       </div>
     </Modal>
