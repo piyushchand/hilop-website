@@ -7,6 +7,7 @@ if (!API_URL) throw new Error('API URL is not set in environment variables');
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log("Received body:", body);
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("accessToken");
 

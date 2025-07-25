@@ -1562,7 +1562,13 @@ export default function Cart() {
           theme="dark"
           className="w-fit"
           size="lg"
-          onClick={() => setPaymentOptionModelOpen(true)}
+          onClick={() => {
+            if (!selectedAddress || !selectedAddress._id) {
+              toast.error("No address selected. Please select a delivery address.");
+              return;
+            }
+            setPaymentOptionModelOpen(true);
+          }}
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
