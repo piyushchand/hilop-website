@@ -208,7 +208,6 @@ export default function ProductPage() {
 
   const handleThumbsSwiper = useCallback((swiper: SwiperType) => {
     // Add custom class to swiper-wrapper
-    swiper.wrapperEl.classList.add("justify-center");
   }, []);
 
   useEffect(() => {
@@ -454,7 +453,7 @@ export default function ProductPage() {
               {imagesToShow.map((image: string, index: number) => (
                 <SwiperSlide
                   key={index}
-                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300"
+                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
                 >
                   <Image
                     src={getSafeImage(image)}
