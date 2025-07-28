@@ -1,7 +1,6 @@
 import React from "react";
 import Image from "next/image";
 import Modal from "../animationComponents/animated-model";
-import { CreditCard, HandCoins, Landmark } from "lucide-react";
 
 interface PaymentOptionProps {
   isOpen: boolean;
@@ -18,7 +17,6 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
   onCashOnDelivery,
   loading,
 }) => {
-
   return (
     <Modal
       isOpen={isOpen}
@@ -35,31 +33,48 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
           <div>
             <button
               onClick={onOnlinePayment}
-              className="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-100 border hover:border-black border-gray-200 hover:bg-green-50 rounded-lg w-full"
+              className="flex flex-col cursor-pointer gap-1 md:gap-0 md:flex-row items-center justify-between p-8 bg-gray-100 border hover:border-black border-gray-200 hover:bg-green-50 rounded-lg w-full"
               disabled={loading}
             >
-              <div className="flex items-center gap-4">
+              <h3 className="text-base font-semibold">Online Payment</h3>
+              <div className="ml-2 text-sm text-gray-500 animate-spin"></div>
+
+              <div className="flex items-center gap-2">
                 <Image
                   src="/images/payment-option-icon/upi.svg"
                   alt="UPI"
-                  width={24}
-                  height={24}
+                  width={30}
+                  height={30}
                 />
-                <CreditCard />
-                <Landmark />
+                <Image
+                  src="/images/payment-option-icon/card.svg"
+                  alt="UPI"
+                  width={30}
+                  height={30}
+                />
+
+                <Image
+                  src="/images/payment-option-icon/bank.svg"
+                  alt="UPI"
+                  width={30}
+                  height={30}
+                />
               </div>
-              <div className="ml-2 text-sm text-gray-500 animate-spin"></div>
-              <h3 className="text-base font-semibold">Online Payment</h3>
             </button>
           </div>
           <div>
             <button
               onClick={onCashOnDelivery}
-              className="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-100 border border-gray-200 hover:border-black hover:bg-green-50 rounded-lg w-full"
+              className="flex flex-col cursor-pointer gap-1 md:gap-0 md:flex-row items-center justify-between p-8 bg-gray-100 border border-gray-200 hover:border-black hover:bg-green-50 rounded-lg w-full"
               disabled={loading}
             >
-              <HandCoins size={32} />
               <h3 className="text-base font-semibold">Cash on Delivery</h3>
+              <Image
+                src="/images/payment-option-icon/cash.svg"
+                alt="UPI"
+                width={30}
+                height={30}
+              />
             </button>
           </div>
         </div>

@@ -61,33 +61,38 @@ interface LongerWithBetterProps {
   testId2?: string;
 }
 
-const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWithBetterProps) => {
+const LongerWithBetter = ({
+  productId1,
+  testId1,
+  productId2,
+  testId2,
+}: LongerWithBetterProps) => {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   return (
     <>
       <section className=" bg-rackley md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
         <div className="container">
-         <div className="max-w-lg mx-auto">
-         <Paragraph
-            align="center"
-            paragraph="Give your best performance in the bedroom"
-            textColor="text-white"
-            textSize="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold"
-            className="mb-6 md:mb-10 max-w-5xl"
-          />
-         </div>
+          <div className="max-w-lg mx-auto">
+            <Paragraph
+              align="center"
+              paragraph="Give your best performance in the bedroom"
+              textColor="text-white"
+              textSize="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold"
+              className="mb-6 md:mb-10 max-w-5xl"
+            />
+          </div>
           <div className="max-w-fit mx-auto sm:-mt-20 -mt-13 relative mb-16">
             <motion.img
               src="/images/improving-sexual/commponant-model.png"
               width={408}
               height={493}
               alt="weightloss model"
-              initial={{ y: 100, opacity: 0 }}   // Start 100px below and invisible
-      whileInView={{ y: 0, opacity: 1 }} // Animate to original position and visible
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      viewport={{ once: true, amount: 0.5 }} // Animate once when 50% visible
-      style={{ display: "block" }}
+              initial={{ y: 100, opacity: 0 }} // Start 100px below and invisible
+              whileInView={{ y: 0, opacity: 1 }} // Animate to original position and visible
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              viewport={{ once: true, amount: 0.5 }} // Animate once when 50% visible
+              style={{ display: "block" }}
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
             <div className="flex flex-col sm:flex-row gap-4 -mt-[52px]">
@@ -121,7 +126,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-              Natural For Improve Testosterone, Stamina & Energy
+                Natural For Improve Testosterone, Stamina & Energy
               </h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 {testId1 && (
@@ -135,7 +140,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 )}
                 {productId1 && (
                   <Button
-                    label="Pre-Book"
+                    label="Pre-Order"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -153,7 +158,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 className="mb-6 md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
-              Last Longer Herbal Sexual Enhancer Powder
+                Last Longer Herbal Sexual Enhancer Powder
               </h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 {testId2 && (
@@ -167,7 +172,7 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 )}
                 {productId2 && (
                   <Button
-                    label="Pre-Book"
+                    label="Pre-Order"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -213,7 +218,12 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.6 }} // 'once' runs it one time only, 'amount' defines visibility threshold
                 >
-                  {[ "Get hard", "Last longer", "Staying hard", "All of the above", ].map((text, index) => (
+                  {[
+                    "Get hard",
+                    "Last longer",
+                    "Staying hard",
+                    "All of the above",
+                  ].map((text, index) => (
                     <motion.span
                       key={index}
                       className="bg-black/20 backdrop-blur-lg text-xs lg:text-base rounded-full px-2 py-1 lg:px-4 lg:py-2 text-white"
@@ -230,35 +240,35 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
                 modules={[Navigation]}
                 slidesPerView={1}
                 navigation={{
-                  nextEl: '.swiper-button-next-custom',
-                  prevEl: '.swiper-button-prev-custom',
+                  nextEl: ".swiper-button-next-custom",
+                  prevEl: ".swiper-button-prev-custom",
                 }}
               >
                 {testimonials.map((testimonial, index) => (
                   <SwiperSlide key={index}>
-                     <Image
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        width={200}
-                        height={200}
-                        className="rotate-[20deg]"
-                      />
-                      <div>
-                        <h3 className="text-white font-medium text-xl mb-2">
-                          {testimonial.name}
-                        </h3>
-                        <p className="text-white mb-6 lg:mb-10">
-                          {testimonial.product}
-                        </p>
-                      </div>
-                      <p className="text-2xl">
-                        <span className="text-gray-400">
-                          “{testimonial.quotePart1}
-                        </span>{" "}
-                        <span className="text-white font-medium">
-                          {testimonial.quotePart2}”
-                        </span>
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      width={200}
+                      height={200}
+                      className="rotate-[20deg]"
+                    />
+                    <div>
+                      <h3 className="text-white font-medium text-xl mb-2">
+                        {testimonial.name}
+                      </h3>
+                      <p className="text-white mb-6 lg:mb-10">
+                        {testimonial.product}
                       </p>
+                    </div>
+                    <p className="text-2xl">
+                      <span className="text-gray-400">
+                        “{testimonial.quotePart1}
+                      </span>{" "}
+                      <span className="text-white font-medium">
+                        {testimonial.quotePart2}”
+                      </span>
+                    </p>
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -276,7 +286,10 @@ const LongerWithBetter = ({ productId1, testId1, productId2, testId2 }: LongerWi
           </div>
         </div>
       </section>
-      <TestModal isOpen={isTestModalOpen} onClose={() => setIsTestModalOpen(false)} />
+      <TestModal
+        isOpen={isTestModalOpen}
+        onClose={() => setIsTestModalOpen(false)}
+      />
     </>
   );
 };
