@@ -20,7 +20,7 @@ import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
-import type { Product as ProductType } from '@/types/index';
+import type { Product as ProductType } from "@/types/index";
 import { useRouter } from "next/navigation";
 
 // Define a type for the dynamic content to ensure consistency
@@ -290,9 +290,7 @@ export default function ProductPage() {
     return (
       <div className="container mx-auto px-4 py-8 h-screen flex justify-center items-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            {error}
-          </h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
           <Button
             link="/"
             label={language === "en" ? "Return to Home" : "होम पर वापस जाएं"}
@@ -309,8 +307,12 @@ export default function ProductPage() {
   // Helper: is this a placeholder product?
   const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
   const MIN_IMAGE_SLOTS = 3;
-  const getSafeImage = (img?: string) => img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
-  const isPlaceholderProduct = !product.images || product.images.length === 0 || product.images[0] === PLACEHOLDER_IMAGE;
+  const getSafeImage = (img?: string) =>
+    img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
+  const isPlaceholderProduct =
+    !product.images ||
+    product.images.length === 0 ||
+    product.images[0] === PLACEHOLDER_IMAGE;
 
   let imagesToShow: string[] = [];
   if (isPlaceholderProduct) {
@@ -323,8 +325,10 @@ export default function ProductPage() {
   }
 
   // For key ingredients, override image if placeholder
-  const keyIngredientsToShow = (product?.key_ingredients || []).map(ki =>
-    isPlaceholderProduct ? { ...ki, image: PLACEHOLDER_IMAGE } : { ...ki, image: getSafeImage(ki.image) }
+  const keyIngredientsToShow = (product?.key_ingredients || []).map((ki) =>
+    isPlaceholderProduct
+      ? { ...ki, image: PLACEHOLDER_IMAGE }
+      : { ...ki, image: getSafeImage(ki.image) }
   );
 
   const dynamicProductContent = getProductContent(product.name);
@@ -336,34 +340,43 @@ export default function ProductPage() {
 
   const whyChooseUs = Array.isArray(product?.why_choose_us)
     ? product.why_choose_us
-        .map((item: string | WhyChooseUsItem): { question: string; answer: string } => {
-          if (typeof item === "string") {
-            return { question: item, answer: item };
+        .map(
+          (
+            item: string | WhyChooseUsItem
+          ): { question: string; answer: string } => {
+            if (typeof item === "string") {
+              return { question: item, answer: item };
+            }
+            return {
+              question: item.title || item.question || "",
+              answer: item.description || item.answer || "",
+            };
           }
-          return {
-            question: item.title || item.question || "",
-            answer: item.description || item.answer || "",
-          };
-        })
+        )
         .filter((item) => item.question && item.answer)
     : [];
 
   const faqItems = Array.isArray(product?.faqs)
     ? product.faqs
-        .map((item: string | FaqAccordionItem, index: number): { id: string; question: string; answer: string } => {
-          if (typeof item === "string") {
+        .map(
+          (
+            item: string | FaqAccordionItem,
+            index: number
+          ): { id: string; question: string; answer: string } => {
+            if (typeof item === "string") {
+              return {
+                id: `faq-${index}`,
+                question: item,
+                answer: item,
+              };
+            }
             return {
               id: `faq-${index}`,
-              question: item,
-              answer: item,
+              question: item.title || item.question || "",
+              answer: item.description || item.answer || "",
             };
           }
-          return {
-            id: `faq-${index}`,
-            question: item.title || item.question || "",
-            answer: item.description || item.answer || "",
-          };
-        })
+        )
         .filter((item) => item.question && item.answer)
     : [];
 
@@ -400,10 +413,14 @@ export default function ProductPage() {
                 label="Get Started Now"
                 variant="btn-primary"
                 size="xl"
-                link={product.test_id ? `/consultation?testId=${product.test_id}` : '/consultation'}
+                link={
+                  product.test_id
+                    ? `/consultation?testId=${product.test_id}`
+                    : "/consultation"
+                }
               />
               <Button
-                label={addToCartLoading ? "Adding..." : "Pre-Book"}
+                label={addToCartLoading ? "Adding..." : "Pre-Order"}
                 variant="btn-dark"
                 size="xl"
                 onClick={handleBuyNow}
@@ -656,7 +673,7 @@ export default function ProductPage() {
               size="xl"
               link={`/product/${productId}`}
             />
-            <Button label="Pre-Book" variant="btn-light" size="xl" />
+            <Button label="Pre-Order" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>

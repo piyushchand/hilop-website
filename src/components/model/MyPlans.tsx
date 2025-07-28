@@ -72,7 +72,7 @@ export default function MyPlansModal({ isOpen, onClose }: MyPlansModalProps) {
         <h2 className="text-xl md:text-2xl font-semibold p-6 border-b border-gray-200 text-gray-800 flex-shrink-0">
           My Plans & Kit Guide
         </h2>
-        <div className="flex flex-col gap-6  p-6">
+        <div className="flex flex-col overflow-auto gap-6  p-6">
           {loading ? (
             <div className="text-center py-10 text-gray-500">
               Loading your plans...
