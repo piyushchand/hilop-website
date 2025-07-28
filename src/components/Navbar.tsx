@@ -22,11 +22,11 @@ import { setCartCount } from "../store/cartSlice";
 import type { User } from "@/types/auth";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { Dispatch, SetStateAction, RefObject } from "react";
-
 const Navbar = () => {
-
-  const [profileDropdownOpenDesktop, setProfileDropdownOpenDesktop] = useState(false);
-  const [profileDropdownOpenMobile, setProfileDropdownOpenMobile] = useState(false);
+  const [profileDropdownOpenDesktop, setProfileDropdownOpenDesktop] =
+    useState(false);
+  const [profileDropdownOpenMobile, setProfileDropdownOpenMobile] =
+    useState(false);
   const [mounted, setMounted] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { user, logout, isLoading, isInitialized } = useAuth();
@@ -51,7 +51,11 @@ const Navbar = () => {
     if (typeof window === "undefined") return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (window.innerWidth >= 768 && profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        window.innerWidth >= 768 &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setProfileDropdownOpenDesktop(false);
       }
     };
@@ -65,7 +69,9 @@ const Navbar = () => {
       try {
         if (user) {
           // Logged-in user: fetch count from /api/cart/count
-          const res = await fetch("/api/cart/count", { credentials: "include" });
+          const res = await fetch("/api/cart/count", {
+            credentials: "include",
+          });
           if (!res.ok) throw new Error("Failed to fetch cart count");
           const data = await res.json();
           dispatch(setCartCount(data?.data?.count ?? 0));
@@ -92,7 +98,7 @@ const Navbar = () => {
 
   // Check if language toggle should be shown (only on product and prescription pages)
   const shouldShowLanguageToggle = () => {
-    return pathname?.startsWith('/product/') || pathname === '/prescription';
+    return pathname?.startsWith("/product/") || pathname === "/prescription";
   };
 
   // Subcomponent: LoginButton
@@ -127,15 +133,23 @@ const Navbar = () => {
     return (
       <Link
         href="/cart"
-        className={`relative rounded-full ${size === "lg" ? "size-[52px]" : "size-[40px]"} hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center ${className}`}
+        className={`relative rounded-full ${
+          size === "lg" ? "size-[52px]" : "size-[40px]"
+        } hover:bg-gray-200 flex justify-center transition-all duration-300 border border-gray-200 items-center ${className}`}
       >
-        <ShoppingCart className={`text-dark ${size === "lg" ? "w-5 h-5" : "w-4 h-4"}`} />
-        {(cartLoading) ? (
-          <span className={`absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full animate-pulse`}>
+        <ShoppingCart
+          className={`text-dark ${size === "lg" ? "w-5 h-5" : "w-4 h-4"}`}
+        />
+        {cartLoading ? (
+          <span
+            className={`absolute -top-0.5 -right-0.5 bg-gray-300 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full animate-pulse`}
+          >
             ...
           </span>
         ) : cartCount > 0 ? (
-          <span className={`absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full`}>
+          <span
+            className={`absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs ${badgeSize} flex items-center justify-center rounded-full`}
+          >
             {cartCount}
           </span>
         ) : null}
@@ -166,7 +180,10 @@ const Navbar = () => {
     const buttonSize = isMobile ? "size-[46px]" : "size-[54px]";
     const nameClass = isMobile ? "text-lg" : "text-xl";
     return (
-      <div className={`relative ${isMobile ? "md:hidden" : "hidden md:block"}`} ref={isMobile ? undefined : profileRef}>
+      <div
+        className={`relative ${isMobile ? "md:hidden" : "hidden md:block"}`}
+        ref={isMobile ? undefined : profileRef}
+      >
         <button
           className={`${buttonSize} rounded-full bg-dark overflow-hidden focus:outline-none border border-gray-800 focus:border-green-800 cursor-pointer`}
           onClick={() => onClose((prev: boolean) => !prev)}
@@ -180,7 +197,9 @@ const Navbar = () => {
               className="rounded-full h-full w-full object-cover"
             />
           ) : (
-            <div className={`w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 ${nameClass}`}>
+            <div
+              className={`w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 ${nameClass}`}
+            >
               {user.name.charAt(0).toUpperCase()}
             </div>
           )}
@@ -206,11 +225,11 @@ const Navbar = () => {
                     className="flex-shrink-0"
                   />
                   <p className="text-sm text-green-800">
-                    {(user.hilop_coins ?? 0).toLocaleString()}  Coins
+                    {(user.hilop_coins ?? 0).toLocaleString()} Coins
                   </p>
                 </div>
               </div>
-              { [
+              {[
                 {
                   href: "/profile",
                   icon: <UserIcon className="mr-3 h-4 w-4" />,
@@ -299,8 +318,6 @@ const Navbar = () => {
           />
         </Link>
 
-       
-
         {/* Right Side Desktop */}
         <div className="flex items-center gap-2">
           {/* Language Toggle and Cart */}
@@ -328,7 +345,11 @@ const Navbar = () => {
               </button>
             )}
 
-            <CartButton cartLoading={cartLoading} cartCount={cartCount} size="lg" />
+            <CartButton
+              cartLoading={cartLoading}
+              cartCount={cartCount}
+              size="lg"
+            />
           </div>
 
           {/* Mobile Cart and Language */}
@@ -356,7 +377,11 @@ const Navbar = () => {
               </button>
             )}
 
-            <CartButton cartLoading={cartLoading} cartCount={cartCount} size="sm" />
+            <CartButton
+              cartLoading={cartLoading}
+              cartCount={cartCount}
+              size="sm"
+            />
           </div>
 
           {/* Login/Profile */}
@@ -400,8 +425,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-
-
     </header>
   );
 };

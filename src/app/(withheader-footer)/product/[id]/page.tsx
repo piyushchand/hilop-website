@@ -381,7 +381,7 @@ export default function ProductPage() {
     : [];
 
   return (
-    <>
+    <div className="relative">
       <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           <div className="order-2 lg:order-1">
@@ -408,7 +408,8 @@ export default function ProductPage() {
             <p className="md:text-xl text-lg font-medium text-dark mb-6">
               Start your transformation today with a personalized plan!
             </p>
-            <div className="flex gap-4">
+
+            <div className="hidden md:flex  gap-4">
               <Button
                 label="Get Started Now"
                 variant="btn-primary"
@@ -719,6 +720,25 @@ export default function ProductPage() {
       <Testimonials filteredByProductId={productId} />
       <FaqAccordion items={faqItems} className="mx-auto" />
       <Toaster position="bottom-right" />
-    </>
+      <div className="fixed bottom-0 flex z-[999] w-full  justify-center border-t border-t-gray-300 py-5 bg-white md:hidden  gap-4">
+        <Button
+          label="Get Started Now"
+          variant="btn-primary"
+          size="xl"
+          link={
+            product.test_id
+              ? `/consultation?testId=${product.test_id}`
+              : "/consultation"
+          }
+        />
+        <Button
+          label={addToCartLoading ? "Adding..." : "Pre-Order"}
+          variant="btn-dark"
+          size="xl"
+          onClick={handleBuyNow}
+          disabled={addToCartLoading}
+        />
+      </div>
+    </div>
   );
 }

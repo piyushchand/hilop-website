@@ -16,7 +16,8 @@ interface FormData {
 }
 
 export default function RegisterPage() {
-  const { register, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError, success, setSuccess } =
+    useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -27,7 +28,6 @@ export default function RegisterPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const countryBoxRef = useRef<HTMLDivElement>(null);
 
- 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -148,6 +148,14 @@ export default function RegisterPage() {
     }
   };
 
+  // Hide success message after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setSuccess]);
+
   return (
     <AuthLayout
       bottomContent={
@@ -178,6 +186,12 @@ export default function RegisterPage() {
           </div>
         )}
 
+        {success && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md transition-all duration-300 ease-in-out">
+            <p className="text-green-700 text-sm">{success}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-5 mb-6">
             <AnimatedInput
@@ -199,11 +213,12 @@ export default function RegisterPage() {
             />
 
             <div className="flex items-stretch gap-2 relative">
-            
               {/* Mobile input field */}
               <div className="flex-1 h-12">
                 <div className="h-full relative hilop-mobile-input-wrapper">
-                  <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+                  <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">
+                    +91
+                  </span>
                   <AnimatedInput
                     label="Mobile number"
                     name="mobile_number"

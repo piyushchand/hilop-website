@@ -233,6 +233,7 @@ export default function Cart() {
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState<string | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
+  const [planSuccess, setPlanSuccess] = useState<string | null>(null);
   const [coinsLoading, setCoinsLoading] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [planLoading, setPlanLoading] = useState(false);
@@ -257,6 +258,8 @@ export default function Cart() {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   // Address modal state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
+  // Address error state
+  const [addressError, setAddressError] = useState("");
 
   // State for payment confirmation modal
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
@@ -315,11 +318,9 @@ export default function Cart() {
       if (planId === selectedPlanId || planLoading) return;
 
       setPlanLoading(true);
+      setPlanError(null);
+      setPlanSuccess(null);
       try {
-        // Find the selected plan's months
-        // const plan = plans.find((p) => p._id === planId);
-        // const months = plan ? plan.months : 1;
-
         // 1. Update the plan in the backend (for logged-in users)
         const res = await fetch("/api/cart/plan", {
           method: "PUT",
@@ -348,15 +349,13 @@ export default function Cart() {
         }
         // 3. Refresh cart
         await fetchCart();
-        toast.success("Plan and quantities updated");
+        setPlanSuccess("Plan and quantities updated");
+        setPlanError(null);
       } catch (err) {
-        toast.error(
+        setPlanError(
           err instanceof Error ? err.message : "Failed to update plan"
         );
-        // Revert selection on error
-        // if (cart?.selected_plan) {
-        //   setSelectedPlanId(cart.selected_plan._id);
-        // }
+        setPlanSuccess(null);
       } finally {
         setPlanLoading(false);
       }
@@ -684,6 +683,7 @@ export default function Cart() {
   const handlePlanClick = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
     setPlanError(null);
+    setPlanSuccess(null);
     const plan = plans.find((p) => p._id === planId);
     const months = plan ? plan.months : 1;
     if (!user) {
@@ -711,11 +711,12 @@ export default function Cart() {
               })
             );
             await fetchCart();
-            toast.success("Plan and quantities updated");
+            setPlanSuccess("Plan and quantities updated");
             setPlanError(null);
           }
         } catch {
           setPlanError("Failed to update guest cart quantities");
+          setPlanSuccess(null);
         }
       }
       return;
@@ -748,6 +749,7 @@ export default function Cart() {
   // After closing the modal, refetch addresses
   const handleAddressModalClose = () => {
     setAddressModalOpen(false);
+    setAddressError(""); // Clear error when closing modal
     // Refetch addresses to update selected address
     if (user) {
       fetchAddresses();
@@ -982,6 +984,15 @@ export default function Cart() {
       setCheckoutLoading(false);
     }
   };
+  // Hide planSuccess after 4 seconds
+  useEffect(() => {
+    if (planSuccess) {
+      const timer = setTimeout(() => {
+        setPlanSuccess(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [planSuccess]);
 
   return (
     <>
@@ -990,6 +1001,7 @@ export default function Cart() {
       <div
         className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6 cursor-pointer select-none"
         onClick={() => {
+          setAddressError(""); // Clear error when opening modal
           if (user) {
             setAddressModalOpen(true);
           } else {
@@ -1004,6 +1016,7 @@ export default function Cart() {
         aria-label="Change address"
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
+            setAddressError(""); // Clear error when opening modal
             if (user) {
               setAddressModalOpen(true);
             } else {
@@ -1054,6 +1067,12 @@ export default function Cart() {
                 {formatPhone(selectedAddress.phone_number)}
               </div>
             )}
+            {/* Address error message */}
+            {addressError && (
+              <div className="text-red-600 text-xs md:text-sm mt-1 font-semibold">
+                Add address
+              </div>
+            )}
           </div>
           {/* Dropdown/Caret for address selection */}
           <button
@@ -1064,6 +1083,7 @@ export default function Cart() {
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              setAddressError(""); // Clear error when opening modal
               if (user) {
                 setAddressModalOpen(true);
               } else {
@@ -1186,6 +1206,11 @@ export default function Cart() {
                   {planError && (
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                       <p className="text-red-700 text-sm">{planError}</p>
+                    </div>
+                  )}
+                  {planSuccess && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-green-700 text-sm">{planSuccess}</p>
                     </div>
                   )}
                 </div>
@@ -1612,13 +1637,16 @@ export default function Cart() {
             </>
           )}
         </div>
+
         <ArrowButton
           label={checkoutLoading ? "Processing..." : "Pre-Order Now"}
           theme="dark"
           className="w-fit"
+          isIcon={true}
           size="lg"
           onClick={() => {
             if (!selectedAddress || !selectedAddress._id) {
+              setAddressError("Add Address First");
               toast.error(
                 "No address selected. Please select a delivery address."
               );
@@ -1629,6 +1657,7 @@ export default function Cart() {
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
+
       <OrderSuccessful
         src="/images/icon/verify.svg"
         title={orderSuccessTitle}

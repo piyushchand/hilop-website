@@ -11,39 +11,39 @@ body {
   --font-sans: var(--font-poppins);
   --font-serif: var(--font-poppins);
   --outline-color: var(--color-gray-200);
-  --color-primary: #7EBF28;
+  --color-primary: #7ebf28;
   --color-dark: #171717;
-  --color-neutral-200: #EAEAEA;
-  --color-gray-100: #F8F8F8;
-  --color-gray-200: #EAEAEA;
-  --color-gray-300: #D4D4D4;
-  --color-gray-400: #B8B8B8;
-  --color-gray-500: #9C9C9C;
-  --color-gray-600: #7F7F7F;
+  --color-neutral-200: #eaeaea;
+  --color-gray-100: #f8f8f8;
+  --color-gray-200: #eaeaea;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #b8b8b8;
+  --color-gray-500: #9c9c9c;
+  --color-gray-600: #7f7f7f;
   --color-gray-700: #636363;
   --color-gray-800: #454545;
-  --color-gray-900: #2E2E2E;
-  --color-green-100: #E6F5D0;
-  --color-green-200: #D2EBAD;
-  --color-green-300: #B7DB7D;
-  --color-green-400: #9ECA53;
-  --color-green-500: #88BA36;
+  --color-gray-900: #2e2e2e;
+  --color-green-100: #e6f5d0;
+  --color-green-200: #d2ebad;
+  --color-green-300: #b7db7d;
+  --color-green-400: #9eca53;
+  --color-green-500: #88ba36;
   --color-green-600: var(--color-primary);
-  --color-green-700: #6EA523;
-  --color-green-800: #5D8A1E;
+  --color-green-700: #6ea523;
+  --color-green-800: #5d8a1e;
   --color-green-900: #446514;
 
-  --color-red-200: #FF6F61;
-  --color-red-900: #D32F2F;
+  --color-red-200: #ff6f61;
+  --color-red-900: #d32f2f;
 
   --color-black: var(--color-dark);
-  --color-white: #FFFFFFFF;
+  --color-white: #ffffffff;
 
-  --color-light-vanilla: #D2C49F;
-  --color-vanilla: #BDAB7B;
-  --color-dark-vanilla: #AA955E;
+  --color-light-vanilla: #d2c49f;
+  --color-vanilla: #bdab7b;
+  --color-dark-vanilla: #aa955e;
 
-  --color-rackley: #5B87A4;
+  --color-rackley: #5b87a4;
   --color-dark-rackley: #477593;
 
   --breakpoint-sm: 640px;
@@ -108,17 +108,16 @@ body {
 
   --text-10xl: 128px;
   --text-10xl--line-height: 136px;
-
 }
 .container {
   @apply mx-auto px-4;
 }
 
-.top-content-badge{
-  @apply  bg-green-600/20 text-green-800 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit mb-3;
+.top-content-badge {
+  @apply bg-green-600/20 text-green-800 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit mb-3;
 }
-.text-40{
-font-size: 40px;
+.text-40 {
+  font-size: 40px;
 }
 .btn-tn-arrow {
   .btn-tn-arrow-round {
@@ -195,7 +194,7 @@ font-size: 40px;
   }
 }
 
-.swiper-custome-button{
+.swiper-custome-button {
   &.swiper-button-disabled {
     @apply cursor-not-allowed opacity-40;
   }
@@ -217,7 +216,7 @@ font-size: 40px;
       transform: translate(0, 0);
     }
   }
-  &.swiper-button-disabled{
+  &.swiper-button-disabled {
     &:hover {
       .roundbutton-arrow-1 {
         transform: none !important;
@@ -238,32 +237,34 @@ font-size: 40px;
   }
 }
 
-.social-icon{
+.social-icon {
   @apply w-12 h-12 rounded-full flex items-center justify-center bg-green-600/20 text-green-800 hover:bg-green-800 hover:text-white transition-all duration-300;
 }
 
-.bg-greenleaf{
-  background-image: url('/images/banner.jpg');
+.bg-greenleaf {
+  background-image: url("/images/banner.jpg");
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.20);
+    transform: scale(1.2);
     opacity: 0.85;
   }
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.40);
+    transform: scale(1.4);
     opacity: 0.85;
   }
 }
@@ -290,4 +291,13 @@ font-size: 40px;
 }
 .hilop-mobile-input-wrapper label {
   margin-left: 2.5rem !important;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
