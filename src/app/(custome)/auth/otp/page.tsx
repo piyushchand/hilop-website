@@ -12,7 +12,8 @@ import { Toaster } from "react-hot-toast";
 const OTP_TIMEOUT = 120;
 
 function OtpPageContent() {
-  const { isLoading, clearError, refreshUserData } = useAuth();
+  const { isLoading, clearError, refreshUserData, success, setSuccess } =
+    useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -20,7 +21,6 @@ function OtpPageContent() {
   const [timer, setTimer] = useState(OTP_TIMEOUT);
   const [canResend, setCanResend] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   // Always get params directly from searchParams
@@ -149,6 +149,14 @@ function OtpPageContent() {
       setIsResending(false);
     }
   };
+
+  // Hide success message after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setSuccess]);
 
   // Memoized page title/description to avoid SSR/CSR mismatch
   const pageTitle =

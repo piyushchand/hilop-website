@@ -8,11 +8,15 @@ import React, {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { User } from "@/types/auth";
 import { useLoading } from "./LoadingContext";
 import { getFirebaseInstances } from "@/lib/firebase";
-import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 
 // Types
 export interface AuthState {
@@ -20,6 +24,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean; // Track if initial auth check is complete
+  success: string | null; // <-- Add success state
 }
 
 interface AuthContextType extends AuthState {
@@ -37,6 +42,7 @@ interface AuthContextType extends AuthState {
   setUser: (user: User) => void;
   updateUser: (updates: Partial<User>) => void;
   refreshUserData: () => Promise<boolean>; // Function to refresh user data from /api/auth/me
+  setSuccess: (success: string | null) => void; // <-- Add setSuccess
 }
 
 interface RegisterData {
@@ -60,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: false,
     error: null,
     isInitialized: false,
+    success: null, // <-- Add success state
   });
 
   // Initialize auth state on mount - call /api/auth/me to check authentication
@@ -77,6 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setError = (error: string) => {
     setState((prev) => ({ ...prev, error }));
     toast.error(error);
+  };
+
+  const setSuccess = (success: string | null) => {
+    setState((prev) => ({ ...prev, success }));
   };
 
   // Function to refresh user data from /api/auth/me
@@ -137,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (userData: RegisterData) => {
     showLoading("Creating your account...");
     clearError();
+    setSuccess(null);
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -155,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data.message || "Invalid registration response");
       }
 
-      toast.success("Registration successful! Please verify your OTP.");
+      setSuccess("Registration successful! Please verify your OTP.");
       router.push(
         `/auth/otp?type=register&userId=${data.data.user_id}&mobile=${userData.mobile_number}`
       );
@@ -169,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (mobileNumber: string) => {
     showLoading("Sending OTP...");
     clearError();
+    setSuccess(null);
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -187,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data.message || "Invalid login response");
       }
 
-      toast.success("OTP sent successfully!");
+      setSuccess("OTP sent successfully!");
       router.push(
         `/auth/otp?type=login&userId=${data.data.user_id}&mobile=${mobileNumber}`
       );
@@ -205,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) => {
     showLoading("Verifying OTP...");
     clearError();
+    setSuccess(null);
 
     try {
       const response = await fetch("/api/auth/verify-otp", {
@@ -230,7 +244,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (userFetched) {
         // Show success message
-        toast.success(
+        setSuccess(
           type === "login" ? "Login successful!" : "Registration completed!"
         );
 
@@ -265,9 +279,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: null,
         error: null,
         isLoading: false,
+        success: null,
       }));
+      toast.success("Logged out successfully", { position: "top-right" });
       router.push("/"); // Redirect to home page after logout
-      toast.success("Logged out successfully");
     }
   };
 
@@ -287,6 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { auth } = getFirebaseInstances();
     showLoading("Signing in with Google...");
     clearError();
+    setSuccess(null);
     try {
       const googleProvider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, googleProvider);
@@ -332,7 +348,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // If user is authenticated and profile is complete, fetch user data and redirect to home
       const userFetched = await refreshUserData();
       if (userFetched) {
-        toast.success("Signed in with Google successfully!");
+        setSuccess("Signed in with Google successfully!");
         router.replace("/");
       } else {
         throw new Error("Failed to fetch user data after Google Sign-In");
@@ -359,6 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { auth } = getFirebaseInstances();
     showLoading("Signing in with Facebook...");
     clearError();
+    setSuccess(null);
     try {
       const facebookProvider = new FacebookAuthProvider();
       const result = await signInWithPopup(auth, facebookProvider);
@@ -391,7 +408,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const userFetched = await refreshUserData();
       if (userFetched) {
-        toast.success("Signed in with Facebook successfully!");
+        setSuccess("Signed in with Facebook successfully!");
         router.push("/");
       } else {
         throw new Error("Failed to fetch user data after Facebook Sign-In");
@@ -416,6 +433,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = {
     ...state,
+    success: state.success, // Explicitly include success
     login,
     register,
     verifyOTP,
@@ -426,9 +444,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUserData,
     signInWithGoogle,
     signInWithFacebook,
+    setSuccess, // <-- Add setSuccess to context value
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {" "}
+      <Toaster position="bottom-right" />
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 // Custom hook

@@ -12,8 +12,19 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, error, clearError, signInWithGoogle, signInWithFacebook, user } = useAuth();
+  const {
+    login,
+    isLoading,
+    error,
+    clearError,
+    signInWithGoogle,
+    signInWithFacebook,
+    user,
+    success,
+    setSuccess,
+  } = useAuth();
   const [mobileNumber, setMobileNumber] = useState("");
+  const [inputError, setInputError] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 10);
@@ -37,17 +48,20 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!mobileNumber.trim()) {
-      toast.error("Please enter your mobile number");
+      setInputError("Please enter your mobile number");
+      setTimeout(() => setInputError(""), 4000);
       return;
     }
 
     if (!validatePhoneNumber(mobileNumber)) {
-      toast.error(
+      setInputError(
         "Please enter a valid 10-digit Indian mobile number starting with 6-9"
       );
+      setTimeout(() => setInputError(""), 4000);
       return;
     }
 
+    setInputError("");
     try {
       await login(`91${mobileNumber}`);
     } catch (error: unknown) {
@@ -72,6 +86,14 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
+  // Hide success message after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setSuccess]);
+
   return (
     <>
       <Toaster position="bottom-right" />
@@ -95,8 +117,21 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit}>
+            {success && (
+              <div className="my-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-700 text-sm">{success}</p>
+              </div>
+            )}
+            {inputError && (
+              <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-700 text-sm"> {inputError}</p>
+              </div>
+            )}
+
             <div className="relative hilop-mobile-input-wrapper">
-              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">
+                +91
+              </span>
               <AnimatedInput
                 label="Mobile number"
                 name="mobile_number"
