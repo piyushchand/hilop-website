@@ -1403,22 +1403,19 @@ export default function Cart() {
                             className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0 flex flex-row items-center justify-between gap-2">
-                            <div>
-                              <p
-                                className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
-                                title={getText(item.name, language)}
-                              >
-                                {getText(item.name, language)}
+                            <p
+                              className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                              title={getText(item.name, language)}
+                            >
+                              {getText(item.name, language)}
+                            </p>
+                            {item.orderDate && (
+                              <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                                Last ordered:{" "}
+                                {new Date(item.orderDate).toLocaleDateString()}
                               </p>
-                              {item.orderDate && (
-                                <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                                  Last ordered:{" "}
-                                  {new Date(
-                                    item.orderDate
-                                  ).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
+                            )}
+
                             <div className="flex-shrink-0 ml-2">
                               <Button
                                 label={

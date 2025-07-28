@@ -186,7 +186,7 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                   trackColor="text-gray-200"
                   animationDuration={800}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+                <div className="absolute top-1/2 bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
                   <span className="text-3xl md:text-5xl font-extrabold text-primary leading-none font-sans drop-shadow-lg">
                     {bmi !== null ? bmi : "--"}
                   </span>
