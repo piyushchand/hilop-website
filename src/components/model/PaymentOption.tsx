@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Modal from "../animationComponents/animated-model";
+import Button from "../uiFramework/Button";
 
 interface PaymentOptionProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
     } else {
       onCashOnDelivery();
     }
+    onClose();
   };
 
   return (
@@ -53,15 +55,9 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   type="radio"
                   name="payment"
                   value="razorpay"
-                  onClick={() => {
-                    setSelectedPayment("razorpay");
-                    onOnlinePayment();
-                  }}
                   checked={selectedPayment === "razorpay"}
                   onChange={() => {
                     setSelectedPayment("razorpay");
-                    onOnlinePayment();
-                    onClose();
                   }}
                   className="size-4 mt-1"
                   disabled={loading}
@@ -78,23 +74,51 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                       height={28}
                     />
                     <Image
-                      src="/images/payment-option-icon/card.svg"
-                      alt="Card"
+                      src="/images/payment-option-icon/visa.svg"
+                      alt="Visa"
                       width={28}
                       height={28}
                     />
                     <Image
-                      src="/images/payment-option-icon/bank.svg"
-                      alt="Bank"
+                      src="/images/payment-option-icon/mastercard.svg"
+                      alt="Mastercard"
                       width={28}
                       height={28}
                     />
+                    <Image
+                      src="/images/payment-option-icon/rupay.svg"
+                      alt="Rupay"
+                      width={28}
+                      height={28}
+                    />
+
                     <span className="text-xs bg-gray-200 rounded px-2 py-0.5 ml-1">
                       +16
                     </span>
                   </div>
                 </div>
               </div>
+              {/* Razorpay redirect details */}
+              {/* {selectedPayment === "razorpay" && ( */}
+              <div className="flex flex-col items-center justify-center border-t border-gray-200 mt-4 pt-4">
+                <Image
+                  src="/images/payment-option-icon/card.svg"
+                  alt="Cash"
+                  width={64}
+                  height={64}
+                />
+
+                <p className="text-center text-gray-700 text-sm mt-2">
+                  After clicking{" "}
+                  <span className="font-semibold">“Pay now”</span>, you will be
+                  redirected to
+                  <br />
+                  Razorpay Secure (UPI, Cards, Wallets, NetBanking) to
+                  <br />
+                  complete your purchase securely.
+                </p>
+              </div>
+              {/*  )} */}
             </label>
           </div>
           <div>
@@ -107,8 +131,6 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   checked={selectedPayment === "cod"}
                   onChange={() => {
                     setSelectedPayment("cod");
-                    onCashOnDelivery();
-                    onClose();
                   }}
                   className="size-4"
                   disabled={loading}
@@ -125,7 +147,20 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
               </div>
             </label>
           </div>
-          {/* Remove the Pay now button */}
+          {/* Pay now button */}
+          {/* <button
+            type="submit"
+            className="w-full mt-4 py-2 px-4 cursor-pointer bg-gree-600 text-white font-semibold rounded-lg shadow hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Pay now"}
+          </button> */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full"
+            label="Pay now"
+          ></Button>
         </form>
       </div>
     </Modal>
