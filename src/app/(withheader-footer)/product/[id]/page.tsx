@@ -11,7 +11,7 @@ import { getText } from "@/utils/getText";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/thumbs";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, ShoppingCart } from "lucide-react";
 import Accordion from "@/components/uiFramework/Accordion";
 import RoundButton from "@/components/uiFramework/RoundButton";
 import Paragraph from "@/components/animationComponents/TextVisble";
@@ -243,6 +243,7 @@ export default function ProductPage() {
         }
 
         setProduct(data.data);
+        console.log(data.data, "data.data");
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unexpected error occurred"
@@ -411,7 +412,7 @@ export default function ProductPage() {
 
             <div className="hidden md:flex  gap-4">
               <Button
-                label="Get Started Now"
+                label="Take The Test"
                 variant="btn-primary"
                 size="xl"
                 link={
@@ -421,7 +422,7 @@ export default function ProductPage() {
                 }
               />
               <Button
-                label={addToCartLoading ? "Adding..." : "Pre-Order"}
+                label={addToCartLoading ? "Adding..." : "Add To Cart"}
                 variant="btn-dark"
                 size="xl"
                 onClick={handleBuyNow}
@@ -500,7 +501,7 @@ export default function ProductPage() {
             </h2>
             <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
-              label="Get Started Now"
+              label="Take The Test"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
@@ -596,7 +597,7 @@ export default function ProductPage() {
                 {getText(product.how_it_works || "", language)}
               </p>
               <Button
-                label="Get Started Now"
+                label="Take The Test"
                 variant="btn-primary"
                 size="xl"
                 link={`/product/${productId}`}
@@ -669,12 +670,12 @@ export default function ProductPage() {
           </div>
           <div className="flex gap-4">
             <Button
-              label="Get Started Now"
+              label="Take The Test"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
             />
-            <Button label="Pre-Order" variant="btn-light" size="xl" />
+            <Button label="Add To Cart" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>
@@ -720,24 +721,29 @@ export default function ProductPage() {
       <Testimonials filteredByProductId={productId} />
       <FaqAccordion items={faqItems} className="mx-auto" />
       <Toaster position="bottom-right" />
-      <div className="fixed bottom-0 flex z-[999] w-full  justify-center border-t border-t-gray-300 py-5 bg-white md:hidden  gap-4">
-        <Button
-          label="Get Started Now"
-          variant="btn-primary"
-          size="xl"
-          link={
-            product.test_id
-              ? `/consultation?testId=${product.test_id}`
-              : "/consultation"
-          }
-        />
-        <Button
-          label={addToCartLoading ? "Adding..." : "Pre-Order"}
-          variant="btn-dark"
-          size="xl"
-          onClick={handleBuyNow}
-          disabled={addToCartLoading}
-        />
+      <div className="fixed bottom-0 grid grid-cols-2 items-center    z-[999] w-full  justify-center border-t border-t-gray-300  bg-white md:hidden  ">
+        <div className="bg-primary py-5">
+          <Button
+            label="Take The Test"
+            variant="btn-primary"
+            className="!w-full !h-full !rounded-none "
+            link={
+              product.test_id
+                ? `/consultation?testId=${product.test_id}`
+                : "/consultation"
+            }
+          />
+        </div>
+        <div className="bg-dark flex justify-center items-center py-5">
+          <Button
+            label={addToCartLoading ? "Adding..." : "Add To Cart"}
+            variant="btn-dark"
+            className=" !h-full !rounded-none !border-transparent"
+            onClick={handleBuyNow}
+            disabled={addToCartLoading}
+          />
+          <ShoppingCart className={`text-white `} />
+        </div>
       </div>
     </div>
   );
