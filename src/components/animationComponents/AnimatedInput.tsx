@@ -1,9 +1,13 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, InputHTMLAttributes } from "react";
 import { motion } from "framer-motion";
 import { CalendarRange, Clock } from "lucide-react";
 
-interface AnimatedInputProps {
+interface AnimatedInputProps
+  extends Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    "onChange" | "value" | "type" | "name" | "label"
+  > {
   label: string;
   name: string;
   type?:
@@ -37,6 +41,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
   onChange,
   placeholder,
   disabled = false,
+  ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [inputValue, setInputValue] = useState(initialValue);
@@ -174,6 +179,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
             w-full px-3 py-4 bg-none outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
             text-gray-900 placeholder-transparent leading-[24px] appearance-none
           `}
+          {...rest}
         />
         {(type === "date" || type === "time") && (
           <button

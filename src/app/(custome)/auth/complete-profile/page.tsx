@@ -175,6 +175,11 @@ function CompleteProfileForm() {
               value={formData.birthdate}
               onChange={handleInputChange}
               required
+              max={
+                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                  .toISOString()
+                  .split("T")[0]
+              }
             />
 
             <Button
