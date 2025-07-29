@@ -36,7 +36,7 @@ interface ProductDynamicContent {
 
 // Consolidated Dynamic content mapping based on product name
 const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
-  Slimvibe: {
+  "Hardveda - Natural Performance Booster Capsule": {
     customImage: "/images/weight-loss/why-choose.jpg",
     whyChooseTitle: "Our Herbal Fat Loss Formula?",
     benefitTags: [
@@ -80,7 +80,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       hi: "हमारा बोल्डराइज फॉर्मूला यौन प्रदर्शन और ऊर्जा में तत्काल और ध्यान देने योग्य सुधार प्रदान करने के लिए प्राकृतिक जड़ी-बूटियों के एक शक्तिशाली मिश्रण का उपयोग करता है, जिसमें कोई कृत्रिम योजक नहीं होता है।",
     },
   },
-  Hardveda: {
+  "Slimvibe - Herbal Weight Loss Capsule": {
     customImage: "/images/improving-sexual/why-choose.jpg",
     whyChooseTitle: "Our Herbal Sexual Wellness formula?",
     benefitTags: [
@@ -243,7 +243,6 @@ export default function ProductPage() {
         }
 
         setProduct(data.data);
-        console.log(data.data, "data.data");
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unexpected error occurred"
