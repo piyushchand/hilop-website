@@ -18,7 +18,7 @@ export default function LoginPage() {
     error,
     clearError,
     signInWithGoogle,
-    signInWithFacebook,
+    // signInWithFacebook,
     user,
     success,
     setSuccess,
@@ -35,9 +35,9 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     await signInWithGoogle();
   };
-  const handleFacebookLogin = async () => {
-    await signInWithFacebook();
-  };
+  // const handleFacebookLogin = async () => {
+  //   await signInWithFacebook();
+  // };
 
   const validatePhoneNumber = (phone: string) => {
     const cleanPhone = phone.replace(/\D/g, "");
@@ -173,7 +173,7 @@ export default function LoginPage() {
               Google
             </button>
 
-            <button
+            {/* <button
               type="button"
               className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
@@ -186,7 +186,7 @@ export default function LoginPage() {
                 alt="Facebook"
               />
               Facebook
-            </button>
+            </button> */}
           </div>
         </div>
       </AuthLayout>

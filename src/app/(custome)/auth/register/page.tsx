@@ -292,7 +292,7 @@ export default function RegisterPage() {
             Google
           </button>
 
-          <button
+          {/* <button
             type="button"
             className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}
@@ -304,7 +304,7 @@ export default function RegisterPage() {
               alt="Facebook"
             />
             Facebook
-          </button>
+          </button> */}
         </div>
       </div>
     </AuthLayout>
