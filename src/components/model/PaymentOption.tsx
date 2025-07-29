@@ -33,12 +33,15 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-sm w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg bg-white flex flex-col justify-start"
+      className="max-w-md w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg bg-white flex flex-col justify-start"
     >
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <h2 className="text-xl md:text-2xl font-semibold text-dark p-4 md:p-5">
-          Payment Option
+      <div className="sticky top-0 z-10 bg-white border-b p-4 md:p-5 border-gray-200">
+        <h2 className="text-xl md:text-2xl font-semibold text-dark ">
+          Payment
         </h2>
+        <p className="text-black/50 text-sm mt-1">
+          All transactions are secure and encrypted.
+        </p>
       </div>
       <div className="overflow-y-auto flex-1 w-full">
         <form
@@ -49,7 +52,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
           }}
         >
           <div>
-            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black hover:bg-green-50 w-full">
+            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black/50  w-full">
               <div className="flex flex-row items-start gap-3">
                 <input
                   type="radio"
@@ -59,11 +62,11 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   onChange={() => {
                     setSelectedPayment("razorpay");
                   }}
-                  className="size-4 mt-1"
+                  className="size-4 mt-1 accent-dark"
                   disabled={loading}
                 />
                 <div className="flex flex-col md:flex-row flex-1  gap-2">
-                  <span className="font-semibold text-sm md:text-base w-full break-words leading-snug">
+                  <span className="font-medium text-sm md:text-base w-full break-words leading-snug">
                     Razorpay Secure (UPI, Cards, Wallets, NetBanking)
                   </span>
                   <div className="flex flex-wrap md:justify-end w-full items-center gap-2">
@@ -72,27 +75,31 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                       alt="UPI"
                       width={28}
                       height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
                     />
                     <Image
                       src="/images/payment-option-icon/visa.svg"
                       alt="Visa"
                       width={28}
                       height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
                     />
                     <Image
                       src="/images/payment-option-icon/mastercard.svg"
                       alt="Mastercard"
                       width={28}
                       height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
                     />
                     <Image
                       src="/images/payment-option-icon/rupay.svg"
                       alt="Rupay"
                       width={28}
                       height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
                     />
 
-                    <span className="text-xs bg-gray-200 rounded px-2 py-0.5 ml-1">
+                    <span className="text-sm text-center flex border border-black/20  justify-center items-center bg-white  rounded-xs w-12 h-8 p-px ml-1">
                       +16
                     </span>
                   </div>
@@ -100,21 +107,22 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
               </div>
               {/* Razorpay redirect details */}
               {/* {selectedPayment === "razorpay" && ( */}
-              <div className="flex flex-col items-center justify-center border-t border-gray-200 mt-4 pt-4">
+              <div className="flex flex-col gap-8 items-center justify-center border-t border-gray-200 mt-4 pt-4">
                 <Image
                   src="/images/payment-option-icon/card.svg"
                   alt="Cash"
-                  width={64}
+                  width={200}
                   height={64}
+                  className="opacity-50"
                 />
 
-                <p className="text-center text-gray-700 text-sm mt-2">
+                <p className="text-center text-black/80 text-sm sm:text-base">
                   After clicking{" "}
                   <span className="font-semibold">“Pay now”</span>, you will be
                   redirected to
-                  <br />
+                  <br className="hidden sm:block" />
                   Razorpay Secure (UPI, Cards, Wallets, NetBanking) to
-                  <br />
+                  <br className="hidden sm:block" />
                   complete your purchase securely.
                 </p>
               </div>
@@ -122,7 +130,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
             </label>
           </div>
           <div>
-            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black hover:bg-green-50 w-full">
+            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black/50 w-full">
               <div className="flex flex-row items-center gap-3">
                 <input
                   type="radio"
@@ -132,10 +140,10 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   onChange={() => {
                     setSelectedPayment("cod");
                   }}
-                  className="size-4"
+                  className="size-4 accent-dark"
                   disabled={loading}
                 />
-                <span className="font-semibold text-sm md:text-base flex-1 break-words leading-snug">
+                <span className="font-medium text-sm md:text-base flex-1 break-words leading-snug">
                   Cash on Delivery
                 </span>
                 <Image
@@ -158,7 +166,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
           <Button
             type="submit"
             disabled={loading}
-            className="w-full"
+            className="!w-full !min-w-full py-3"
             label="Pay now"
           ></Button>
         </form>

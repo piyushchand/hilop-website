@@ -63,7 +63,7 @@ export default function AboutUsContent() {
               className="mb-8"
               highlightedWord="Science + Nature"
             />
-            <p className="text-gray-600"> 
+            <p className="text-gray-600">
               At Hilop, we don’t believe in quick fixes or gimmicks—we believe
               in science-backed, natural solutions that are designed to help you
               achieve long-term results. Whether you’re looking to enhance
@@ -88,27 +88,24 @@ export default function AboutUsContent() {
               wellness—risk-free!
             </h3>
             <div className="flex-col flex gap-5 p-5 rounded-2xl bg-gray-200">
-                {stats.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-2"
-                  >
-                    <Image
-                      src="/images/icon/list.svg"
-                      alt="About hero image"
-                      width={24}
-                      height={24}
-                    />
-                    <p className="text-gray-800">{item.text}</p>
-                  </div>
-                ))}
-                 <Button
-                        label="Get Started Now"
-                        variant="btn-dark"
-                        size="xl"
-                         link="/consultation"
-                      />
-              </div>
+              {stats.map((item, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <Image
+                    src="/images/icon/list.svg"
+                    alt="About hero image"
+                    width={24}
+                    height={24}
+                  />
+                  <p className="text-gray-800">{item.text}</p>
+                </div>
+              ))}
+              <Button
+                label="Take The Test"
+                variant="btn-dark"
+                size="xl"
+                link="/consultation"
+              />
+            </div>
           </div>
           <Image
             src="/images/about-us/our-commitment.jpg"

@@ -141,21 +141,18 @@ const Footer = () => {
             </div>
 
             <div>
-              <p className="mb-4 text-zinc-400">
-                123 Herbal Lane, Nature City, Earth
-              </p>
-              <a
-                href="tel:+12345678900"
+              <Link
+                href="tel:+919998852888  "
                 className="mb-4 block text-zinc-400 hover:text-white transition-all duration-300"
               >
-                +1 (234) 567-8900
-              </a>
-              <a
+                +91 9998852888
+              </Link>
+              <Link
                 href="mailto:info@hilop.com"
                 className="mb-4 block text-zinc-400 hover:text-white transition-all duration-300"
               >
                 info@hilop.com
-              </a>
+              </Link>
 
               <div className="flex gap-3 mt-2">
                 <Link

@@ -140,7 +140,7 @@ const LongerWithBetter = ({
                 )}
                 {productId1 && (
                   <Button
-                    label="Pre-Order"
+                    label="Add To Cart"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -172,7 +172,7 @@ const LongerWithBetter = ({
                 )}
                 {productId2 && (
                   <Button
-                    label="Pre-Order"
+                    label="Add To Cart"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"

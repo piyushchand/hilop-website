@@ -339,7 +339,7 @@ export default function Cart() {
         setSelectedPlanId(planId);
         // 2. Update all cart items' quantity to match plan months
         if (cart && cart.items.length > 0) {
-          const _plan = cart.available_plans.find((p) => p._id === planId);
+          const _plan = cart.available_plans?.find((p) => p._id === planId);
           const eligibleProductMap: Record<string, number> = {};
           if (_plan) {
             _plan.eligible_items?.forEach((item: EligibleItem) => {
@@ -598,7 +598,7 @@ export default function Cart() {
   const couponDiscount =
     cart && cart.coupon_discount ? cart.coupon_discount : 0;
   // Get the selected plan object (works for both guests and logged-in users)
-  let selectedPlan: SubscriptionPlan | null = null;
+  let selectedPlan: CartPlan | null = null;
   let subscriptionDiscount = 0;
   if (cart && cart.selected_plan?.discount && cart.selected_plan.discount > 0) {
     // Always use backend discount if present
@@ -606,9 +606,12 @@ export default function Cart() {
       (cart.subtotal * cart.selected_plan.discount) / 100
     );
     // Try to match the plan for display purposes
-    selectedPlan = plans.find((p) => p._id === cart.selected_plan?._id) || null;
+    selectedPlan =
+      cart.available_plans?.find((p) => p._id === cart.selected_plan?._id) ||
+      null;
   } else if (selectedPlanId) {
-    selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
+    selectedPlan =
+      cart?.available_plans?.find((p) => p._id === selectedPlanId) || null;
     if (selectedPlan && selectedPlan.discount > 0) {
       subscriptionDiscount = Math.round(
         ((cart?.subtotal || 0) * selectedPlan.discount) / 100
@@ -684,7 +687,7 @@ export default function Cart() {
     if (planId === selectedPlanId || planLoading) return;
     setPlanError(null);
     setPlanSuccess(null);
-    const plan = plans.find((p) => p._id === planId);
+    const plan = cart?.available_plans?.find((p) => p._id === planId);
     const months = plan ? plan.months : 1;
     if (!user) {
       if (typeof window !== "undefined") {
@@ -1140,7 +1143,7 @@ export default function Cart() {
                         }}
                         className="!overflow-visible"
                       >
-                        {plans.map((plan: SubscriptionPlan) => (
+                        {cart?.available_plans?.map((plan: CartPlan) => (
                           <SwiperSlide key={plan._id}>
                             <div
                               className={`p-4 rounded-lg w-full border bg-gray-100 border-gray-200 transition-colors cursor-pointer ${
@@ -1175,6 +1178,19 @@ export default function Cart() {
                               )} plan`}
                             >
                               <div className="flex items-center gap-3 mb-3">
+                                {/* Add radio button here */}
+                                <input
+                                  type="radio"
+                                  name="plan"
+                                  checked={selectedPlanId === plan._id}
+                                  onChange={() => handlePlanClick(plan._id)}
+                                  disabled={planLoading}
+                                  className="accent-dark cursor-pointer h-4 w-4"
+                                  aria-label={`Select ${getText(
+                                    plan.name,
+                                    language
+                                  )} plan`}
+                                />
                                 <p className="text-dark font-medium">
                                   {getText(plan.name, language)}
                                 </p>
@@ -1191,8 +1207,13 @@ export default function Cart() {
                                   </span>
                                 )}
                                 <span className="text-primary font-medium">
-                                  {plan.months} Month
-                                  {plan.months > 1 ? "s" : ""}
+                                  ₹
+                                  {formatPrice(
+                                    Math.round(
+                                      plan.eligible_subtotal -
+                                        plan.discount_amount
+                                    )
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -1606,8 +1627,13 @@ export default function Cart() {
                           <span className="font-medium text-primary">
                             Selected Plan:
                           </span>{" "}
-                          {selectedPlan.months} month
-                          {selectedPlan.months > 1 ? "s" : ""}
+                          ₹
+                          {formatPrice(
+                            Math.round(
+                              selectedPlan.eligible_subtotal -
+                                selectedPlan.discount_amount
+                            )
+                          )}
                         </div>
                       )}
                     </div>
@@ -1636,7 +1662,7 @@ export default function Cart() {
         </div>
 
         <ArrowButton
-          label={checkoutLoading ? "Processing..." : "Pre-Order Now"}
+          label={checkoutLoading ? "Processing..." : "Add To Cart"}
           theme="dark"
           className="w-fit"
           isIcon={true}

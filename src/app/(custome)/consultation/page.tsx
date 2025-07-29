@@ -9,6 +9,8 @@ import { Globe, Undo2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Button from "@/components/uiFramework/Button";
 import Link from "next/link";
+import AnimatedInput from "@/components/animationComponents/AnimatedInput";
+import AnimatedScrollBar from "@/components/animationComponents/AnimatedScrollBar";
 
 interface Test {
   _id: string;
@@ -54,11 +56,13 @@ function AssessmentPageContent() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [height, setHeight] = useState("");
+  const [feet, setFeet] = useState("");
+  const [inches, setInches] = useState("");
   const [weight, setWeight] = useState("");
-  const [heightUnit, setHeightUnit] = useState("cm");
-  const [weightUnit, setWeightUnit] = useState("kg");
-  
+  const [feetError, setFeetError] = useState<string | null>(null);
+  const [inchesError, setInchesError] = useState<string | null>(null);
+  const [weightError, setWeightError] = useState<string | null>(null);
+
   const [bmi, setBmi] = useState<number | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [testResultId, setTestResultId] = useState<string | null>(null);
@@ -100,9 +104,7 @@ function AssessmentPageContent() {
     };
 
     fetchQuestions();
-    
   }, [selectedTestId, modalStep]);
-  
 
   const fetchTests = async () => {
     setIsLoading(true);
@@ -143,10 +145,10 @@ function AssessmentPageContent() {
     setSelectedOption(answerId);
     if (!testStarted) {
       // First answer: start the test
-      const res = await fetch('/api/consultation/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const res = await fetch("/api/consultation/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           test_id: selectedTestId,
           question_id: currentQuestion._id,
@@ -173,43 +175,56 @@ function AssessmentPageContent() {
         body.weight = bmiPayload.weight;
         body.bmi_value = bmiPayload.bmi_value;
       }
-      const res = await fetch('/api/consultation/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const res = await fetch("/api/consultation/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
       });
       await res.json();
       if (isLastQuestion && testResultId) {
         try {
-          const completeRes = await fetch(`/api/consultation/complete/${testResultId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({}),
-          });
+          const completeRes = await fetch(
+            `/api/consultation/complete/${testResultId}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({}),
+            }
+          );
           const completeData = await completeRes.json();
           if (completeRes.ok && completeData.success) {
             // Try to add recommended product to cart if present
-            const recommendedProductId = completeData.data?.recommended_product_id || completeData.recommended_product_id;
+            const recommendedProductId =
+              completeData.data?.recommended_product_id ||
+              completeData.recommended_product_id;
             if (recommendedProductId) {
-              const cartRes = await fetch('/api/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ product_id: recommendedProductId, quantity: 1 }),
+              const cartRes = await fetch("/api/cart/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                  product_id: recommendedProductId,
+                  quantity: 1,
+                }),
               });
               if (!cartRes.ok) {
-                setError('Consultation complete, but failed to add product to cart.');
+                setError(
+                  "Consultation complete, but failed to add product to cart."
+                );
                 return;
               }
             }
-            window.location.href = '/cart';
+            window.location.href = "/cart";
           } else {
-            setError(completeData.message || 'Failed to complete consultation. Please try again.');
+            setError(
+              completeData.message ||
+                "Failed to complete consultation. Please try again."
+            );
           }
         } catch {
-          setError('Failed to complete consultation. Please try again.');
+          setError("Failed to complete consultation. Please try again.");
         }
       } else {
         setTimeout(() => proceedToNextStep(), 200);
@@ -218,18 +233,51 @@ function AssessmentPageContent() {
   };
 
   const handleBmiSubmit = () => {
-    const h = parseFloat(height);
-    const w = parseFloat(weight);
-    if (h > 0 && w > 0) {
-      const heightInMeters = heightUnit === "cm" ? h / 100 : (h * 30.48) / 100;
-      const finalBmi = w / (heightInMeters * heightInMeters);
-      setBmi(finalBmi);
-      handleOptionClick(currentQuestion.answers[0]._id, {
-        height,
-        weight,
-        bmi_value: finalBmi,
-      });
+    // Clear previous errors
+    setFeetError(null);
+    setInchesError(null);
+    setWeightError(null);
+
+    const feetNum = Number(feet);
+    const inchesNum = Number(inches);
+    const weightNum = Number(weight);
+
+    let valid = true;
+
+    // Validate feet
+    if (!feet || isNaN(feetNum) || feetNum < 3 || feetNum > 9) {
+      setFeetError("Feet must be between 3 and 9");
+      valid = false;
     }
+
+    // Validate inches
+    if (!inches || isNaN(inchesNum) || inchesNum < 0 || inchesNum > 11) {
+      setInchesError("Inches must be between 0 and 11");
+      valid = false;
+    }
+
+    // Validate weight
+    if (!weight || isNaN(weightNum) || weightNum < 35 || weightNum > 635) {
+      setWeightError("Weight must be between 35 and 635 kg");
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // Calculate BMI
+    const totalInches = feetNum * 12 + inchesNum;
+    const heightMeters = totalInches * 0.0254;
+    const finalBmi = +(weightNum / (heightMeters * heightMeters)).toFixed(1);
+
+    // Convert feet and inches to total centimeters
+    const heightInCm = Math.round(totalInches * 2.54);
+
+    setBmi(finalBmi);
+    handleOptionClick(currentQuestion.answers[0]._id, {
+      height: heightInCm.toString(),
+      weight: weightNum.toString(),
+      bmi_value: finalBmi,
+    });
   };
 
   const currentQuestion = questions[currentStep];
@@ -331,87 +379,82 @@ function AssessmentPageContent() {
             </h2>
 
             {currentQuestion.is_bmi_question ? (
-             <div className="space-y-6">
-             {/* Weight Input */}
-             <div className="flex gap-4">
-               <div className="w-1/2">
-                 <label className="text-sm text-gray-700 mb-2 block">Weight</label>
-                 <div className="flex relative border border-gray-300 rounded-xl hover:border-green-300 transition-color duration-300">
-                   <input
-                     type="number"
-                     value={weight}
-                     onChange={(e) => setWeight(e.target.value)}
-                     placeholder="70"
-                     className="w-full p-3 text-sm  focus:outline-none transition-all duration-200 border-r border-gray-300"
-                   />
-                   {/* Animated Weight Unit Dropdown */}
-                   <div className="relative">
-                     <motion.select
-                       initial={{ opacity: 0, y: -10 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       transition={{ duration: 0.2 }}
-                       value={weightUnit}
-                       onChange={(e) => setWeightUnit(e.target.value)}
-                       className="p-3 text-sm focus:outline-none"
-                     >
-                       <option value="kg">kg</option>
-                       <option value="lbs">lbs</option>
-                     </motion.select>
-                   </div>
-                 </div>
-               </div>
-           
-               {/* Height Input */}
-               <div className="w-1/2">
-                 <label className="text-sm text-gray-700 mb-2 block">Height</label>
-                 <div className="flex relative border border-gray-300 rounded-xl hover:border-green-300 transition-color duration-300">
-                   <input
-                     type="number"
-                     value={height}
-                     onChange={(e) => setHeight(e.target.value)}
-                     placeholder="175"
-                     className="w-full p-3 text-sm  focus:outline-none transition-all duration-200 border-r border-gray-300"
-                   />
-                   {/* Animated Height Unit Dropdown */}
-                   <div className="relative">
-                     <motion.select
-                       initial={{ opacity: 0, y: -10 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       transition={{ duration: 0.2 }}
-                       value={heightUnit}
-                       onChange={(e) => setHeightUnit(e.target.value)}
-                       className="p-3 text-sm focus:outline-none"
-                     >
-                       <option value="cm">cm</option>
-                       <option value="ft">ft</option>
-                     </motion.select>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           
-             {/* BMI Display */}
-             {bmi && (
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.9 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.3 }}
-                 className="bg-green-100 p-3 text-center rounded"
-               >
-                 Your BMI is <strong>{bmi.toFixed(2)}</strong>
-               </motion.div>
-             )}
-           
-             {/* Continue Button */}
-             <Button
-               label="Continue"
-               variant="btn-dark"
-               size="xl"
-               onClick={handleBmiSubmit}
-               disabled={!height || !weight}
-               className="w-full"
-             />
-           </div>
+              <div className="space-y-6">
+                {/* Height Input */}
+                <div>
+                  <label className="block font-semibold text-dark mb-2">
+                    Height
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 md:gap-3 w-full">
+                    <AnimatedInput
+                      label="Feet"
+                      name="feet"
+                      type="number"
+                      value={feet}
+                      onChange={(e) => setFeet(e.target.value)}
+                      required
+                    />
+                    <AnimatedInput
+                      label="Inches"
+                      name="inches"
+                      type="number"
+                      value={inches}
+                      onChange={(e) => setInches(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    {feetError && (
+                      <div className="text-red-600 text-xs">{feetError}</div>
+                    )}
+                    {inchesError && (
+                      <div className="text-red-600 text-xs">{inchesError}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Weight Input */}
+                <div>
+                  <label className="block font-semibold text-dark mb-2">
+                    Weight (kg)
+                  </label>
+                  <AnimatedInput
+                    label="Weight in Kg"
+                    name="weight"
+                    type="number"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    required
+                  />
+                  {weightError && (
+                    <div className="text-red-600 text-xs mt-1">
+                      {weightError}
+                    </div>
+                  )}
+                </div>
+
+                {/* BMI Display */}
+                {bmi && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-green-100 p-3 text-center rounded"
+                  >
+                    Your BMI is <strong>{bmi.toFixed(1)}</strong>
+                  </motion.div>
+                )}
+
+                {/* Continue Button */}
+                <Button
+                  label="Continue"
+                  variant="btn-dark"
+                  size="xl"
+                  onClick={handleBmiSubmit}
+                  disabled={!feet || !inches || !weight}
+                  className="!w-full !min-w-full"
+                />
+              </div>
             ) : (
               <div className="space-y-4">
                 {currentQuestion.answers.map((answer) => (
@@ -433,23 +476,19 @@ function AssessmentPageContent() {
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* Animated Progress bar */}
       {!isLoading && !error && modalStep === 2 && questions.length > 0 && (
-        <>
-          <div className="w-full bg-gray-200 h-1 relative">
-            <div
-              className="bg-green-600 h-full"
-              style={{
-                width: `${((currentStep + 1) / questions.length) * 100}%`,
-              }}
-            />
-          </div>
+        <div className="">
+          <AnimatedScrollBar
+            currentStep={currentStep}
+            totalSteps={questions.length}
+          />
           <div className="md:py-10 py-6">
             <p className="text-gray-600 text-center w-full">
-            Step {currentStep + 1} of {questions.length} — Powered by Hilop
+              Step {currentStep + 1} of {questions.length} — Powered by Hilop
             </p>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -457,14 +496,16 @@ function AssessmentPageContent() {
 
 export default function AssessmentPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="w-full h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-gray-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <AssessmentPageContent />
     </Suspense>
   );
