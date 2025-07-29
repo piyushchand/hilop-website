@@ -11,6 +11,7 @@ import Button from "@/components/uiFramework/Button";
 import Link from "next/link";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import AnimatedScrollBar from "@/components/animationComponents/AnimatedScrollBar";
+import ConsultationResultModal from "@/components/model/ConsultationResultModal";
 
 interface Test {
   _id: string;
@@ -42,6 +43,29 @@ type AnswerPayload = {
   weight?: string;
   bmi_value?: number;
 };
+// Add state for result modal and completion data
+interface CompletionProduct {
+  _id: string;
+  name: { en: string; hi: string };
+  treatment_plan_id: string;
+  total_count: number;
+  purchased_count: number;
+  dosage_schedule: string;
+  recommendation_type: string;
+}
+interface CompletionTreatmentPlan {
+  product_name: { en: string; hi: string };
+  product_image: string;
+  total_months: number;
+}
+interface CompletionData {
+  test_result_id: string;
+  is_completed: boolean;
+  answers_count: number;
+  bmi_value?: number;
+  recommended_products?: CompletionProduct[];
+  treatment_plans?: CompletionTreatmentPlan[];
+}
 
 function AssessmentPageContent() {
   const router = useRouter();
@@ -66,6 +90,11 @@ function AssessmentPageContent() {
   const [bmi, setBmi] = useState<number | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [testResultId, setTestResultId] = useState<string | null>(null);
+
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [completionData, setCompletionData] = useState<CompletionData | null>(
+    null
+  );
 
   const queryTestId = searchParams ? searchParams.get("testId") : null;
 
@@ -216,7 +245,18 @@ function AssessmentPageContent() {
                 return;
               }
             }
-            window.location.href = "/cart";
+            // Show result modal with completion data only if treatment_plans exists and is not empty
+            const resultData = completeData.data || completeData;
+            if (
+              resultData.treatment_plans &&
+              resultData.treatment_plans.length > 0
+            ) {
+              setCompletionData(resultData);
+              setShowResultModal(true);
+            } else {
+              router.push("/cart");
+            }
+            return;
           } else {
             setError(
               completeData.message ||
@@ -490,6 +530,22 @@ function AssessmentPageContent() {
           </div>
         </div>
       )}
+      {/* Result Modal */}
+      {showResultModal &&
+        completionData?.treatment_plans &&
+        completionData.treatment_plans.length > 0 && (
+          <ConsultationResultModal
+            isOpen={showResultModal}
+            onClose={() => setShowResultModal(false)}
+            onContinue={() => {
+              setShowResultModal(false);
+              router.push("/cart");
+            }}
+            productImage={completionData.treatment_plans[0].product_image}
+            productName={completionData.treatment_plans[0].product_name.en}
+            totalMonths={completionData.treatment_plans[0].total_months}
+          />
+        )}
     </div>
   );
 }
