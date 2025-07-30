@@ -6,7 +6,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import FaqAccordion from "@/components/FaqAccordion";
 import MobileApproch from "@/components/Mobileapproch";
-import { BadgeCheck,  } from "lucide-react";
+import { BadgeCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const homepagefaqdata = [
@@ -63,7 +63,7 @@ const hilopRules = [
 ];
 
 export default function HilopCoins() {
-  const [copied, ] = useState<boolean>(false);
+  const [copied] = useState<boolean>(false);
   const { user, isLoading, isInitialized } = useAuth();
   // const referralLink = "https://hilop.com/refer/user123";
 
@@ -79,7 +79,9 @@ export default function HilopCoins() {
       <section className="w-full lg:mb-40 mb-20">
         <div className="container py-20 flex flex-col items-center justify-center">
           <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
-          <p className="text-gray-600">Please wait while we load your Hilop Coins.</p>
+          <p className="text-gray-600">
+            Please wait while we load your Hilop Coins.
+          </p>
         </div>
       </section>
     );
@@ -131,7 +133,6 @@ export default function HilopCoins() {
         </div>
       </section>
 
-    
       <section className="lg:mb-40 mb-20 bg-white py-10 lg:py-20">
         <div className="container">
           <h2 className="text-5xl 2xl:text-6xl font-semibold mb-5 text-center">
@@ -151,35 +152,35 @@ export default function HilopCoins() {
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   ✅ Mark your daily doses:
-                </span>{' '}
-                with a simple checkbox and earn{' '}
+                </span>{" "}
+                with a simple checkbox and earn{" "}
                 <span className="text-dark font-semibold">1 Hilop</span> Coin
                 every time you check in.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   🔔 Daily Dose Reminders:
-                </span>{' '}
+                </span>{" "}
                 Get automatic notifications at your preferred time so you never
                 miss a dose.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   🕒 Custom Notification Time:
-                </span>{' '}
+                </span>{" "}
                 Set and change your daily reminder time easily from the app.
               </p>
               <p className="text-gray-700 mb-3">
                 <span className="text-dark font-semibold">
                   📅 Track Your History:
-                </span>{' '}
+                </span>{" "}
                 See your dose completion history and stay motivated with
                 streaks.
               </p>
               <p className="text-gray-700 mb-7">
                 <span className="text-dark font-semibold">
                   🔁 Smart Reminders:
-                </span>{' '}
+                </span>{" "}
                 Forgot to take a dose? We&apos;ll remind you again later!
               </p>
             </div>
@@ -194,16 +195,15 @@ export default function HilopCoins() {
               <h2 className="text-2xl font-medium mb-3">Refer a Friend</h2>
               <p className="text-gray-700 mb-11">
                 When your friend places their first order, you&apos;ll get a
-                <span className="font-semibold text-dark"> 20% discount</span>{' '}
+                <span className="font-semibold text-dark"> 20% discount</span>{" "}
                 on your next purchase!
               </p>
               <div className="relative">
-
-              {copied && (
-                <p className="text-sm text-green-500 end-0 mt-1 absolute">
-                  Copied to clipboard!
-                </p>
-              )}
+                {copied && (
+                  <p className="text-sm text-green-500 end-0 mt-1 absolute">
+                    Copied to clipboard!
+                  </p>
+                )}
               </div>
               {/* <Button label="Share" variant="btn-primary" size="xl" className="mt-7" /> */}
             </div>
@@ -222,7 +222,7 @@ export default function HilopCoins() {
                   <p className="text-gray-700">
                     <span className="text-dark font-semibold">
                       {rule.title}
-                    </span>{' '}
+                    </span>{" "}
                     {rule.description}
                   </p>
                 </div>

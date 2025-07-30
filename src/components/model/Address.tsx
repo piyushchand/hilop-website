@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Modal from "../animationComponents/animated-model";
-import { Pen, Trash2 } from "lucide-react";
+import { Pen, Star, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "../uiFramework/Button";
 import AnimatedInput from "../animationComponents/AnimatedInput";
@@ -125,7 +125,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   };
 
   const handleAddNewClick = () => {
-    setFormData(initialAddressFormState);
+    // Check if there are existing addresses to determine if this should be default
+    const hasExistingAddresses = addresses.length > 0;
+    setFormData({
+      ...initialAddressFormState,
+      is_default: !hasExistingAddresses, // Set as default only if it's the first address
+    });
     setViewMode("addForm");
   };
 
@@ -163,6 +168,59 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     return true;
   };
 
+  // Function to set an address as default
+  const setAddressAsDefault = async (addressId: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Find the address to update
+      const addressToUpdate = addresses.find((addr) => addr._id === addressId);
+      if (!addressToUpdate) {
+        throw new Error("Address not found");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/addresses/${addressId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          name: addressToUpdate.name,
+          address: addressToUpdate.address,
+          phone_number: addressToUpdate.phone_number,
+          landmark: addressToUpdate.landmark || "",
+          city: addressToUpdate.city || "",
+          state: addressToUpdate.state || "",
+          country: addressToUpdate.country || "India",
+          zipcode: addressToUpdate.zipcode || "",
+          is_default: true,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to set address as default");
+      }
+
+      toast.success("Default address updated successfully");
+
+      // Refresh the address list
+      await fetchAddresses();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to set address as default"
+      );
+      toast.error(
+        err instanceof Error ? err.message : "Failed to set address as default"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSaveAddress = async () => {
     if (!validateForm()) return;
 
@@ -177,23 +235,26 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
       const method = isEditing ? "PUT" : "POST";
 
+      // If setting as default, we need to ensure only one address is default
+      const requestBody = {
+        name: formData.name,
+        address: formData.address,
+        phone_number: formData.phone_number,
+        landmark: formData.landmark,
+        city: formData.city,
+        state: formData.state,
+        country: "India",
+        zipcode: formData.zipcode,
+        is_default: formData.is_default,
+      };
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include", // Include cookies for authentication
-        body: JSON.stringify({
-          name: formData.name,
-          address: formData.address,
-          phone_number: formData.phone_number,
-          landmark: formData.landmark,
-          city: formData.city,
-          state: formData.state,
-          country: "India",
-          zipcode: formData.zipcode,
-          is_default: formData.is_default,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -228,6 +289,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     setFormData(initialAddressFormState);
     setViewMode("list");
   };
+
   function showDeleteConfirmation(onConfirm: () => void) {
     toast.custom(
       (t) => (
@@ -239,7 +301,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => toast.dismiss(t.id)}
-              // className="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200"
               className="px-3.5 py-2 flex bg-gray-100 text-black hover:bg-gray-200 transition-all border rounded-full duration-200 items-center cursor-pointer text-sm"
             >
               Cancel
@@ -249,7 +310,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 toast.dismiss(t.id);
                 onConfirm(); // Trigger delete logic
               }}
-              // className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
               className="px-3.5 py-2 flex bg-red-100/50 text-red-700 hover:bg-red-700 hover:text-white transition-all duration-200 border border-red-700 rounded-full items-center cursor-pointer text-sm"
             >
               Remove
@@ -364,17 +424,21 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       <div
                         key={address._id}
                         className={`bg-gray-100 p-5 rounded-lg ${
-                          address.is_default ? "border-2 border-green-600" : ""
+                          address.is_default
+                            ? "border-2 border-green-600 bg-green-50"
+                            : ""
                         }`}
                       >
-                        <p className="font-medium text-lg mb-1 flex items-center gap-2">
-                          {address.name}
-                          {address.is_default && (
-                            <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-100 text-green-700 border border-green-600 font-semibold">
-                              Default
-                            </span>
-                          )}
-                        </p>
+                        <div className="flex items-start justify-between mb-2">
+                          <p className="font-medium text-lg flex items-center gap-2">
+                            {address.name}
+                            {address.is_default && (
+                              <span className="flex items-center gap-1 px-2 py-0.5 text-xs rounded bg-green-100 text-green-700 border border-green-600 font-semibold">
+                                Default
+                              </span>
+                            )}
+                          </p>
+                        </div>
                         <p className="text-gray-700 text-sm">
                           {address.address}
                         </p>
@@ -391,7 +455,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         <p className="text-gray-700 mb-4 text-sm mt-1">
                           Phone: {address.phone_number}
                         </p>
-                        <div className="flex gap-4 items-center">
+                        <div className="flex gap-2 items-center flex-wrap">
                           <button
                             onClick={() => handleEditClick(address)}
                             className="px-3.5 py-2 flex gap-1.5 bg-green-100/50 text-green-700 hover:bg-green-700 hover:text-white transition-all duration-200 border border-green-700 rounded-full items-center cursor-pointer text-sm"
@@ -400,6 +464,16 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                             <Pen size={14} />
                             <span className="font-medium">Edit</span>
                           </button>
+                          {!address.is_default && (
+                            <button
+                              onClick={() => setAddressAsDefault(address._id)}
+                              className="px-3.5 py-2 flex gap-1.5 border  bg-dark/5 border-dark text-dark hover:text-white  hover:bg-dark transition-all duration-200  rounded-full items-center cursor-pointer text-sm"
+                              disabled={isLoading}
+                            >
+                              <Star size={14} />
+                              <span className="font-medium">Set Default</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteAddress(address._id)}
                             className="px-3.5 py-2 flex gap-1.5 bg-red-100/50 text-red-700 hover:bg-red-700 hover:text-white transition-all duration-200 border border-red-700 rounded-full items-center cursor-pointer text-sm"
@@ -484,14 +558,6 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       value={formData.state || ""}
                       onChange={handleInputChange}
                     />
-                    {/* <AnimatedInput
-                        label="Country"
-                        name="country"
-                        type="text"
-                        value={formData.country = "India"}
-                        onChange={handleInputChange}
-                        readOnly
-                      /> */}
                     <AnimatedInput
                       label="Zipcode"
                       name="zipcode"
@@ -507,20 +573,25 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       onChange={handleInputChange}
                       required
                     />
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <input
                         type="checkbox"
                         id="is_default"
                         name="is_default"
                         checked={formData.is_default}
                         onChange={handleCheckboxChange}
-                        className="w-4 h-4 accent-green-600 focus:ring-primary border-gray-300 rounded"
+                        className="w-4 h-4 accent-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <label
                         htmlFor="is_default"
-                        className="text-sm text-gray-700"
+                        className="text-sm text-gray-700 flex items-center gap-2"
                       >
                         Set as default address
+                        {formData.is_default && (
+                          <span className="text-xs text-blue-600 font-medium">
+                            (This will replace any existing default address)
+                          </span>
+                        )}
                       </label>
                     </div>
                   </div>
