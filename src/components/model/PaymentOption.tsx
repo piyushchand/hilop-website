@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Modal from "../animationComponents/animated-model";
-import { CreditCard, HandCoins, Landmark } from "lucide-react";
+import Button from "../uiFramework/Button";
 
 interface PaymentOptionProps {
   isOpen: boolean;
@@ -18,51 +18,170 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
   onCashOnDelivery,
   loading,
 }) => {
+  const [selectedPayment, setSelectedPayment] = useState<string>("razorpay");
+
+  const handlePayNow = () => {
+    if (selectedPayment === "razorpay") {
+      onOnlinePayment();
+    } else {
+      onCashOnDelivery();
+    }
+    onClose();
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-sm w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg bg-white flex flex-col justify-start"
+      className="max-w-md w-full max-h-[80vh] rounded-lg overflow-hidden shadow-lg bg-white flex flex-col justify-start"
     >
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <h2 className="text-xl md:text-2xl font-semibold text-dark p-4 md:p-5">
-          Payment Option
+      <div className="sticky top-0 z-10 bg-white border-b p-4 md:p-5 border-gray-200">
+        <h2 className="text-xl md:text-2xl font-semibold text-dark ">
+          Payment
         </h2>
+        <p className="text-black/50 text-sm mt-1">
+          All transactions are secure and encrypted.
+        </p>
       </div>
       <div className="overflow-y-auto flex-1 w-full">
-        <div className="px-4 py-4 space-y-6">
+        <form
+          className="px-4 py-4 space-y-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handlePayNow();
+          }}
+        >
           <div>
-            <button
-              onClick={onOnlinePayment}
-              className="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-100 border hover:border-black border-gray-200 hover:bg-green-50 rounded-lg w-full"
-              disabled={loading}
+            <label
+              className={`flex flex-col gap-2 p-4 border rounded-lg cursor-pointer ${
+                selectedPayment === "razorpay"
+                  ? "border-black/50"
+                  : "border-gray-200"
+              } bg-gray-100  hover:border-black/50  w-full`}
             >
-              <div className="flex items-center gap-4">
-                <Image
-                  src="/images/payment-option-icon/upi.svg"
-                  alt="UPI"
-                  width={24}
-                  height={24}
+              <div className="flex flex-row items-start gap-3">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="razorpay"
+                  checked={selectedPayment === "razorpay"}
+                  onChange={() => {
+                    setSelectedPayment("razorpay");
+                  }}
+                  className="size-4 mt-1 accent-dark"
+                  disabled={loading}
                 />
-                <CreditCard />
-                <Landmark />
+                <div className="flex flex-col md:flex-row flex-1  gap-2">
+                  <span className="font-normal text-sm md:text-base w-full break-words leading-snug">
+                    Razorpay Secure (UPI, Cards, Wallets, NetBanking)
+                  </span>
+                  <div className="flex flex-wrap md:justify-end w-full items-center gap-2">
+                    <Image
+                      src="/images/payment-option-icon/upi.svg"
+                      alt="UPI"
+                      width={28}
+                      height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
+                    />
+                    <Image
+                      src="/images/payment-option-icon/visa.svg"
+                      alt="Visa"
+                      width={28}
+                      height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
+                    />
+                    <Image
+                      src="/images/payment-option-icon/mastercard.svg"
+                      alt="Mastercard"
+                      width={28}
+                      height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
+                    />
+                    <Image
+                      src="/images/payment-option-icon/rupay.svg"
+                      alt="Rupay"
+                      width={28}
+                      height={28}
+                      className="bg-white  rounded-xs border border-black/20 w-12 h-8 p-px"
+                    />
+
+                    <span className="text-sm text-center flex border border-black/20  justify-center items-center bg-white  rounded-xs w-12 h-8 p-px ml-1">
+                      +16
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="ml-2 text-sm text-gray-500 animate-spin"></div>
-              <h3 className="text-base font-semibold">Online Payment</h3>
-            </button>
+              {/* Razorpay redirect details */}
+              {/* {selectedPayment === "razorpay" && ( */}
+              <div className="flex flex-col gap-8 items-center justify-center border-t border-gray-200 mt-4 pt-4">
+                <Image
+                  src="/images/payment-option-icon/card.svg"
+                  alt="Cash"
+                  width={200}
+                  height={64}
+                  className="opacity-50"
+                />
+
+                <p className="text-center text-black/80 text-sm sm:text-base">
+                  After clicking{" "}
+                  <span className="font-semibold">“Pay now”</span>, you will be
+                  redirected to
+                  <br className="hidden sm:block" />
+                  Razorpay Secure (UPI, Cards, Wallets, NetBanking) to
+                  <br className="hidden sm:block" />
+                  complete your purchase securely.
+                </p>
+              </div>
+              {/*  )} */}
+            </label>
           </div>
           <div>
-            <button
-              onClick={onCashOnDelivery}
-              className="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-100 border border-gray-200 hover:border-black hover:bg-green-50 rounded-lg w-full"
-              disabled={loading}
+            <label
+              className={`flex flex-col gap-2 p-4 ${
+                selectedPayment === "cod"
+                  ? "border-black/50"
+                  : "border-gray-200"
+              } border rounded-lg cursor-pointer  bg-gray-100  hover:border-black/50 w-full`}
             >
-              <HandCoins size={32} />
-              <h3 className="text-base font-semibold">Cash on Delivery</h3>
-            </button>
+              <div className="flex flex-row items-center gap-3">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={selectedPayment === "cod"}
+                  onChange={() => {
+                    setSelectedPayment("cod");
+                  }}
+                  className="size-4 accent-dark"
+                  disabled={loading}
+                />
+                <span className="font-normal text-sm md:text-base flex-1 break-words leading-snug">
+                  Cash on Delivery
+                </span>
+                <Image
+                  src="/images/payment-option-icon/cash.svg"
+                  alt="Cash"
+                  width={28}
+                  height={28}
+                />
+              </div>
+            </label>
           </div>
-        </div>
+          {/* Pay now button */}
+          {/* <button
+            type="submit"
+            className="w-full mt-4 py-2 px-4 cursor-pointer bg-gree-600 text-white font-semibold rounded-lg shadow hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Pay now"}
+          </button> */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="!w-full !min-w-full py-3"
+            label="Pay now"
+          ></Button>
+        </form>
       </div>
     </Modal>
   );

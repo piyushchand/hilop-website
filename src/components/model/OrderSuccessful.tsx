@@ -1,7 +1,7 @@
-"use client"
+"use client";
 import React from "react";
 import Image from "next/image";
-import Button from "@/components/uiFramework/Button";  
+import Button from "@/components/uiFramework/Button";
 interface OrderSummary {
   _id?: string;
   order_id?: string;
@@ -40,12 +40,8 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
             alt="Success"
             className="mx-auto mb-2"
           />
-          <h2 className="text-2xl font-bold text-green-700 mb-2">
-            {title}
-          </h2>
-          <p className="text-gray-700 mb-2">
-            {description}
-          </p>
+          <h2 className="text-2xl font-bold text-green-700 mb-2">{title}</h2>
+          <p className="text-gray-700 mb-2">{description}</p>
         </div>
         {orderSummary && (
           <div className="mb-4 text-left bg-gray-50 rounded-lg p-4">

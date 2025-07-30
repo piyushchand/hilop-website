@@ -1,5 +1,5 @@
 // components/CircularProgressBar.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface CircularProgressBarProps {
   percentage: number; // The percentage of product consumed (0-100)
@@ -14,8 +14,8 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   percentage,
   size = 100, // Default size
   strokeWidth = 10, // Default stroke width
-  progressColor = 'text-blue-500', // Tailwind class for progress color
-  trackColor = 'text-gray-300', // Tailwind class for track color
+  progressColor = "text-blue-500", // Tailwind class for progress color
+  trackColor = "text-gray-300", // Tailwind class for track color
   animationDuration = 5000, // 5 seconds default
 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -50,7 +50,9 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   const dashOffset = circumference - (animatedPercentage / 100) * circumference;
 
   return (
-    <div className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center top-2`}>
+    <div
+      className={`relative w-[${size}px] h-[${size}px] flex items-center justify-center top-2`}
+    >
       <svg
         className="transform -rotate-90 absolute" // Rotate to start progress from the top
         width={size}
@@ -83,11 +85,11 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           }}
         />
       </svg>
-      
+
       {/* Percentage text in center */}
       <div className=" inset-0 flex items-center justify-center h-[133px]">
         <span className={`text-xs font-semibold ${progressColor}`}>
-          {Math.round(animatedPercentage)}%
+          {/* {Math.round(animatedPercentage)}% */}
         </span>
       </div>
     </div>

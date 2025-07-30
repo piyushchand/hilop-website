@@ -11,7 +11,7 @@ import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
 function CompleteProfileForm() {
-  const { isLoading, error, clearError } = useAuth();
+  const { isLoading, error, clearError, success, setSuccess } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -31,6 +31,14 @@ function CompleteProfileForm() {
       email: searchParams?.get("email") || "",
     }));
   }, [searchParams]);
+
+  // Hide success message after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setSuccess]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -79,13 +87,17 @@ function CompleteProfileForm() {
       if (!registerResult.ok) {
         if (
           registerData.message &&
-          registerData.message.toLowerCase().includes("user with this email or mobile number already exists")
+          registerData.message
+            .toLowerCase()
+            .includes("user with this email or mobile number already exists")
         ) {
           // User already exists: send OTP for login and redirect to OTP page (type=login)
           const loginResponse = await fetch("/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobile_number: `91${formData.mobile_number}` }),
+            body: JSON.stringify({
+              mobile_number: `91${formData.mobile_number}`,
+            }),
           });
           const loginData = await loginResponse.json();
           if (!loginResponse.ok || !loginData.data?.user_id) {
@@ -111,7 +123,9 @@ function CompleteProfileForm() {
         return;
       }
       // Fallback: if no user_id, show error
-      toast.error("Registration succeeded but user ID missing. Please try logging in.");
+      toast.error(
+        "Registration succeeded but user ID missing. Please try logging in."
+      );
       router.replace("/auth/login");
     } catch {
       // Errors are handled by the useAuth hook and displayed via toast
@@ -141,6 +155,11 @@ function CompleteProfileForm() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {success && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-700 text-sm">{success}</p>
+              </div>
+            )}
             <AnimatedInput
               label="Mobile Number"
               name="mobile_number"
@@ -156,6 +175,11 @@ function CompleteProfileForm() {
               value={formData.birthdate}
               onChange={handleInputChange}
               required
+              max={
+                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                  .toISOString()
+                  .split("T")[0]
+              }
             />
 
             <Button

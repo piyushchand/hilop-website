@@ -19,17 +19,22 @@ const modal = {
   visible: { opacity: 1, y: "0", scale: 1 },
 };
 
-export default function Modal({ isOpen, onClose, children, className = "" }: ModalProps) {
+export default function Modal({
+  isOpen,
+  onClose,
+  children,
+  className = "",
+}: ModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-  
+
     if (isOpen) {
       document.body.style.overflow = "hidden";
       document.addEventListener("keydown", handleEsc);
     }
-  
+
     return () => {
       document.body.style.overflow = "";
       document.removeEventListener("keydown", handleEsc);
@@ -61,7 +66,7 @@ export default function Modal({ isOpen, onClose, children, className = "" }: Mod
               onClick={onClose}
             >
               <motion.div
-                className="w-12 h-12 flex justify-center items-center text-white hover:text-gray-300"
+                className="size-8 p-1 md:size-12 flex justify-center items-center text-white hover:text-gray-300"
                 initial={{ rotate: -180, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}

@@ -71,7 +71,11 @@ export default function AccountDetailsModal({
       mobile_number: mobileNumber,
       birthdate: formatBirthdateForInput(userData.birthdate || ""),
       profile_image: userData.profile_image || "",
-      gender: ('gender' in userData && typeof (userData as { gender?: unknown }).gender === 'string') ? (userData as { gender?: string }).gender || "" : "",
+      gender:
+        "gender" in userData &&
+        typeof (userData as { gender?: unknown }).gender === "string"
+          ? (userData as { gender?: string }).gender || ""
+          : "",
     };
   };
 
@@ -202,7 +206,9 @@ export default function AccountDetailsModal({
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     let processedValue = value;
 
@@ -435,17 +441,20 @@ export default function AccountDetailsModal({
 
   return (
     <Modal
-      className="max-w-sm w-full h-full max-h-[85vh] rounded-lg overflow-auto shadow-lg" isOpen={isOpen}
+      className="max-w-sm w-full h-full max-h-[85vh] overflow-hidden rounded-lg  shadow-lg"
+      isOpen={isOpen}
       onClose={handleCancel}
     >
       {/* Left column: Image (desktop only) */}
-    
+
       {/* Right column: Form */}
-      <div className="sm:col-span-7 col-span-1 w-full flex flex-col overflow-auto bg-white">
-        <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200">
+      <div className="sm:col-span-7 col-span-1 w-full flex flex-col h-full bg-white">
+        {/* Header: Not scrollable */}
+        <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200 shrink-0">
           Edit Account Details
         </h2>
-        <div className="flex flex-col gap-6 overflow-y-auto p-6">
+        {/* Scrollable Form Section */}
+        <div className="flex-1 flex flex-col gap-6 overflow-y-auto p-6 min-h-0">
           <div className="flex items-center gap-4">
             <Image
               src={profileImageUrl}
@@ -495,7 +504,6 @@ export default function AccountDetailsModal({
               <div className="text-red-500 text-sm mt-1">{errors.name}</div>
             )}
           </div>
-
           <div>
             <AnimatedInput
               label="Email"
@@ -509,10 +517,11 @@ export default function AccountDetailsModal({
               <div className="text-red-500 text-sm mt-1">{errors.email}</div>
             )}
           </div>
-
           <div>
             <div className="relative hilop-mobile-input-wrapper [&_input:focus]:outline-none [&_input:focus]:ring-0 [&_input:focus]:border-gray-300">
-              <span className="absolute left-3 top-4 translate-y-[10%]  text-gray-500 text-base select-none pointer-events-none z-10">+91</span>
+              <span className="absolute left-3 top-4 translate-y-[10%]  text-gray-500 text-base select-none pointer-events-none z-10">
+                +91
+              </span>
               <AnimatedInput
                 label="Mobile number"
                 name="mobile_number"
@@ -524,17 +533,13 @@ export default function AccountDetailsModal({
                 disabled={true}
               />
             </div>
-
-
             {errors.mobile_number && (
               <div className="text-red-500 text-sm mt-1">
                 {errors.mobile_number}
               </div>
             )}
           </div>
-
           <div>
-
             <AnimatedInput
               label="Date of Birth"
               name="birthdate"
@@ -542,13 +547,21 @@ export default function AccountDetailsModal({
               value={formData.birthdate}
               onChange={handleInputChange}
               required
+              max={
+                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
+                  .toISOString()
+                  .split("T")[0]
+              }
             />
             {errors.birthdate && (
               <div className="text-red-500 text-sm">{errors.birthdate}</div>
             )}
           </div>
           <div>
-            <label className="block text-gray-700 font-medium mb-1" htmlFor="gender-select">
+            <label
+              className="block text-gray-700 font-medium mb-1"
+              htmlFor="gender-select"
+            >
               Gender <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -570,7 +583,13 @@ export default function AccountDetailsModal({
               {/* Custom arrow icon */}
               <span className="pointer-events-none absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                 <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                  <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path
+                    d="M6 8l4 4 4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </span>
             </div>
@@ -579,7 +598,8 @@ export default function AccountDetailsModal({
             )}
           </div>
         </div>
-        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 mt-auto text-red-500">
+        {/* Footer: Not scrollable */}
+        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 mt-auto text-red-500 shrink-0 bg-white">
           <Button
             label="Reset"
             variant="btn-secondary"
@@ -587,9 +607,8 @@ export default function AccountDetailsModal({
             onClick={handleReset}
             disabled={isLoading || !isDirty}
           />
-
           <Button
-            label={isLoading ? "Saving..." : "Save Changes"}
+            label={isLoading ? "Saving..." : "Save"}
             variant="btn-dark"
             size="xl"
             onClick={handleSave}

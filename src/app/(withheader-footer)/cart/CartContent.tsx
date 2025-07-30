@@ -70,7 +70,7 @@ interface CartPlan {
   name: string;
   months: number;
   discount: number;
-  discount_type: 'fixed' | 'percentage';
+  discount_type: "fixed" | "percentage";
   eligible_subtotal: number;
   discount_amount: number;
   eligible_items: EligibleItem[];
@@ -90,7 +90,7 @@ interface CartData {
   total_price: number;
   item_count: number;
   auto_added_products: unknown;
-  available_plans:CartPlan[];
+  available_plans: CartPlan[];
 }
 
 interface Coupon {
@@ -224,6 +224,13 @@ type OrderSummary = {
 //   );
 // };
 
+// Utility function to scroll to top
+const scrollToTop = () => {
+  if (typeof window !== "undefined") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -232,6 +239,8 @@ export default function Cart() {
   const [cart, setCart] = useState<CartData | null>(null);
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState<string | null>(null);
+  const [planError, setPlanError] = useState<string | null>(null);
+  const [planSuccess, setPlanSuccess] = useState<string | null>(null);
   const [coinsLoading, setCoinsLoading] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [planLoading, setPlanLoading] = useState(false);
@@ -256,13 +265,17 @@ export default function Cart() {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   // Address modal state
   const [addressModalOpen, setAddressModalOpen] = useState(false);
+  // Address error state
+  const [addressError, setAddressError] = useState("");
 
   // State for payment confirmation modal
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [lastOrderSummary, setLastOrderSummary] = useState<OrderSummary | null>(
     null
   );
-  const [orderSuccessTitle, setOrderSuccessTitle] = useState<string>("Payment Successful!");
+  const [orderSuccessTitle, setOrderSuccessTitle] = useState<string>(
+    "Payment Successful!"
+  );
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -290,14 +303,14 @@ export default function Cart() {
         } else if (prev && prev.selected_plan) {
           return { ...data.data, selected_plan: prev.selected_plan };
         } else {
-          return { ...data.data }
+          return { ...data.data };
         }
       });
       const totalQuantity = data?.data?.items?.reduce(
         (acc: number, item: CartProduct) => acc + (item.quantity || 0),
         0
       );
-      dispatch(setCartCount(totalQuantity))
+      dispatch(setCartCount(totalQuantity));
       setAppliedCoupon(data.data.coupon || null);
     } catch (err) {
       setCartError((err as Error).message);
@@ -307,54 +320,55 @@ export default function Cart() {
   }, [dispatch]);
 
   // Move handlePlanSelection above the useEffect that uses it and wrap in useCallback
-  const handlePlanSelection = useCallback(async (planId: string) => {
-    if (planId === selectedPlanId || planLoading) return;
+  const handlePlanSelection = useCallback(
+    async (planId: string) => {
+      if (planId === selectedPlanId || planLoading) return;
 
-    setPlanLoading(true);
-    try {
-      // Find the selected plan's months
-      // const plan = plans.find((p) => p._id === planId);
-      // const months = plan ? plan.months : 1;
-
-      // 1. Update the plan in the backend (for logged-in users)
-      const res = await fetch("/api/cart/plan", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_id: planId }),
-      });
-      if (res.status === 401) {
-        toast.error("Please log in first");
-        setPlanLoading(false);
-        return;
-      }
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.message || "Failed to update plan");
-      }
-      setSelectedPlanId(planId);
-      // 2. Update all cart items' quantity to match plan months
-      if (cart && cart.items.length > 0) {
-        const _plan = cart.available_plans.find((p) => p._id === planId);
-        const eligibleProductMap: Record<string, number> = {};
-        if (_plan) {
-          _plan.eligible_items?.forEach((item:EligibleItem) => {
-            eligibleProductMap[item.product_id] = item.quantity_needed;
-          });
+      setPlanLoading(true);
+      setPlanError(null);
+      setPlanSuccess(null);
+      try {
+        // 1. Update the plan in the backend (for logged-in users)
+        const res = await fetch("/api/cart/plan", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan_id: planId }),
+        });
+        if (res.status === 401) {
+          toast.error("Please log in first");
+          setPlanLoading(false);
+          return;
         }
+        const data = await res.json();
+        if (!data.success) {
+          throw new Error(data.message || "Failed to update plan");
+        }
+        setSelectedPlanId(planId);
+        // 2. Update all cart items' quantity to match plan months
+        if (cart && cart.items.length > 0) {
+          const _plan = cart.available_plans?.find((p) => p._id === planId);
+          const eligibleProductMap: Record<string, number> = {};
+          if (_plan) {
+            _plan.eligible_items?.forEach((item: EligibleItem) => {
+              eligibleProductMap[item.product_id] = item.quantity_needed;
+            });
+          }
+        }
+        // 3. Refresh cart
+        await fetchCart();
+        setPlanSuccess("Plan and quantities updated");
+        setPlanError(null);
+      } catch (err) {
+        setPlanError(
+          err instanceof Error ? err.message : "Failed to update plan"
+        );
+        setPlanSuccess(null);
+      } finally {
+        setPlanLoading(false);
       }
-      // 3. Refresh cart
-      await fetchCart();
-      toast.success("Plan and quantities updated");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update plan");
-      // Revert selection on error
-      // if (cart?.selected_plan) {
-      //   setSelectedPlanId(cart.selected_plan._id);
-      // }
-    } finally {
-      setPlanLoading(false);
-    }
-  }, [selectedPlanId, planLoading, cart, fetchCart]);
+    },
+    [selectedPlanId, planLoading, cart, fetchCart]
+  );
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -591,7 +605,7 @@ export default function Cart() {
   const couponDiscount =
     cart && cart.coupon_discount ? cart.coupon_discount : 0;
   // Get the selected plan object (works for both guests and logged-in users)
-  let selectedPlan: SubscriptionPlan | null = null;
+  let selectedPlan: CartPlan | null = null;
   let subscriptionDiscount = 0;
   if (cart && cart.selected_plan?.discount && cart.selected_plan.discount > 0) {
     // Always use backend discount if present
@@ -599,9 +613,12 @@ export default function Cart() {
       (cart.subtotal * cart.selected_plan.discount) / 100
     );
     // Try to match the plan for display purposes
-    selectedPlan = plans.find((p) => p._id === cart.selected_plan?._id) || null;
+    selectedPlan =
+      cart.available_plans?.find((p) => p._id === cart.selected_plan?._id) ||
+      null;
   } else if (selectedPlanId) {
-    selectedPlan = plans.find((p) => p._id === selectedPlanId) || null;
+    selectedPlan =
+      cart?.available_plans?.find((p) => p._id === selectedPlanId) || null;
     if (selectedPlan && selectedPlan.discount > 0) {
       subscriptionDiscount = Math.round(
         ((cart?.subtotal || 0) * selectedPlan.discount) / 100
@@ -673,10 +690,11 @@ export default function Cart() {
     (p) => !cartProductIds.includes(p._id)
   );
 
-
- const handlePlanClick = async (planId: string) => {
+  const handlePlanClick = async (planId: string) => {
     if (planId === selectedPlanId || planLoading) return;
-    const plan = plans.find((p) => p._id === planId);
+    setPlanError(null);
+    setPlanSuccess(null);
+    const plan = cart?.available_plans?.find((p) => p._id === planId);
     const months = plan ? plan.months : 1;
     if (!user) {
       if (typeof window !== "undefined") {
@@ -703,10 +721,12 @@ export default function Cart() {
               })
             );
             await fetchCart();
-            toast.success("Plan and quantities updated");
+            setPlanSuccess("Plan and quantities updated");
+            setPlanError(null);
           }
         } catch {
-          toast.error("Failed to update guest cart quantities");
+          setPlanError("Failed to update guest cart quantities");
+          setPlanSuccess(null);
         }
       }
       return;
@@ -739,6 +759,7 @@ export default function Cart() {
   // After closing the modal, refetch addresses
   const handleAddressModalClose = () => {
     setAddressModalOpen(false);
+    setAddressError(""); // Clear error when closing modal
     // Refetch addresses to update selected address
     if (user) {
       fetchAddresses();
@@ -766,7 +787,7 @@ export default function Cart() {
   useEffect(() => {
     fetchAddresses();
   }, [user, fetchAddresses]);
-  
+
   // Payment modal handlers
   const handleOnlinePayment = async () => {
     setCheckoutLoading(true);
@@ -785,6 +806,7 @@ export default function Cart() {
       if (!selectedAddress || !selectedAddress._id) {
         toast.error("No address selected. Please select a delivery address.");
         setCheckoutLoading(false);
+        scrollToTop();
         return;
       }
       const address = selectedAddress;
@@ -805,18 +827,28 @@ export default function Cart() {
       if (paymentResponse.ok && paymentData.success) {
         // toast.success("Payment order created successfully!");
         const paymentInfo = paymentData.data || paymentData;
-        const razorpayOrderId = paymentInfo.razorpay_order_id || paymentInfo.order_id;
-        const amountPaise = paymentInfo.amount || (typeof paymentInfo.total_amount === "number" ? paymentInfo.total_amount * 100 : undefined);
-        const razorpayKey = paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+        const razorpayOrderId =
+          paymentInfo.razorpay_order_id || paymentInfo.order_id;
+        const amountPaise =
+          paymentInfo.amount ||
+          (typeof paymentInfo.total_amount === "number"
+            ? paymentInfo.total_amount * 100
+            : undefined);
+        const razorpayKey =
+          paymentInfo.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
         const currency = paymentInfo.currency || "INR";
         if (!amountPaise || !razorpayOrderId || !razorpayKey) {
-          toast.error("Payment gateway error: Missing order details. Please try again or contact support.");
+          toast.error(
+            "Payment gateway error: Missing order details. Please try again or contact support."
+          );
           setCheckoutLoading(false);
           return;
         }
         const scriptLoaded = await loadRazorpayScript();
         if (!scriptLoaded || typeof window.Razorpay !== "function") {
-          toast.error("Failed to load Razorpay payment gateway. Please try again.");
+          toast.error(
+            "Failed to load Razorpay payment gateway. Please try again."
+          );
           setCheckoutLoading(false);
           return;
         }
@@ -827,7 +859,11 @@ export default function Cart() {
           name: "Hilop",
           description: "Order Payment",
           order_id: razorpayOrderId,
-          handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string; }) {
+          handler: async function (response: {
+            razorpay_payment_id: string;
+            razorpay_order_id: string;
+            razorpay_signature: string;
+          }) {
             try {
               setCheckoutLoading(true);
               const verifyRes = await fetch("/api/payment/verify", {
@@ -842,7 +878,9 @@ export default function Cart() {
               });
               const verifyData = await verifyRes.json();
               if (verifyData.success) {
-                const orderId = verifyData.order_id || (verifyData.data && verifyData.data.order_id);
+                const orderId =
+                  verifyData.order_id ||
+                  (verifyData.data && verifyData.data.order_id);
                 let orderSummary: OrderSummary | null = null;
                 if (orderId) {
                   try {
@@ -863,11 +901,16 @@ export default function Cart() {
                 return;
               } else {
                 setCheckoutLoading(false);
-                toast.error(verifyData.message || "Payment verification failed. Please contact support.");
+                toast.error(
+                  verifyData.message ||
+                    "Payment verification failed. Please contact support."
+                );
               }
             } catch {
               setCheckoutLoading(false);
-              toast.error("Payment verification failed. Please contact support.");
+              toast.error(
+                "Payment verification failed. Please contact support."
+              );
             }
           },
           prefill: {
@@ -879,14 +922,21 @@ export default function Cart() {
             color: "#0f5132",
           },
         };
-        interface RazorpayInstance { open(): void; }
-        const rzp = new (window.Razorpay as unknown as { new (options: Record<string, unknown>): RazorpayInstance; })(options);
+        interface RazorpayInstance {
+          open(): void;
+        }
+        const rzp = new (window.Razorpay as unknown as {
+          new (options: Record<string, unknown>): RazorpayInstance;
+        })(options);
         rzp.open();
         setCheckoutLoading(false);
         setPaymentOptionModelOpen(false);
         return;
       } else {
-        toast.error(paymentData.message || `Failed to create payment order (${paymentResponse.status})`);
+        toast.error(
+          paymentData.message ||
+            `Failed to create payment order (${paymentResponse.status})`
+        );
       }
     } catch (error) {
       console.log("COD response status:", error);
@@ -896,7 +946,7 @@ export default function Cart() {
     }
   };
 
- const handleCashOnDelivery = async () => {
+  const handleCashOnDelivery = async () => {
     if (!user) {
       if (typeof window !== "undefined") {
         localStorage.setItem("redirectAfterLogin", "/cart");
@@ -935,7 +985,7 @@ export default function Cart() {
 
         setLastOrderSummary(data.order);
         setOrderSuccessTitle("Order Successful!");
-        setShowPaymentSuccess(true); 
+        setShowPaymentSuccess(true);
       } else {
         toast.error(data.message || "Failed to place COD order.");
       }
@@ -945,9 +995,16 @@ export default function Cart() {
       setCheckoutLoading(false);
     }
   };
-  
-  
-  
+  // Hide planSuccess after 4 seconds
+  useEffect(() => {
+    if (planSuccess) {
+      const timer = setTimeout(() => {
+        setPlanSuccess(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [planSuccess]);
+
   return (
     <>
       <Toaster position="bottom-right" />
@@ -955,6 +1012,7 @@ export default function Cart() {
       <div
         className="w-full bg-gradient-to-r from-green-50 to-green-100 border-b border-green-100 py-4 px-0 mb-6 cursor-pointer select-none"
         onClick={() => {
+          setAddressError(""); // Clear error when opening modal
           if (user) {
             setAddressModalOpen(true);
           } else {
@@ -969,6 +1027,7 @@ export default function Cart() {
         aria-label="Change address"
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
+            setAddressError(""); // Clear error when opening modal
             if (user) {
               setAddressModalOpen(true);
             } else {
@@ -1019,6 +1078,12 @@ export default function Cart() {
                 {formatPhone(selectedAddress.phone_number)}
               </div>
             )}
+            {/* Address error message */}
+            {addressError && (
+              <div className="text-red-600 text-xs md:text-sm mt-1 font-semibold">
+                Add address
+              </div>
+            )}
           </div>
           {/* Dropdown/Caret for address selection */}
           <button
@@ -1029,6 +1094,7 @@ export default function Cart() {
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              setAddressError(""); // Clear error when opening modal
               if (user) {
                 setAddressModalOpen(true);
               } else {
@@ -1085,54 +1151,97 @@ export default function Cart() {
                         }}
                         className="!overflow-visible"
                       >
-                        {plans.map((plan: SubscriptionPlan) => (
+                        {cart?.available_plans?.map((plan: CartPlan) => (
                           <SwiperSlide key={plan._id}>
-                            <label className="inline-flex items-center w-full group cursor-pointer">
-                              <input
-                                type="radio"
-                                name="subscription"
-                                value={plan._id}
-                                checked={selectedPlanId === plan._id}
-                                onChange={() => handlePlanClick(plan._id)}
-                                className="peer sr-only"
-                              />
-                              <span
-                                className={`p-4 rounded-lg w-full border bg-gray-100 border-gray-200 transition-colors ${
-                                  planLoading
-                                    ? "opacity-60 pointer-events-none"
-                                    : ""
-                                } hover:bg-primary/10 peer-checked:bg-green-50 peer-checked:border-green-500`}
-                                // Remove onClick from here
-                              >
-                                <div className="flex items-center gap-3 mb-3">
-                                  <p className="text-dark font-medium">
-                                    {getText(plan.name, language)}
-                                  </p>
-                                  {planLoading &&
-                                    selectedPlanId === plan._id && (
-                                      <div className="ml-auto">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                                      </div>
-                                    )}
-                                </div>
-                                <div className="flex gap-3 items-center">
-                                  {plan.discount > 0 && (
-                                    <span className="text-dark font-medium">
-                                      {plan.discount}% OFF
-                                    </span>
-                                  )}
-                                  <span className="text-primary font-medium">
-                                    {plan.months} Month
-                                    {plan.months > 1 ? "s" : ""}
+                            <div
+                              className={`p-4 rounded-lg w-full border bg-gray-100 border-gray-200 transition-colors cursor-pointer ${
+                                planLoading
+                                  ? "opacity-60 pointer-events-none"
+                                  : ""
+                              } hover:bg-primary/10 ${
+                                selectedPlanId === plan._id
+                                  ? "bg-green-50 border-green-500"
+                                  : ""
+                              }`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!planLoading) {
+                                  handlePlanClick(plan._id);
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  if (!planLoading) {
+                                    handlePlanClick(plan._id);
+                                  }
+                                }
+                              }}
+                              tabIndex={0}
+                              role="button"
+                              aria-label={`Select ${getText(
+                                plan.name,
+                                language
+                              )} plan`}
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                {/* Add radio button here */}
+                                <input
+                                  type="radio"
+                                  name="plan"
+                                  checked={selectedPlanId === plan._id}
+                                  onChange={() => handlePlanClick(plan._id)}
+                                  disabled={planLoading}
+                                  className="accent-dark cursor-pointer h-4 w-4"
+                                  aria-label={`Select ${getText(
+                                    plan.name,
+                                    language
+                                  )} plan`}
+                                />
+                                <p className="text-dark font-medium">
+                                  {getText(plan.name, language)}
+                                </p>
+                                {planLoading && selectedPlanId === plan._id && (
+                                  <div className="ml-auto">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex gap-3 items-center">
+                                {plan.discount > 0 && (
+                                  <span className="text-dark font-medium">
+                                    {plan.discount}% OFF
                                   </span>
-                                </div>
-                              </span>
-                            </label>
+                                )}
+                                <span className="text-primary font-medium">
+                                  ₹
+                                  {formatPrice(
+                                    Math.round(
+                                      plan.eligible_subtotal -
+                                        plan.discount_amount
+                                    )
+                                  )}
+                                </span>
+                              </div>
+                            </div>
                           </SwiperSlide>
                         ))}
                       </Swiper>
                     )}
                   </div>
+
+                  {/* Plan Error Display */}
+                  {planError && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-red-700 text-sm">{planError}</p>
+                    </div>
+                  )}
+                  {planSuccess && (
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-green-700 text-sm">{planSuccess}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1323,22 +1432,19 @@ export default function Cart() {
                             className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg bg-gray-200 flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0 flex flex-row items-center justify-between gap-2">
-                            <div>
-                              <p
-                                className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
-                                title={getText(item.name, language)}
-                              >
-                                {getText(item.name, language)}
+                            <p
+                              className="text-sm sm:text-base md:text-lg font-semibold text-green-900 mb-1 truncate"
+                              title={getText(item.name, language)}
+                            >
+                              {getText(item.name, language)}
+                            </p>
+                            {item.orderDate && (
+                              <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
+                                Last ordered:{" "}
+                                {new Date(item.orderDate).toLocaleDateString()}
                               </p>
-                              {item.orderDate && (
-                                <p className="text-xs sm:text-sm text-gray-500 leading-tight truncate">
-                                  Last ordered:{" "}
-                                  {new Date(
-                                    item.orderDate
-                                  ).toLocaleDateString()}
-                                </p>
-                              )}
-                            </div>
+                            )}
+
                             <div className="flex-shrink-0 ml-2">
                               <Button
                                 label={
@@ -1383,19 +1489,19 @@ export default function Cart() {
                         <h3 className="text-sm font-medium text-gray-700 mb-2">
                           Applied Coupon
                         </h3>
-                        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
                           <div>
-                            <div className="font-medium text-blue-800">
+                            <div className="font-medium text-primary">
                               {appliedCoupon.code}
                             </div>
-                            <div className="text-sm text-blue-600">
+                            <div className="text-sm text-gray-600">
                               Discount: ₹{formatPrice(couponDiscount)}
                             </div>
                           </div>
                           <button
                             onClick={removeCoupon}
                             disabled={couponLoading}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                            className="px-3 py-1 cursor-pointer  text-red-500 text-sm rounded  disabled:opacity-50 transition-colors"
                           >
                             {couponLoading ? "Removing..." : "Remove"}
                           </button>
@@ -1529,8 +1635,13 @@ export default function Cart() {
                           <span className="font-medium text-primary">
                             Selected Plan:
                           </span>{" "}
-                          {selectedPlan.months} month
-                          {selectedPlan.months > 1 ? "s" : ""}
+                          ₹
+                          {formatPrice(
+                            Math.round(
+                              selectedPlan.eligible_subtotal -
+                                selectedPlan.discount_amount
+                            )
+                          )}
                         </div>
                       )}
                     </div>
@@ -1557,14 +1668,20 @@ export default function Cart() {
             </>
           )}
         </div>
+
         <ArrowButton
-          label={checkoutLoading ? "Processing..." : "Pre-Book Now"}
+          label={checkoutLoading ? "Processing..." : "Place Order"}
           theme="dark"
           className="w-fit"
+          isIcon={true}
           size="lg"
           onClick={() => {
             if (!selectedAddress || !selectedAddress._id) {
-              toast.error("No address selected. Please select a delivery address.");
+              setAddressError("Add Address First");
+              toast.error(
+                "No address selected. Please select a delivery address."
+              );
+              scrollToTop();
               return;
             }
             setPaymentOptionModelOpen(true);
@@ -1572,6 +1689,7 @@ export default function Cart() {
           disabled={checkoutLoading || !cart || cart.items.length === 0}
         />
       </div>
+
       <OrderSuccessful
         src="/images/icon/verify.svg"
         title={orderSuccessTitle}

@@ -11,7 +11,7 @@ import { getText } from "@/utils/getText";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/thumbs";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, ShoppingCart } from "lucide-react";
 import Accordion from "@/components/uiFramework/Accordion";
 import RoundButton from "@/components/uiFramework/RoundButton";
 import Paragraph from "@/components/animationComponents/TextVisble";
@@ -20,7 +20,7 @@ import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 import { toast } from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
-import type { Product as ProductType } from '@/types/index';
+import type { Product as ProductType } from "@/types/index";
 import { useRouter } from "next/navigation";
 
 // Define a type for the dynamic content to ensure consistency
@@ -36,7 +36,7 @@ interface ProductDynamicContent {
 
 // Consolidated Dynamic content mapping based on product name
 const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
-  Slimvibe: {
+  "Hardveda - Natural Performance Booster Capsule": {
     customImage: "/images/weight-loss/why-choose.jpg",
     whyChooseTitle: "Our Herbal Fat Loss Formula?",
     benefitTags: [
@@ -58,7 +58,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
     },
   },
-  BoldRise: {
+  "BoldRise - Last Long Delay Powder": {
     customImage: "/images/instant-boost/why-choose.jpg",
     whyChooseTitle: "Our Herbal Instant Sexual Enhancer?",
     benefitTags: [
@@ -80,7 +80,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       hi: "हमारा बोल्डराइज फॉर्मूला यौन प्रदर्शन और ऊर्जा में तत्काल और ध्यान देने योग्य सुधार प्रदान करने के लिए प्राकृतिक जड़ी-बूटियों के एक शक्तिशाली मिश्रण का उपयोग करता है, जिसमें कोई कृत्रिम योजक नहीं होता है।",
     },
   },
-  Hardveda: {
+  "Slimvibe - Herbal Weight Loss Capsule": {
     customImage: "/images/improving-sexual/why-choose.jpg",
     whyChooseTitle: "Our Herbal Sexual Wellness formula?",
     benefitTags: [
@@ -290,9 +290,7 @@ export default function ProductPage() {
     return (
       <div className="container mx-auto px-4 py-8 h-screen flex justify-center items-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            {error}
-          </h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
           <Button
             link="/"
             label={language === "en" ? "Return to Home" : "होम पर वापस जाएं"}
@@ -309,8 +307,12 @@ export default function ProductPage() {
   // Helper: is this a placeholder product?
   const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
   const MIN_IMAGE_SLOTS = 3;
-  const getSafeImage = (img?: string) => img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
-  const isPlaceholderProduct = !product.images || product.images.length === 0 || product.images[0] === PLACEHOLDER_IMAGE;
+  const getSafeImage = (img?: string) =>
+    img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
+  const isPlaceholderProduct =
+    !product.images ||
+    product.images.length === 0 ||
+    product.images[0] === PLACEHOLDER_IMAGE;
 
   let imagesToShow: string[] = [];
   if (isPlaceholderProduct) {
@@ -323,8 +325,10 @@ export default function ProductPage() {
   }
 
   // For key ingredients, override image if placeholder
-  const keyIngredientsToShow = (product?.key_ingredients || []).map(ki =>
-    isPlaceholderProduct ? { ...ki, image: PLACEHOLDER_IMAGE } : { ...ki, image: getSafeImage(ki.image) }
+  const keyIngredientsToShow = (product?.key_ingredients || []).map((ki) =>
+    isPlaceholderProduct
+      ? { ...ki, image: PLACEHOLDER_IMAGE }
+      : { ...ki, image: getSafeImage(ki.image) }
   );
 
   const dynamicProductContent = getProductContent(product.name);
@@ -336,39 +340,48 @@ export default function ProductPage() {
 
   const whyChooseUs = Array.isArray(product?.why_choose_us)
     ? product.why_choose_us
-        .map((item: string | WhyChooseUsItem): { question: string; answer: string } => {
-          if (typeof item === "string") {
-            return { question: item, answer: item };
+        .map(
+          (
+            item: string | WhyChooseUsItem
+          ): { question: string; answer: string } => {
+            if (typeof item === "string") {
+              return { question: item, answer: item };
+            }
+            return {
+              question: item.title || item.question || "",
+              answer: item.description || item.answer || "",
+            };
           }
-          return {
-            question: item.title || item.question || "",
-            answer: item.description || item.answer || "",
-          };
-        })
+        )
         .filter((item) => item.question && item.answer)
     : [];
 
   const faqItems = Array.isArray(product?.faqs)
     ? product.faqs
-        .map((item: string | FaqAccordionItem, index: number): { id: string; question: string; answer: string } => {
-          if (typeof item === "string") {
+        .map(
+          (
+            item: string | FaqAccordionItem,
+            index: number
+          ): { id: string; question: string; answer: string } => {
+            if (typeof item === "string") {
+              return {
+                id: `faq-${index}`,
+                question: item,
+                answer: item,
+              };
+            }
             return {
               id: `faq-${index}`,
-              question: item,
-              answer: item,
+              question: item.title || item.question || "",
+              answer: item.description || item.answer || "",
             };
           }
-          return {
-            id: `faq-${index}`,
-            question: item.title || item.question || "",
-            answer: item.description || item.answer || "",
-          };
-        })
+        )
         .filter((item) => item.question && item.answer)
     : [];
 
   return (
-    <>
+    <div className="relative">
       <section className="container mb-20 lg:mb-32 lg:mt-14 mt-8">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
           <div className="order-2 lg:order-1">
@@ -395,15 +408,20 @@ export default function ProductPage() {
             <p className="md:text-xl text-lg font-medium text-dark mb-6">
               Start your transformation today with a personalized plan!
             </p>
-            <div className="flex gap-4">
+
+            <div className="hidden md:flex  gap-4">
               <Button
-                label="Get Started Now"
+                label="TAKE THE TEST ™"
                 variant="btn-primary"
                 size="xl"
-                link={product.test_id ? `/consultation?testId=${product.test_id}` : '/consultation'}
+                link={
+                  product.test_id
+                    ? `/consultation?testId=${product.test_id}`
+                    : "/consultation"
+                }
               />
               <Button
-                label={addToCartLoading ? "Adding..." : "Pre-Book"}
+                label={addToCartLoading ? "Adding..." : "ADD TO CART"}
                 variant="btn-dark"
                 size="xl"
                 onClick={handleBuyNow}
@@ -482,7 +500,7 @@ export default function ProductPage() {
             </h2>
             <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
-              label="Get Started Now"
+              label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
@@ -578,7 +596,7 @@ export default function ProductPage() {
                 {getText(product.how_it_works || "", language)}
               </p>
               <Button
-                label="Get Started Now"
+                label="TAKE THE TEST ™"
                 variant="btn-primary"
                 size="xl"
                 link={`/product/${productId}`}
@@ -651,12 +669,12 @@ export default function ProductPage() {
           </div>
           <div className="flex gap-4">
             <Button
-              label="Get Started Now"
+              label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
             />
-            <Button label="Pre-Book" variant="btn-light" size="xl" />
+            <Button label="ADD TO CART" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>
@@ -702,6 +720,30 @@ export default function ProductPage() {
       <Testimonials filteredByProductId={productId} />
       <FaqAccordion items={faqItems} className="mx-auto" />
       <Toaster position="bottom-right" />
-    </>
+      <div className="fixed bottom-0 grid grid-cols-2 items-center    z-[999] w-full  justify-center border-t border-t-gray-300  bg-white md:hidden  ">
+        <div className="bg-primary py-2.5">
+          <Button
+            label="TAKE THE TEST ™"
+            variant="btn-primary"
+            className="!w-full !h-full !rounded-none !text-base"
+            link={
+              product.test_id
+                ? `/consultation?testId=${product.test_id}`
+                : "/consultation"
+            }
+          />
+        </div>
+        <div className="bg-dark flex justify-center items-center py-2.5">
+          <Button
+            label={addToCartLoading ? "Adding..." : "ADD TO CART"}
+            variant="btn-dark"
+            className=" !h-full !rounded-none !border-transparent !text-base"
+            onClick={handleBuyNow}
+            disabled={addToCartLoading}
+          />
+          <ShoppingCart className={`text-white `} />
+        </div>
+      </div>
+    </div>
   );
 }

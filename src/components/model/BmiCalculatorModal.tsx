@@ -95,11 +95,15 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
           {/* Left: Form */}
           <div className="w-full min-w-0 max-w-md mx-auto md:px-0 px-1">
             <p className="mb-2 text-base md:text-lg text-gray-700 font-medium max-w-md font-sans text-center md:text-left">
-              BMI stands for Body Mass Index. It’s a measurement that uses your height and weight to estimate if your weight is in a healthy range for your height.
+              BMI stands for Body Mass Index. It’s a measurement that uses your
+              height and weight to estimate if your weight is in a healthy range
+              for your height.
             </p>
             <form onSubmit={handleCalculate} className="space-y-4 w-full">
               <div>
-                <label className="block font-semibold text-dark mb-2">Height</label>
+                <label className="block font-semibold text-dark mb-2">
+                  Height
+                </label>
                 <div className="grid grid-cols-2 gap-2 md:gap-3 w-full">
                   <AnimatedInput
                     label="Feet"
@@ -119,12 +123,18 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                   />
                 </div>
                 <div className="flex gap-2 mt-1">
-                  {feetError && <div className="text-red-600 text-xs">{feetError}</div>}
-                  {inchesError && <div className="text-red-600 text-xs">{inchesError}</div>}
+                  {feetError && (
+                    <div className="text-red-600 text-xs">{feetError}</div>
+                  )}
+                  {inchesError && (
+                    <div className="text-red-600 text-xs">{inchesError}</div>
+                  )}
                 </div>
               </div>
               <div>
-                <label className="block font-semibold text-dark mb-2">Weight (kg)</label>
+                <label className="block font-semibold text-dark mb-2">
+                  Weight (kg)
+                </label>
                 <AnimatedInput
                   label="Weight in Kg"
                   name="pounds"
@@ -133,7 +143,9 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                   onChange={(e) => setPounds(e.target.value)}
                   required
                 />
-                {poundsError && <div className="text-red-600 text-xs mt-1">{poundsError}</div>}
+                {poundsError && (
+                  <div className="text-red-600 text-xs mt-1">{poundsError}</div>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 w-full">
                 <Button
@@ -160,30 +172,48 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
               <div className="relative flex justify-center items-center w-full max-w-[160px] md:max-w-[220px] mx-auto mb-4 md:mb-6 mt-2">
                 <CircularProgressBar
                   percentage={bmi !== null ? percentage : 0}
-                  size={typeof window !== "undefined" && window.innerWidth < 768 ? 120 : 180}
-                  strokeWidth={typeof window !== "undefined" && window.innerWidth < 768 ? 12 : 20}
+                  size={
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? 120
+                      : 180
+                  }
+                  strokeWidth={
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? 12
+                      : 20
+                  }
                   progressColor="text-primary"
                   trackColor="text-gray-200"
                   animationDuration={800}
                 />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+                <div className="absolute top-1/2 bottom-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
                   <span className="text-3xl md:text-5xl font-extrabold text-primary leading-none font-sans drop-shadow-lg">
                     {bmi !== null ? bmi : "--"}
                   </span>
-                  <span className="text-sm md:text-base text-gray-500 font-medium mt-2">Your BMI</span>
-                  <span className="text-xs md:text-sm text-gray-400 font-medium mt-1">{bmi !== null ? `${Math.round(percentage)}%` : "--"}</span>
+                  <span className="text-sm md:text-base text-gray-500 font-medium mt-2">
+                    Your BMI
+                  </span>
+                  <span className="text-xs md:text-sm text-gray-400 font-medium mt-1">
+                    {bmi !== null ? `${Math.round(percentage)}%` : "--"}
+                  </span>
                 </div>
               </div>
               {/* Category highlight */}
               {bmi !== null ? (
                 <div className="flex items-center gap-3 bg-primary/10 rounded-full px-3 md:px-5 py-2 my-3 md:mb-4 shadow transition-all duration-300 whitespace-nowrap">
                   <CheckCircle className="text-primary" size={20} />
-                  <span className="text-sm md:text-base font-bold text-dark font-sans whitespace-nowrap">{category.label}</span>
-                  <span className="ml-auto text-dark/70 font-semibold whitespace-nowrap">{bmiRanges[category.index].range}</span>
+                  <span className="text-sm md:text-base font-bold text-dark font-sans whitespace-nowrap">
+                    {category.label}
+                  </span>
+                  <span className="ml-auto text-dark/70 font-semibold whitespace-nowrap">
+                    {bmiRanges[category.index].range}
+                  </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 bg-primary/5 rounded-full px-3 md:px-5 py-2 my-3 md:mb-4 shadow transition-all duration-300 whitespace-nowrap text-gray-500">
-                  <span className="text-sm md:text-base font-medium">Enter your height and weight, then calculate BMI.</span>
+                <div className="flex items-center gap-3 bg-white rounded-full px-3 md:px-5 py-2 my-3 md:mb-4 md:mt-2  transition-all duration-300 lg:whitespace-nowrap text-gray-600">
+                  <span className="text-xs md:text-base  text-center font-medium">
+                    Enter your height and weight, then calculate BMI.
+                  </span>
                 </div>
               )}
               {/* Category list */}
@@ -193,11 +223,28 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                   return (
                     <div
                       key={r.label}
-                      className={`flex items-center gap-3 px-2 md:px-3 py-2 rounded-lg transition-all ${isActive ? "bg-black text-white font-bold" : ""} whitespace-nowrap`}
+                      className={`flex items-center gap-3 px-2 md:px-3 py-2 rounded-lg transition-all ${
+                        isActive ? "bg-black text-white font-bold" : ""
+                      } whitespace-nowrap`}
                     >
-                      <span className={`inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full`} style={{ background: r.color }}></span>
-                      <span className={`${isActive ? "text-white" : "text-dark"} text-xs md:text-sm font-medium font-sans whitespace-nowrap`}>{r.label}</span>
-                      <span className={`ml-auto ${isActive ? "text-white" : "text-dark/70"} text-xs font-semibold font-sans whitespace-nowrap`}>{r.range}</span>
+                      <span
+                        className={`inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded-full`}
+                        style={{ background: r.color }}
+                      ></span>
+                      <span
+                        className={`${
+                          isActive ? "text-white" : "text-dark"
+                        } text-xs md:text-sm font-medium font-sans whitespace-nowrap`}
+                      >
+                        {r.label}
+                      </span>
+                      <span
+                        className={`ml-auto ${
+                          isActive ? "text-white" : "text-dark/70"
+                        } text-xs font-semibold font-sans whitespace-nowrap`}
+                      >
+                        {r.range}
+                      </span>
                     </div>
                   );
                 })}

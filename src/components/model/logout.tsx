@@ -16,7 +16,9 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
       isOpen={isOpen}
       onClose={onClose}
     >
-      <h2 className="text-lg md:text-2xl font-semibold mb-4 p-6 border-b border-gray-200">Confirm Logout</h2>
+      <h2 className="text-lg md:text-2xl font-semibold mb-4 p-6 border-b border-gray-200">
+        Confirm Logout
+      </h2>
       <p className="text-gray-600 my-12 text-center px-6">
         Are you sure you want to logout from your account?
       </p>
