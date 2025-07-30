@@ -52,7 +52,13 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
           }}
         >
           <div>
-            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black/50  w-full">
+            <label
+              className={`flex flex-col gap-2 p-4 border rounded-lg cursor-pointer ${
+                selectedPayment === "razorpay"
+                  ? "border-black/50"
+                  : "border-gray-200"
+              } bg-gray-100  hover:border-black/50  w-full`}
+            >
               <div className="flex flex-row items-start gap-3">
                 <input
                   type="radio"
@@ -66,7 +72,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   disabled={loading}
                 />
                 <div className="flex flex-col md:flex-row flex-1  gap-2">
-                  <span className="font-medium text-sm md:text-base w-full break-words leading-snug">
+                  <span className="font-normal text-sm md:text-base w-full break-words leading-snug">
                     Razorpay Secure (UPI, Cards, Wallets, NetBanking)
                   </span>
                   <div className="flex flex-wrap md:justify-end w-full items-center gap-2">
@@ -130,7 +136,13 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
             </label>
           </div>
           <div>
-            <label className="flex flex-col gap-2 p-4 border rounded-lg cursor-pointer bg-gray-100 border-gray-200 hover:border-black/50 w-full">
+            <label
+              className={`flex flex-col gap-2 p-4 ${
+                selectedPayment === "cod"
+                  ? "border-black/50"
+                  : "border-gray-200"
+              } border rounded-lg cursor-pointer  bg-gray-100  hover:border-black/50 w-full`}
+            >
               <div className="flex flex-row items-center gap-3">
                 <input
                   type="radio"
@@ -143,7 +155,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
                   className="size-4 accent-dark"
                   disabled={loading}
                 />
-                <span className="font-medium text-sm md:text-base flex-1 break-words leading-snug">
+                <span className="font-normal text-sm md:text-base flex-1 break-words leading-snug">
                   Cash on Delivery
                 </span>
                 <Image

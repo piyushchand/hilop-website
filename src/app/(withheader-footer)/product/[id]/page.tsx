@@ -58,7 +58,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
     },
   },
-  BoldRise: {
+  "BoldRise - Last Long Delay Powder": {
     customImage: "/images/instant-boost/why-choose.jpg",
     whyChooseTitle: "Our Herbal Instant Sexual Enhancer?",
     benefitTags: [
