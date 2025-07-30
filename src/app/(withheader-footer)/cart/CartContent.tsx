@@ -1670,7 +1670,7 @@ export default function Cart() {
         </div>
 
         <ArrowButton
-          label={checkoutLoading ? "Processing..." : "Place Order"}
+          label={checkoutLoading ? "Processing..." : "PLACE ORDER"}
           theme="dark"
           className="w-fit"
           isIcon={true}
