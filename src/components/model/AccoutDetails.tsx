@@ -276,21 +276,15 @@ export default function AccountDetailsModal({
       newErrors.birthdate = "Date of birth is required";
     } else {
       const birthDate = new Date(formData.birthdate);
-      const today = new Date();
-
       // Check if date is valid
       if (isNaN(birthDate.getTime())) {
         newErrors.birthdate = "Please enter a valid date of birth";
       } else {
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-          age--;
+        const today = new Date();
+        if (birthDate > today) {
+          newErrors.birthdate = "Date of birth cannot be in the future";
         }
-        if (age < 18) {
-          newErrors.birthdate = "You must be at least 18 years old";
-        }
-        if (age > 120) {
+        if (today.getFullYear() - birthDate.getFullYear() > 120) {
           newErrors.birthdate = "Please enter a valid date of birth";
         }
       }
@@ -547,11 +541,7 @@ export default function AccountDetailsModal({
               value={formData.birthdate}
               onChange={handleInputChange}
               required
-              max={
-                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-                  .toISOString()
-                  .split("T")[0]
-              }
+              max={new Date().toISOString().split("T")[0]}
             />
             {errors.birthdate && (
               <div className="text-red-500 text-sm">{errors.birthdate}</div>
