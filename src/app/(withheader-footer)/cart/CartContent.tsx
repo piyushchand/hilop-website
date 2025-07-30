@@ -1481,19 +1481,19 @@ export default function Cart() {
                         <h3 className="text-sm font-medium text-gray-700 mb-2">
                           Applied Coupon
                         </h3>
-                        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-lg">
                           <div>
-                            <div className="font-medium text-blue-800">
+                            <div className="font-medium text-primary">
                               {appliedCoupon.code}
                             </div>
-                            <div className="text-sm text-blue-600">
+                            <div className="text-sm text-gray-600">
                               Discount: ₹{formatPrice(couponDiscount)}
                             </div>
                           </div>
                           <button
                             onClick={removeCoupon}
                             disabled={couponLoading}
-                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                            className="px-3 py-1 cursor-pointer  text-red-500 text-sm rounded  disabled:opacity-50 transition-colors"
                           >
                             {couponLoading ? "Removing..." : "Remove"}
                           </button>
