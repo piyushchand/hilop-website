@@ -224,6 +224,13 @@ type OrderSummary = {
 //   );
 // };
 
+// Utility function to scroll to top
+const scrollToTop = () => {
+  if (typeof window !== "undefined") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+
 export default function Cart() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
@@ -799,6 +806,7 @@ export default function Cart() {
       if (!selectedAddress || !selectedAddress._id) {
         toast.error("No address selected. Please select a delivery address.");
         setCheckoutLoading(false);
+        scrollToTop();
         return;
       }
       const address = selectedAddress;
@@ -1662,7 +1670,7 @@ export default function Cart() {
         </div>
 
         <ArrowButton
-          label={checkoutLoading ? "Processing..." : "Add To Cart"}
+          label={checkoutLoading ? "Processing..." : "Place Order"}
           theme="dark"
           className="w-fit"
           isIcon={true}
@@ -1673,6 +1681,7 @@ export default function Cart() {
               toast.error(
                 "No address selected. Please select a delivery address."
               );
+              scrollToTop();
               return;
             }
             setPaymentOptionModelOpen(true);

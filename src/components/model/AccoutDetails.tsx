@@ -608,7 +608,7 @@ export default function AccountDetailsModal({
             disabled={isLoading || !isDirty}
           />
           <Button
-            label={isLoading ? "Saving..." : "Save Changes"}
+            label={isLoading ? "Saving..." : "Save"}
             variant="btn-dark"
             size="xl"
             onClick={handleSave}

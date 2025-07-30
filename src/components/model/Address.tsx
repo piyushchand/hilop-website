@@ -573,26 +573,28 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                       onChange={handleInputChange}
                       required
                     />
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <input
-                        type="checkbox"
-                        id="is_default"
-                        name="is_default"
-                        checked={formData.is_default}
-                        onChange={handleCheckboxChange}
-                        className="w-4 h-4 accent-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor="is_default"
-                        className="text-sm text-gray-700 flex items-center gap-2"
-                      >
-                        Set as default address
-                        {formData.is_default && (
-                          <span className="text-xs text-blue-600 font-medium">
-                            (This will replace any existing default address)
-                          </span>
-                        )}
-                      </label>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <input
+                          type="checkbox"
+                          id="is_default"
+                          name="is_default"
+                          checked={formData.is_default}
+                          onChange={handleCheckboxChange}
+                          className="w-4 h-4 accent-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="is_default"
+                          className="text-sm text-gray-700 flex items-center gap-2"
+                        >
+                          Set as default address
+                        </label>
+                      </div>
+                      {formData.is_default && (
+                        <span className="text-xs mt-1 text-blue-600 font-medium">
+                          This will replace any existing default address
+                        </span>
+                      )}
                     </div>
                   </div>
                 </form>
@@ -625,8 +627,8 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 isLoading
                   ? "Saving..."
                   : viewMode === "editForm"
-                  ? "Update Address"
-                  : "Save Address"
+                  ? "Update"
+                  : "Save"
               }
               variant="btn-dark"
               size="xl"

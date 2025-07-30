@@ -411,7 +411,7 @@ export default function ProductPage() {
 
             <div className="hidden md:flex  gap-4">
               <Button
-                label="Take The Test"
+                label="TAKE THE TEST ™"
                 variant="btn-primary"
                 size="xl"
                 link={
@@ -421,7 +421,7 @@ export default function ProductPage() {
                 }
               />
               <Button
-                label={addToCartLoading ? "Adding..." : "Add To Cart"}
+                label={addToCartLoading ? "Adding..." : "ADD TO CART"}
                 variant="btn-dark"
                 size="xl"
                 onClick={handleBuyNow}
@@ -500,7 +500,7 @@ export default function ProductPage() {
             </h2>
             <Accordion items={whyChooseUs} className="mx-auto mb-8" />
             <Button
-              label="Take The Test"
+              label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
@@ -596,7 +596,7 @@ export default function ProductPage() {
                 {getText(product.how_it_works || "", language)}
               </p>
               <Button
-                label="Take The Test"
+                label="TAKE THE TEST ™"
                 variant="btn-primary"
                 size="xl"
                 link={`/product/${productId}`}
@@ -669,12 +669,12 @@ export default function ProductPage() {
           </div>
           <div className="flex gap-4">
             <Button
-              label="Take The Test"
+              label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
               link={`/product/${productId}`}
             />
-            <Button label="Add To Cart" variant="btn-light" size="xl" />
+            <Button label="ADD TO CART" variant="btn-light" size="xl" />
           </div>
         </div>
       </section>
@@ -721,11 +721,11 @@ export default function ProductPage() {
       <FaqAccordion items={faqItems} className="mx-auto" />
       <Toaster position="bottom-right" />
       <div className="fixed bottom-0 grid grid-cols-2 items-center    z-[999] w-full  justify-center border-t border-t-gray-300  bg-white md:hidden  ">
-        <div className="bg-primary py-5">
+        <div className="bg-primary py-2.5">
           <Button
-            label="Take The Test"
+            label="TAKE THE TEST ™"
             variant="btn-primary"
-            className="!w-full !h-full !rounded-none "
+            className="!w-full !h-full !rounded-none !text-base"
             link={
               product.test_id
                 ? `/consultation?testId=${product.test_id}`
@@ -733,11 +733,11 @@ export default function ProductPage() {
             }
           />
         </div>
-        <div className="bg-dark flex justify-center items-center py-5">
+        <div className="bg-dark flex justify-center items-center py-2.5">
           <Button
-            label={addToCartLoading ? "Adding..." : "Add To Cart"}
+            label={addToCartLoading ? "Adding..." : "ADD TO CART"}
             variant="btn-dark"
-            className=" !h-full !rounded-none !border-transparent"
+            className=" !h-full !rounded-none !border-transparent !text-base"
             onClick={handleBuyNow}
             disabled={addToCartLoading}
           />
