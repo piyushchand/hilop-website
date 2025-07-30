@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setError = (error: string) => {
     setState((prev) => ({ ...prev, error }));
-    toast.error(error);
+    // toast.error(error);
   };
 
   const setSuccess = (success: string | null) => {

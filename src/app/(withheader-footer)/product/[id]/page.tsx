@@ -37,25 +37,26 @@ interface ProductDynamicContent {
 // Consolidated Dynamic content mapping based on product name
 const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
   "Hardveda - Natural Performance Booster Capsule": {
-    customImage: "/images/weight-loss/why-choose.jpg",
-    whyChooseTitle: "Our Herbal Fat Loss Formula?",
+    customImage: "/images/improving-sexual/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Sexual Wellness formula?",
     benefitTags: [
-      "Individuals looking to support their weight loss goals naturally.",
-      "Those who want to increase their energy levels and improve overall health.",
-      "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
+      "Men looking to naturally boost their testosterone levels and support sexual wellness.",
+      "Individuals experiencing low energy, reduced libido, or a decrease in overall vitality.",
+      "Those who want to enhance performance, stamina, and confidence in intimate moments.",
+      "Active individuals who want to support muscle mass, strength, and energy levels.",
     ],
-    benefitImage: "/images/weight-loss/who-can-benefit.jpg",
+    benefitImage: "/images/improving-sexual/who-can-benefit.jpg",
     howItWorksDescription: {
-      en: "Our Slimvibe formula works by boosting your metabolism, reducing cravings, and promoting natural fat burning. It helps you achieve sustainable weight loss without harsh chemicals.",
-      hi: "हमारा स्लिमवाइब फॉर्मूला आपके मेटाबॉलिज्म को बढ़ाकर, क्रेविंग को कम करके और प्राकृतिक वसा जलने को बढ़ावा देकर काम करता है। यह आपको कठोर रसायनों के बिना स्थायी वजन घटाने में मदद करता है।",
+      en: "Hardveda supports sexual wellness by optimizing hormonal balance and improving overall reproductive health, leading to increased vitality and improved performance over time.",
+      hi: "हार्डवेदा हार्मोनल संतुलन को अनुकूलित करके और समग्र प्रजनन स्वास्थ्य में सुधार करके यौन कल्याण का समर्थन करता है, जिससे समय के साथ बढ़ी हुई जीवन शक्ति और बेहतर प्रदर्शन होता है।",
     },
     howToUseDescription: {
-      en: "Take two capsules daily with water, preferably before meals. For best results, combine with a balanced diet and regular exercise.",
-      hi: "रोजाना दो कैप्सूल पानी के साथ लें, अधिमानतः भोजन से पहले। सर्वोत्तम परिणामों के लिए, संतुलित आहार और नियमित व्यायाम के साथ मिलाएं।",
+      en: "Take one capsule twice daily after meals. Consistent use is recommended for optimal results.",
+      hi: "भोजन के बाद दिन में दो बार एक कैप्सूल लें। इष्टतम परिणामों के लिए लगातार उपयोग की सिफारिश की जाती है।",
     },
     whyChooseUsSectionDescription: {
-      en: "Our Slimvibe formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience tailored for natural weight loss. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
-      hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
+      en: "Hardveda is formulated with traditional Ayurvedic herbs known for their powerful benefits in male sexual health, offering a natural and holistic approach to wellness.",
+      hi: "हार्डवेदा पारंपरिक आयुर्वेदिक जड़ी-बूटियों के साथ तैयार किया गया है जो पुरुष यौन स्वास्थ्य में उनके शक्तिशाली लाभों के लिए जानी जाती हैं, जो कल्याण के लिए एक प्राकृतिक और समग्र दृष्टिकोण प्रदान करती हैं।",
     },
   },
   "BoldRise - Last Long Delay Powder": {
@@ -81,26 +82,25 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
     },
   },
   "Slimvibe - Herbal Weight Loss Capsule": {
-    customImage: "/images/improving-sexual/why-choose.jpg",
-    whyChooseTitle: "Our Herbal Sexual Wellness formula?",
+    customImage: "/images/weight-loss/why-choose.jpg",
+    whyChooseTitle: "Our Herbal Fat Loss Formula?",
     benefitTags: [
-      "Men looking to naturally boost their testosterone levels and support sexual wellness.",
-      "Individuals experiencing low energy, reduced libido, or a decrease in overall vitality.",
-      "Those who want to enhance performance, stamina, and confidence in intimate moments.",
-      "Active individuals who want to support muscle mass, strength, and energy levels.",
+      "Individuals looking to support their weight loss goals naturally.",
+      "Those who want to increase their energy levels and improve overall health.",
+      "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
     ],
-    benefitImage: "/images/improving-sexual/who-can-benefit.jpg",
+    benefitImage: "/images/weight-loss/product-main.png",
     howItWorksDescription: {
-      en: "Hardveda supports sexual wellness by optimizing hormonal balance and improving overall reproductive health, leading to increased vitality and improved performance over time.",
-      hi: "हार्डवेदा हार्मोनल संतुलन को अनुकूलित करके और समग्र प्रजनन स्वास्थ्य में सुधार करके यौन कल्याण का समर्थन करता है, जिससे समय के साथ बढ़ी हुई जीवन शक्ति और बेहतर प्रदर्शन होता है।",
+      en: "Our Slimvibe formula works by boosting your metabolism, reducing cravings, and promoting natural fat burning. It helps you achieve sustainable weight loss without harsh chemicals.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला आपके मेटाबॉलिज्म को बढ़ाकर, क्रेविंग को कम करके और प्राकृतिक वसा जलने को बढ़ावा देकर काम करता है। यह आपको कठोर रसायनों के बिना स्थायी वजन घटाने में मदद करता है।",
     },
     howToUseDescription: {
-      en: "Take one capsule twice daily after meals. Consistent use is recommended for optimal results.",
-      hi: "भोजन के बाद दिन में दो बार एक कैप्सूल लें। इष्टतम परिणामों के लिए लगातार उपयोग की सिफारिश की जाती है।",
+      en: "Take two capsules daily with water, preferably before meals. For best results, combine with a balanced diet and regular exercise.",
+      hi: "रोजाना दो कैप्सूल पानी के साथ लें, अधिमानतः भोजन से पहले। सर्वोत्तम परिणामों के लिए, संतुलित आहार और नियमित व्यायाम के साथ मिलाएं।",
     },
     whyChooseUsSectionDescription: {
-      en: "Hardveda is formulated with traditional Ayurvedic herbs known for their powerful benefits in male sexual health, offering a natural and holistic approach to wellness.",
-      hi: "हार्डवेदा पारंपरिक आयुर्वेदिक जड़ी-बूटियों के साथ तैयार किया गया है जो पुरुष यौन स्वास्थ्य में उनके शक्तिशाली लाभों के लिए जानी जाती हैं, जो कल्याण के लिए एक प्राकृतिक और समग्र दृष्टिकोण प्रदान करती हैं।",
+      en: "Our Slimvibe formula is crafted using premium, organic herbal ingredients, ensuring a clean, chemical-free experience tailored for natural weight loss. Support your natural balance and feel confident as you move toward a healthier, more energized lifestyle.",
+      hi: "हमारा स्लिमवाइब फॉर्मूला प्रीमियम, जैविक हर्बल सामग्री का उपयोग करके तैयार किया गया है, जो प्राकृतिक वजन घटाने के लिए एक स्वच्छ, रसायन-मुक्त अनुभव सुनिश्चित करता है। अपने प्राकृतिक संतुलन का समर्थन करें और एक स्वस्थ, अधिक ऊर्जावान जीवन शैली की ओर बढ़ते हुए आत्मविश्वास महसूस करें।",
     },
   },
 };
@@ -205,7 +205,7 @@ export default function ProductPage() {
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperType | null>(null);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const router = useRouter();
-
+  console.log("product", product);
   useEffect(() => {
     const productId = params?.id as string;
     if (!productId) {
@@ -306,30 +306,26 @@ export default function ProductPage() {
 
   // Helper: is this a placeholder product?
   const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
-  const MIN_IMAGE_SLOTS = 3;
   const getSafeImage = (img?: string) =>
     img && img.trim() !== "" ? img : PLACEHOLDER_IMAGE;
-  const isPlaceholderProduct =
-    !product.images ||
-    product.images.length === 0 ||
-    product.images[0] === PLACEHOLDER_IMAGE;
 
-  let imagesToShow: string[] = [];
-  if (isPlaceholderProduct) {
-    imagesToShow = Array(MIN_IMAGE_SLOTS).fill(PLACEHOLDER_IMAGE);
-  } else {
-    imagesToShow = [...product.images];
-    while (imagesToShow.length < MIN_IMAGE_SLOTS) {
-      imagesToShow.push(PLACEHOLDER_IMAGE);
-    }
-  }
-
-  // For key ingredients, override image if placeholder
-  const keyIngredientsToShow = (product?.key_ingredients || []).map((ki) =>
-    isPlaceholderProduct
-      ? { ...ki, image: PLACEHOLDER_IMAGE }
-      : { ...ki, image: getSafeImage(ki.image) }
+  // Filter out empty images and get valid images from API
+  const validImages = (product.images || []).filter(
+    (img) => img && img.trim() !== "" && img !== PLACEHOLDER_IMAGE
   );
+
+  // If no valid images from API, use placeholder
+  const imagesToShow =
+    validImages.length > 0 ? validImages : [PLACEHOLDER_IMAGE];
+
+  // Check if we should show swiper (more than 1 image) or single image
+  const shouldShowSwiper = imagesToShow.length > 1;
+
+  // For key ingredients, use safe image
+  const keyIngredientsToShow = (product?.key_ingredients || []).map((ki) => ({
+    ...ki,
+    image: getSafeImage(ki.image),
+  }));
 
   const dynamicProductContent = getProductContent(product.name);
   const productId =
@@ -430,54 +426,71 @@ export default function ProductPage() {
             </div>
           </div>
           <div className="order-1 lg:order-1 relative w-full flex flex-col items-center sm:rounded-4xl rounded-2xl overflow-hidden border border-gray-200 bg-green-100">
-            <Swiper
-              spaceBetween={10}
-              thumbs={{
-                swiper:
-                  thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
-              }}
-              modules={[Thumbs]}
-              className="w-full aspect-square"
-            >
-              {imagesToShow.map((image: string, index: number) => (
-                <SwiperSlide key={index}>
-                  <Image
-                    src={getSafeImage(image)}
-                    alt={`${product.name} image ${index + 1}`}
-                    width={500}
-                    height={500}
-                    className="w-full object-cover h-full"
-                    priority={index === 0}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-
-            <Swiper
-              onSwiper={(swiper) => {
-                setThumbsSwiper(swiper);
-              }}
-              spaceBetween={16}
-              slidesPerView={3}
-              watchSlidesProgress
-              modules={[Thumbs]}
-              className="w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
-            >
-              {imagesToShow.map((image: string, index: number) => (
-                <SwiperSlide
-                  key={index}
-                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
+            {shouldShowSwiper ? (
+              <>
+                <Swiper
+                  spaceBetween={10}
+                  thumbs={{
+                    swiper:
+                      thumbsSwiper && !thumbsSwiper.destroyed
+                        ? thumbsSwiper
+                        : null,
+                  }}
+                  modules={[Thumbs]}
+                  className="w-full aspect-square"
                 >
-                  <Image
-                    src={getSafeImage(image)}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    width={60}
-                    height={60}
-                    className="w-full h-full object-cover aspect-square"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+                  {imagesToShow.map((image: string, index: number) => (
+                    <SwiperSlide key={index}>
+                      <Image
+                        src={getSafeImage(image)}
+                        alt={`${product.name} image ${index + 1}`}
+                        width={500}
+                        height={500}
+                        className="w-full object-cover h-full"
+                        priority={index === 0}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+
+                <Swiper
+                  onSwiper={(swiper) => {
+                    setThumbsSwiper(swiper);
+                  }}
+                  spaceBetween={16}
+                  slidesPerView={3}
+                  watchSlidesProgress
+                  modules={[Thumbs]}
+                  className="w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
+                >
+                  {imagesToShow.map((image: string, index: number) => (
+                    <SwiperSlide
+                      key={index}
+                      className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
+                    >
+                      <Image
+                        src={getSafeImage(image)}
+                        alt={`${product.name} thumbnail ${index + 1}`}
+                        width={60}
+                        height={60}
+                        className="w-full h-full object-cover aspect-square"
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </>
+            ) : (
+              <div className="w-full aspect-square">
+                <Image
+                  src={getSafeImage(imagesToShow[0])}
+                  alt={`${product.name} image`}
+                  width={500}
+                  height={500}
+                  className="w-full object-cover h-full"
+                  priority={true}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
