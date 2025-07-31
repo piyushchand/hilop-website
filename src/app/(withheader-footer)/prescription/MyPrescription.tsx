@@ -9,18 +9,21 @@ import "swiper/css/free-mode";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { 
-  PrescriptionService, 
-  PrescriptionListItem, 
-  PrescriptionDetail 
+import {
+  PrescriptionService,
+  PrescriptionListItem,
+  PrescriptionDetail,
 } from "@/services/prescriptionService";
 import { getText } from "@/utils/getText";
 
 export default function MyPrescription() {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const [prescriptionList, setPrescriptionList] = useState<PrescriptionListItem[]>([]);
-  const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionDetail | null>(null);
+  const [prescriptionList, setPrescriptionList] = useState<
+    PrescriptionListItem[]
+  >([]);
+  const [selectedPrescription, setSelectedPrescription] =
+    useState<PrescriptionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,8 +46,8 @@ export default function MyPrescription() {
           setPrescriptionList([]);
         }
       } catch (error) {
-        console.error('Error fetching prescription list:', error);
-        setError('Failed to load prescriptions');
+        console.error("Error fetching prescription list:", error);
+        setError("Failed to load prescriptions");
         setPrescriptionList([]);
       } finally {
         setLoading(false);
@@ -63,7 +66,9 @@ export default function MyPrescription() {
     try {
       setError(null);
 
-      const response = await PrescriptionService.getPrescriptionDetail(prescriptionId);
+      const response = await PrescriptionService.getPrescriptionDetail(
+        prescriptionId
+      );
 
       if (response.success && response.data) {
         setSelectedPrescription(response.data);
@@ -71,8 +76,8 @@ export default function MyPrescription() {
         setSelectedPrescription(null);
       }
     } catch (error) {
-      console.error('Error fetching prescription detail:', error);
-      setError('Failed to load prescription details');
+      console.error("Error fetching prescription detail:", error);
+      setError("Failed to load prescription details");
       setSelectedPrescription(null);
     }
   };
@@ -80,27 +85,31 @@ export default function MyPrescription() {
   // Format date for display
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
+      return new Date(dateString).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       });
     } catch {
-      return 'Invalid Date';
+      return "Invalid Date";
     }
   };
 
   // Format timing for display - show as 1-0-1 format
-  const formatTiming = (timing: { morning: string | null; afternoon: string | null; night: string | null }) => {
-    const morning = timing.morning ? '1' : '0';
-    const afternoon = timing.afternoon ? '1' : '0';
-    const night = timing.night ? '1' : '0';
+  const formatTiming = (timing: {
+    morning: string | null;
+    afternoon: string | null;
+    night: string | null;
+  }) => {
+    const morning = timing.morning ? "1" : "0";
+    const afternoon = timing.afternoon ? "1" : "0";
+    const night = timing.night ? "1" : "0";
     return `${morning}-${afternoon}-${night}`;
   };
 
   // Get instruction text based on current language
   const getInstructionText = (instruction: { en: string; hi: string }) => {
-    return language === 'hi' ? instruction.hi : instruction.en;
+    return language === "hi" ? instruction.hi : instruction.en;
   };
 
   if (loading) {
@@ -108,8 +117,12 @@ export default function MyPrescription() {
       <div className="w-full py-20 bg-cover bg-center bg-greenleaf">
         <div className="container h-full flex flex-col justify-center items-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Loading Prescriptions...</h2>
-            <p className="text-gray-600">Please wait while we load your prescription data.</p>
+            <h2 className="text-2xl font-semibold mb-4">
+              Loading Prescriptions...
+            </h2>
+            <p className="text-gray-600">
+              Please wait while we load your prescription data.
+            </p>
           </div>
         </div>
       </div>
@@ -121,9 +134,11 @@ export default function MyPrescription() {
       <div className="w-full py-20 bg-cover bg-center bg-greenleaf">
         <div className="container h-full flex flex-col justify-center items-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Error Loading Prescriptions</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              Error Loading Prescriptions
+            </h2>
             <p className="text-gray-600 mb-6">{error}</p>
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
@@ -149,11 +164,17 @@ export default function MyPrescription() {
                 <h2 className="text-lg sm:text-2xl font-medium mb-1">
                   {getText(selectedPrescription.doctor.name, language)}
                 </h2>
-                <p className="text-gray-700">{getText(selectedPrescription.doctor.degree, language)}</p>
+                <p className="text-gray-700">
+                  {getText(selectedPrescription.doctor.degree, language)}
+                </p>
               </div>
               <div className="sm:text-end">
-                <h2 className="text-lg sm:text-2xl font-medium mb-1">Reg. No</h2>
-                <p className="text-gray-700">{selectedPrescription.doctor.registration_number}</p>
+                <h2 className="text-lg sm:text-2xl font-medium mb-1">
+                  Reg. No
+                </h2>
+                <p className="text-gray-700">
+                  {selectedPrescription.doctor.registration_number}
+                </p>
               </div>
             </div>
           )}
@@ -165,7 +186,8 @@ export default function MyPrescription() {
           <div className="mb-10">
             <h2 className="text-3xl font-semibold mb-2">Prescription List</h2>
             <p className="text-gray-600">
-              View your recommended monthly prescription based on your assessment.
+              View your recommended monthly prescription based on your
+              assessment.
             </p>
           </div>
 
@@ -174,22 +196,36 @@ export default function MyPrescription() {
               <div className="max-w-md mx-auto">
                 <div className="bg-white rounded-3xl p-8 shadow-sm">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-8 h-8 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">No Prescriptions Yet</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No Prescriptions Yet
+                  </h3>
                   <p className="text-gray-600 mb-6">
-                    You don&apos;t have any prescriptions yet. Once you complete your assessment and receive a prescription from our doctors, it will appear here.
+                    You don&apos;t have any prescriptions yet. Once you complete
+                    your assessment and receive a prescription from our doctors,
+                    it will appear here.
                   </p>
                   <div className="space-y-3">
-                    <Link 
-                      href="/book-call"
+                    <Link
+                      href="/contact-us"
                       className="block w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-center"
                     >
                       Book Consultation
                     </Link>
-                    <Link 
+                    <Link
                       href="/"
                       className="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-center"
                     >
@@ -221,7 +257,8 @@ export default function MyPrescription() {
                     <div
                       onClick={() => fetchPrescriptionDetail(prescription._id)}
                       className={`flex flex-col h-full p-5 rounded-xl cursor-pointer transition-all border relative ${
-                        selectedPrescription?.prescription_id === prescription._id
+                        selectedPrescription?.prescription_id ===
+                        prescription._id
                           ? "bg-green-100 border-green-300"
                           : "bg-white border-gray-200"
                       }`}
@@ -230,9 +267,14 @@ export default function MyPrescription() {
                         {prescriptionList.length - index}
                       </p>
                       <p className="text-gray-600 font-medium mb-4 pr-8">
-                        Order: <span className="text-black">{prescription.order_number}</span>
+                        Order:{" "}
+                        <span className="text-black">
+                          {prescription.order_number}
+                        </span>
                       </p>
-                      <p className="text-md md:text-xl font-medium">{formatDate(prescription.order_date)}</p>
+                      <p className="text-md md:text-xl font-medium">
+                        {formatDate(prescription.order_date)}
+                      </p>
                     </div>
                   </SwiperSlide>
                 ))}
@@ -255,7 +297,10 @@ export default function MyPrescription() {
                           {formatDate(selectedPrescription.order_date)}
                         </h3>
                         <p className="text-gray-600">
-                          Order: <span className="text-black">{selectedPrescription.order_number}</span>
+                          Order:{" "}
+                          <span className="text-black">
+                            {selectedPrescription.order_number}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -266,14 +311,16 @@ export default function MyPrescription() {
                         key={idx}
                         className="bg-gray-100 p-5 rounded-2xl border border-gray-200"
                       >
-                        <h4 className="text-xl font-medium mb-3">{getText(medication.name, language)}</h4>
+                        <h4 className="text-xl font-medium mb-3">
+                          {getText(medication.name, language)}
+                        </h4>
                         <div className="mb-3">
                           <p className="text-gray-700 mb-2 font-medium">
                             <span className="text-dark">Instruction:</span>
                           </p>
                           <p className="text-gray-700 mb-2">
-                              {getInstructionText(medication.dosage_instruction)}
-                            </p>
+                            {getInstructionText(medication.dosage_instruction)}
+                          </p>
                         </div>
                         <p className="text-gray-700 font-medium">
                           <span className="text-dark">Dosage:</span> <br />
@@ -285,7 +332,9 @@ export default function MyPrescription() {
                     {selectedPrescription.notes && (
                       <div className="bg-gray-100 p-5 rounded-2xl border border-gray-200">
                         <h4 className="text-xl font-medium mb-3">Notes</h4>
-                        <p className="text-gray-700">{selectedPrescription.notes}</p>
+                        <p className="text-gray-700">
+                          {selectedPrescription.notes}
+                        </p>
                       </div>
                     )}
 
@@ -300,10 +349,20 @@ export default function MyPrescription() {
                         />
                       )}
                       <div>
-                        <p className="text-black font-medium">{getText(selectedPrescription.doctor.name, language)}</p>
-                        <p className="text-gray-600 font-medium">{getText(selectedPrescription.doctor.degree, language)}</p>
+                        <p className="text-black font-medium">
+                          {getText(selectedPrescription.doctor.name, language)}
+                        </p>
                         <p className="text-gray-600 font-medium">
-                          Reg. No: <span className="text-black">{selectedPrescription.doctor.registration_number}</span>
+                          {getText(
+                            selectedPrescription.doctor.degree,
+                            language
+                          )}
+                        </p>
+                        <p className="text-gray-600 font-medium">
+                          Reg. No:{" "}
+                          <span className="text-black">
+                            {selectedPrescription.doctor.registration_number}
+                          </span>
                         </p>
                       </div>
                     </div>

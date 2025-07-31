@@ -265,12 +265,15 @@ export default function RegisterPage() {
             />
             <span className="text-sm text-gray-600 font-medium">
               By registering, you agree to our{" "}
-              <a href="/terms" className="underline text-dark hover:underline">
+              <a
+                href="/terms-and-conditions"
+                className="underline text-dark hover:underline"
+              >
                 Terms & Conditions
               </a>{" "}
               and{" "}
               <a
-                href="/privacy"
+                href="/privacy-policy"
                 className="underline text-dark hover:underline"
               >
                 Privacy Policy

@@ -8,6 +8,7 @@ interface CircularProgressBarProps {
   progressColor?: string; // Color of the progress arc
   trackColor?: string; // Color of the background track
   animationDuration?: number; // Duration of the animation in milliseconds
+  isShowPercentage?: boolean;
 }
 
 const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
@@ -17,6 +18,7 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   progressColor = "text-blue-500", // Tailwind class for progress color
   trackColor = "text-gray-300", // Tailwind class for track color
   animationDuration = 5000, // 5 seconds default
+  isShowPercentage = true,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -88,9 +90,13 @@ const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
 
       {/* Percentage text in center */}
       <div className=" inset-0 flex items-center justify-center h-[133px]">
-        <span className={`text-xs font-semibold ${progressColor}`}>
-          {/* {Math.round(animatedPercentage)}% */}
-        </span>
+        {isShowPercentage ? (
+          <span className={`text-xs font-semibold ${progressColor}`}>
+            {Math.round(animatedPercentage)}%
+          </span>
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );
