@@ -385,10 +385,10 @@ export default function ProductPage() {
               <BadgeCheck className="text-green-800" />{" "}
               {getText(product.for || "", language)}
             </span>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl 2xl:text-6xl mb-3 sm:mb-6 font-semibold">
+            <h1 className="text-2xl lg:text-3xl 2xl:text-5xl mb-3 sm:mb-6 font-semibold">
               {product.name}
             </h1>
-            <h2 className="md:text-xl text-lg font-medium text-gray-800 mb-6">
+            <h2 className=" text-lg font-medium text-gray-800 mb-6">
               {getText(product.label || "", language)}
             </h2>
             <p className="mb-3 text-gray-700">

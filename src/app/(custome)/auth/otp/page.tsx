@@ -110,7 +110,8 @@ function OtpPageContent() {
         }, 1200);
       } else {
         setSuccess("");
-        setError(data.message || "Verification failed");
+        // setError(data.message || "Verification failed");
+        setError("Invalid otp");
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
