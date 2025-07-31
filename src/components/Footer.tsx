@@ -154,7 +154,7 @@ const Footer = () => {
               <div className="flex gap-3 mt-2">
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.instagram.com/think.novus/"
+                  href="https://www.instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -163,7 +163,7 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.facebook.com/thinknovus.official/"
+                  href="https://www.facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -172,7 +172,7 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://x.com/thinknovus"
+                  href="https://x.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Twitter"
