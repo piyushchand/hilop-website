@@ -78,6 +78,17 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
     }
   };
 
+  const handleContainerClick = () => {
+    if (type === "date" && inputRef.current) {
+      inputRef.current.focus();
+      if (
+        typeof (inputRef.current as HTMLInputElement).showPicker === "function"
+      ) {
+        (inputRef.current as HTMLInputElement).showPicker();
+      }
+    }
+  };
+
   const handleTelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const cleanValue = value.replace(/\D/g, "").slice(0, 10);
@@ -157,8 +168,10 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
       )}
 
       <div
-        className="flex items-center bg-white rounded-lg border-2 overflow-hidden 
-          transition-all duration-200 focus-within:border-green-600 border-gray-200 pr-3"
+        className={`flex items-center bg-white rounded-lg border-2 overflow-hidden 
+          transition-all duration-200 focus-within:border-green-600 border-gray-200 pr-3
+          ${type === "date" ? "cursor-pointer" : ""}`}
+        onClick={type === "date" ? handleContainerClick : undefined}
       >
         <input
           id={name}
@@ -178,6 +191,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           className={`
             w-full px-3 py-4 bg-none outline-none [&::-webkit-calendar-picker-indicator]:opacity-0
             text-gray-900 placeholder-transparent leading-[24px] appearance-none
+            ${type === "date" ? "cursor-pointer" : ""}
           `}
           {...rest}
         />
@@ -185,7 +199,7 @@ const AnimatedInput: React.FC<AnimatedInputProps> = ({
           <button
             type="button"
             onClick={handleIconClick}
-            className=" hover:text-red-800"
+            className="hover:text-red-800"
           >
             {type === "date" ? (
               <CalendarRange size={20} color="currentColor" />
