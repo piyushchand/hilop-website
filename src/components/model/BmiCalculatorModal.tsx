@@ -183,6 +183,7 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                       : 20
                   }
                   progressColor="text-primary"
+                  isShowPercentage={false}
                   trackColor="text-gray-200"
                   animationDuration={800}
                 />
