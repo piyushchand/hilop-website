@@ -153,9 +153,15 @@ const Page = () => {
                       href="mailto:support@hilop.com"
                       className="text-primary underline"
                     >
-                      support@hilop.com
+                      info@hilop.com
                     </a>{" "}
-                    or call +91 12345 67890.
+                    or call{" "}
+                    <a
+                      href="tel:+91 9998852888"
+                      className="text-primary underline"
+                    >
+                      +91 9998852888
+                    </a>{" "}
                   </li>
                   <li>
                     Provide your order number, contact details, and a brief
@@ -194,15 +200,11 @@ const Page = () => {
                 <div className="bg-green-50 p-6 rounded-xl border border-green-200">
                   <p className="text-gray-700 mb-3 font-medium">
                     <strong className="text-green-700">Email:</strong>{" "}
-                    support@hilop.com
+                    info@hilop.com
                   </p>
                   <p className="text-gray-700 mb-3 font-medium">
-                    <strong className="text-green-700">Phone:</strong> +91 12345
-                    67890
-                  </p>
-                  <p className="text-gray-700 font-medium">
-                    <strong className="text-green-700">Address:</strong> 123
-                    Herbal Lane, Nature City, India
+                    <strong className="text-green-700">Phone:</strong>+91
+                    9998852888
                   </p>
                 </div>
               </section>

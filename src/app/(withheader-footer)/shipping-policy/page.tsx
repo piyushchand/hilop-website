@@ -188,15 +188,11 @@ const Page = () => {
                 <div className="bg-green-50 p-6 rounded-xl border border-green-200">
                   <p className="text-gray-700 mb-3 font-medium">
                     <strong className="text-green-700">Email:</strong>{" "}
-                    support@hilop.com
+                    info@hilop.com
                   </p>
                   <p className="text-gray-700 mb-3 font-medium">
-                    <strong className="text-green-700">Phone:</strong> +1 (234)
-                    567-8900
-                  </p>
-                  <p className="text-gray-700 font-medium">
-                    <strong className="text-green-700">Address:</strong> 123
-                    Herbal Lane, Nature City, Earth
+                    <strong className="text-green-700">Phone:</strong> +91
+                    9998852888
                   </p>
                 </div>
               </section>
