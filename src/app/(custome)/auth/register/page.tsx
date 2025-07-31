@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const countryBoxRef = useRef<HTMLDivElement>(null);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -67,58 +68,48 @@ export default function RegisterPage() {
   );
 
   const validateForm = useCallback(() => {
-    const errors: string[] = [];
-
+    const newErrors: { [key: string]: string } = {};
     if (!formData.name.trim()) {
-      errors.push("Name is required");
+      newErrors.name = "Name is required";
     } else if (formData.name.length < 2) {
-      errors.push("Name must be at least 2 characters long");
+      newErrors.name = "Name must be at least 2 characters long";
     }
-
     if (!formData.email.trim()) {
-      errors.push("Email is required");
+      newErrors.email = "Email is required";
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        errors.push("Please enter a valid email address");
+        newErrors.email = "Please enter a valid email address";
       }
     }
-
     const mobileNumber = formData.mobile_number.trim();
     if (!mobileNumber) {
-      errors.push("Mobile number is required");
+      newErrors.mobile_number = "Mobile number is required";
     } else if (mobileNumber.length !== 10) {
-      errors.push("Please enter a valid 10-digit mobile number");
+      newErrors.mobile_number = "Please enter a valid 10-digit mobile number";
     } else {
       const phoneRegex = /^[6-9]\d{9}$/;
       if (!phoneRegex.test(mobileNumber)) {
-        errors.push(
-          "Please enter a valid Indian mobile number starting with 6-9"
-        );
+        newErrors.mobile_number =
+          "Please enter a valid Indian mobile number starting with 6-9";
       }
     }
-
     if (!formData.birthdate) {
-      errors.push("Date of birth is required");
+      newErrors.birthdate = "Date of birth is required";
     } else {
       const birthDate = new Date(formData.birthdate);
       const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      if (age < 18) {
-        errors.push("You must be at least 18 years old to register");
+      today.setHours(0, 0, 0, 0);
+      if (birthDate > today) {
+        newErrors.birthdate = "Date of birth cannot be in the future";
       }
     }
-
     if (!agreedToTerms) {
-      errors.push("Please agree to Terms & Conditions");
+      newErrors.terms = "Please agree to Terms & Conditions";
     }
-
-    if (errors.length > 0) {
-      throw new Error(errors.join("\n"));
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      throw new Error("Validation error");
     }
   }, [formData, agreedToTerms]);
 
@@ -141,7 +132,8 @@ export default function RegisterPage() {
       await register(registrationData);
     } catch (err) {
       if (err instanceof Error) {
-        toast.error(err.message);
+        // Only show toast for API/server errors, not validation
+        console.error(err?.message);
       } else {
         toast.error("Registration failed. Please try again.");
       }
@@ -194,25 +186,35 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-5 mb-6">
-            <AnimatedInput
-              label="Full Name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-            />
+            <div className="flex flex-col gap-1">
+              <AnimatedInput
+                label="Full Name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+              {errors.name && (
+                <div className="text-red-500 text-sm ">{errors.name}</div>
+              )}
+            </div>
 
-            <AnimatedInput
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
+            <div className="flex flex-col gap-px">
+              <AnimatedInput
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+              {errors.email && (
+                <div className="text-red-500 text-sm ">{errors.email}</div>
+              )}
+            </div>
 
-            <div className="flex items-stretch gap-2 relative">
+            <div className="flex flex-col  items-stretch gap-1 relative">
               {/* Mobile input field */}
               <div className="flex-1 h-12">
                 <div className="h-full relative hilop-mobile-input-wrapper">
@@ -230,16 +232,27 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
+              {errors.mobile_number && (
+                <div className="text-red-500 text-sm">
+                  {errors.mobile_number}
+                </div>
+              )}
             </div>
 
-            <AnimatedInput
-              label="Date of Birth"
-              name="birthdate"
-              type="date"
-              value={formData.birthdate}
-              onChange={handleInputChange}
-              required
-            />
+            <div className="flex flex-col gap-px">
+              <AnimatedInput
+                label="Date of Birth"
+                name="birthdate"
+                type="date"
+                value={formData.birthdate}
+                onChange={handleInputChange}
+                required
+                max={new Date().toISOString().split("T")[0]}
+              />
+              {errors.birthdate && (
+                <div className="text-red-500 text-sm ">{errors.birthdate}</div>
+              )}
+            </div>
           </div>
 
           <label className="mb-4 flex cursor-pointer items-start">
@@ -252,18 +265,24 @@ export default function RegisterPage() {
             />
             <span className="text-sm text-gray-600 font-medium">
               By registering, you agree to our{" "}
-              <a href="/terms" className="underline text-dark hover:underline">
+              <a
+                href="/terms-and-conditions"
+                className="underline text-dark hover:underline"
+              >
                 Terms & Conditions
               </a>{" "}
               and{" "}
               <a
-                href="/privacy"
+                href="/privacy-policy"
                 className="underline text-dark hover:underline"
               >
                 Privacy Policy
               </a>
             </span>
           </label>
+          {errors.terms && (
+            <div className="text-red-500 text-sm mb-4 ">{errors.terms}</div>
+          )}
 
           <Button
             label={isLoading ? "Creating Account..." : "Create Account"}

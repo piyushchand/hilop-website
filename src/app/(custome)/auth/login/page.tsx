@@ -122,9 +122,10 @@ export default function LoginPage() {
                 <p className="text-green-700 text-sm">{success}</p>
               </div>
             )}
-            {inputError && (
+
+            {(inputError || error) && (
               <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-700 text-sm"> {inputError}</p>
+                <p className="text-red-700 text-sm"> {inputError || error}</p>
               </div>
             )}
 

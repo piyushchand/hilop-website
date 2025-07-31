@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Button from "../uiFramework/Button";
 import AnimatedInput from "../animationComponents/AnimatedInput";
 import AnimatedTextarea from "../animationComponents/AnimatedTextarea";
+import AnimatedSelect from "../animationComponents/AnimatedSelect";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -42,6 +43,17 @@ type AddressFormState = {
   is_default: boolean;
 };
 
+// Define validation errors type
+type ValidationErrors = {
+  name?: string;
+  address?: string;
+  phone_number?: string;
+  landmark?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+};
+
 const initialAddressFormState: AddressFormState = {
   _id: undefined,
   name: "",
@@ -55,11 +67,16 @@ const initialAddressFormState: AddressFormState = {
   is_default: false,
 };
 
+const initialValidationErrors: ValidationErrors = {};
+
 const API_BASE_URL = "/api/v1";
 
 export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   const {} = useAuth(); // Auth context is imported but not currently used
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [states, setStates] = useState<Array<{ value: string; label: string }>>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,13 +84,18 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     "list"
   );
   const [formData, setFormData] = useState(initialAddressFormState);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    initialValidationErrors
+  );
 
   // Fetch addresses when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchAddresses();
+      fetchStates(); // Now synchronous
       setViewMode("list");
       setFormData(initialAddressFormState);
+      setValidationErrors(initialValidationErrors);
     }
   }, [isOpen]);
 
@@ -112,11 +134,76 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     }
   };
 
+  // Static Indian states data
+  const indianStates = [
+    { value: "andhra-pradesh", label: "Andhra Pradesh" },
+    { value: "arunachal-pradesh", label: "Arunachal Pradesh" },
+    { value: "assam", label: "Assam" },
+    { value: "bihar", label: "Bihar" },
+    { value: "chhattisgarh", label: "Chhattisgarh" },
+    { value: "goa", label: "Goa" },
+    { value: "gujarat", label: "Gujarat" },
+    { value: "haryana", label: "Haryana" },
+    { value: "himachal-pradesh", label: "Himachal Pradesh" },
+    { value: "jharkhand", label: "Jharkhand" },
+    { value: "karnataka", label: "Karnataka" },
+    { value: "kerala", label: "Kerala" },
+    { value: "madhya-pradesh", label: "Madhya Pradesh" },
+    { value: "maharashtra", label: "Maharashtra" },
+    { value: "manipur", label: "Manipur" },
+    { value: "meghalaya", label: "Meghalaya" },
+    { value: "mizoram", label: "Mizoram" },
+    { value: "nagaland", label: "Nagaland" },
+    { value: "odisha", label: "Odisha" },
+    { value: "punjab", label: "Punjab" },
+    { value: "rajasthan", label: "Rajasthan" },
+    { value: "sikkim", label: "Sikkim" },
+    { value: "tamil-nadu", label: "Tamil Nadu" },
+    { value: "telangana", label: "Telangana" },
+    { value: "tripura", label: "Tripura" },
+    { value: "uttar-pradesh", label: "Uttar Pradesh" },
+    { value: "uttarakhand", label: "Uttarakhand" },
+    { value: "west-bengal", label: "West Bengal" },
+    { value: "andaman-nicobar", label: "Andaman and Nicobar Islands" },
+    { value: "chandigarh", label: "Chandigarh" },
+    { value: "dadra-nagar-haveli", label: "Dadra and Nagar Haveli" },
+    { value: "daman-diu", label: "Daman and Diu" },
+    { value: "delhi", label: "Delhi" },
+    { value: "lakshadweep", label: "Lakshadweep" },
+    { value: "puducherry", label: "Puducherry" },
+  ];
+
+  // Initialize states with static data
+  const fetchStates = () => {
+    setStates(indianStates);
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name as keyof ValidationErrors]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear validation error for this field when user selects an option
+    if (validationErrors[name as keyof ValidationErrors]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,7 +218,22 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       ...initialAddressFormState,
       is_default: !hasExistingAddresses, // Set as default only if it's the first address
     });
+    setValidationErrors(initialValidationErrors);
     setViewMode("addForm");
+  };
+
+  // Helper function to map state name to value
+  const mapStateNameToValue = (stateName: string): string => {
+    const state = indianStates.find(
+      (s) => s.label.toLowerCase() === stateName.toLowerCase()
+    );
+    return state ? state.value : stateName;
+  };
+
+  // Helper function to map state value to name
+  const mapStateValueToName = (stateValue: string): string => {
+    const state = indianStates.find((s) => s.value === stateValue);
+    return state ? state.label : stateValue;
   };
 
   const handleEditClick = (address: Address) => {
@@ -143,29 +245,59 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       phone_number: address.phone_number,
       landmark: address.landmark || "",
       city: address.city || "",
-      state: address.state || "",
+      state: address.state ? mapStateNameToValue(address.state) : "",
       country: "India",
       zipcode: address.zipcode || "",
       is_default: address.is_default || false,
     });
+    setValidationErrors(initialValidationErrors);
     setViewMode("editForm");
   };
 
-  const validateForm = () => {
-    const { name, address, phone_number, city, landmark } = formData;
-    if (
-      !name.trim() ||
-      !address.trim() ||
-      !phone_number.trim() ||
-      !city?.trim() ||
-      !landmark?.trim()
-    ) {
-      toast.error(
-        "Please fill in all required fields: Name, Address, Phone, City, and Landmark."
-      );
-      return false;
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    // Validate name
+    if (!formData.name.trim()) {
+      errors.name = "Full name is required";
     }
-    return true;
+
+    // Validate address
+    if (!formData.address.trim()) {
+      errors.address = "Address is required";
+    }
+
+    // Validate phone number
+    if (!formData.phone_number.trim()) {
+      errors.phone_number = "Phone number is required";
+    } else if (!/^[0-9]{10}$/.test(formData.phone_number.trim())) {
+      errors.phone_number = "Please enter a valid 10-digit phone number";
+    }
+
+    // Validate landmark
+    if (!formData.landmark.trim()) {
+      errors.landmark = "Landmark is required";
+    }
+
+    // Validate city
+    if (!formData.city.trim()) {
+      errors.city = "City is required";
+    }
+
+    // Validate state
+    if (!formData.state.trim()) {
+      errors.state = "State is required";
+    }
+
+    // Validate zipcode
+    if (!formData.zipcode.trim()) {
+      errors.zipcode = "Zipcode is required";
+    } else if (!/^[0-9]{6}$/.test(formData.zipcode.trim())) {
+      errors.zipcode = "Please enter a valid 6-digit zipcode";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Function to set an address as default
@@ -222,7 +354,9 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
   };
 
   const handleSaveAddress = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return; // Don't proceed if validation fails
+    }
 
     setIsLoading(true);
     setError(null);
@@ -242,7 +376,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
         phone_number: formData.phone_number,
         landmark: formData.landmark,
         city: formData.city,
-        state: formData.state,
+        state: mapStateValueToName(formData.state),
         country: "India",
         zipcode: formData.zipcode,
         is_default: formData.is_default,
@@ -274,6 +408,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
       // Reset form and go back to list view
       setFormData(initialAddressFormState);
+      setValidationErrors(initialValidationErrors);
       setViewMode("list");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save address");
@@ -287,6 +422,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   const handleCancel = () => {
     setFormData(initialAddressFormState);
+    setValidationErrors(initialValidationErrors);
     setViewMode("list");
   };
 
@@ -519,80 +655,141 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                   }}
                 >
                   <div className="space-y-5">
-                    <AnimatedInput
-                      label="Full Name"
-                      name="name"
-                      type="text"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <AnimatedTextarea
-                      label="Address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      rows={3}
-                      required
-                    />
-                    <AnimatedInput
-                      label="Landmark"
-                      name="landmark"
-                      type="text"
-                      value={formData.landmark || ""}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <AnimatedInput
-                      label="City"
-                      name="city"
-                      type="text"
-                      value={formData.city || ""}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <AnimatedInput
-                      label="State"
-                      name="state"
-                      type="text"
-                      value={formData.state || ""}
-                      onChange={handleInputChange}
-                    />
-                    <AnimatedInput
-                      label="Zipcode"
-                      name="zipcode"
-                      type="text"
-                      value={formData.zipcode || ""}
-                      onChange={handleInputChange}
-                    />
-                    <AnimatedInput
-                      label="Mobile number"
-                      name="phone_number"
-                      type="tel"
-                      value={formData.phone_number}
-                      onChange={handleInputChange}
-                      required
-                    />
-                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <input
-                        type="checkbox"
-                        id="is_default"
-                        name="is_default"
-                        checked={formData.is_default}
-                        onChange={handleCheckboxChange}
-                        className="w-4 h-4 accent-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    <div>
+                      <AnimatedInput
+                        label="Full Name"
+                        name="name"
+                        type="text"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
                       />
-                      <label
-                        htmlFor="is_default"
-                        className="text-sm text-gray-700 flex items-center gap-2"
-                      >
-                        Set as default address
-                        {formData.is_default && (
-                          <span className="text-xs text-blue-600 font-medium">
-                            (This will replace any existing default address)
-                          </span>
-                        )}
-                      </label>
+                      {validationErrors.name && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.name}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedTextarea
+                        label="Address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        rows={3}
+                        required
+                      />
+                      {validationErrors.address && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.address}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedInput
+                        label="Landmark"
+                        name="landmark"
+                        type="text"
+                        value={formData.landmark || ""}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      {validationErrors.landmark && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.landmark}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedInput
+                        label="City"
+                        name="city"
+                        type="text"
+                        value={formData.city || ""}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      {validationErrors.city && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.city}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedSelect
+                        label="State"
+                        name="state"
+                        value={formData.state || ""}
+                        onChange={handleSelectChange}
+                        options={states}
+                        placeholder="state"
+                        required
+                      />
+                      {validationErrors.state && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.state}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedInput
+                        label="Zipcode"
+                        name="zipcode"
+                        type="text"
+                        value={formData.zipcode || ""}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      {validationErrors.zipcode && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.zipcode}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <AnimatedInput
+                        label="Mobile number"
+                        name="phone_number"
+                        type="tel"
+                        value={formData.phone_number}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      {validationErrors.phone_number && (
+                        <p className="text-red-500 text-xs mt-1 ml-1">
+                          {validationErrors.phone_number}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <input
+                          type="checkbox"
+                          id="is_default"
+                          name="is_default"
+                          checked={formData.is_default}
+                          onChange={handleCheckboxChange}
+                          className="w-4 h-4 accent-blue-600 cursor-pointer focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor="is_default"
+                          className="text-sm text-gray-700 flex items-center gap-2"
+                        >
+                          Set as default address
+                        </label>
+                      </div>
+                      {formData.is_default && (
+                        <span className="text-xs mt-1 text-blue-600 font-medium">
+                          This will replace any existing default address
+                        </span>
+                      )}
                     </div>
                   </div>
                 </form>
@@ -625,8 +822,8 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                 isLoading
                   ? "Saving..."
                   : viewMode === "editForm"
-                  ? "Update Address"
-                  : "Save Address"
+                  ? "Update"
+                  : "Save"
               }
               variant="btn-dark"
               size="xl"

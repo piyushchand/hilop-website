@@ -6,7 +6,7 @@ import AuthLayout from "../AuthLayout";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast, Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +14,7 @@ function CompleteProfileForm() {
   const { isLoading, error, clearError, success, setSuccess } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [formError, setFormError] = useState<string>("");
 
   // Initialize with empty strings for hydration match
   const [formData, setFormData] = useState({
@@ -40,6 +41,7 @@ function CompleteProfileForm() {
     }
   }, [success, setSuccess]);
 
+  // Clear form error when user starts typing
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "mobile_number") {
@@ -49,6 +51,7 @@ function CompleteProfileForm() {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
     if (error) clearError();
+    if (formError) setFormError("");
   };
 
   const validatePhoneNumber = (phone: string) => {
@@ -58,19 +61,20 @@ function CompleteProfileForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(""); // Clear any previous errors
 
     if (!formData.mobile_number.trim()) {
-      toast.error("Please enter your mobile number");
+      setFormError("Please enter your mobile number");
       return;
     }
 
     if (!validatePhoneNumber(formData.mobile_number)) {
-      toast.error("Please enter a valid 10-digit Indian mobile number");
+      setFormError("Please enter a valid 10-digit Indian mobile number");
       return;
     }
 
     if (!formData.birthdate) {
-      toast.error("Please enter your birthdate");
+      setFormError("Please enter your birthdate");
       return;
     }
 
@@ -101,8 +105,10 @@ function CompleteProfileForm() {
           });
           const loginData = await loginResponse.json();
           if (!loginResponse.ok || !loginData.data?.user_id) {
-            toast.error("Failed to send OTP. Please try logging in.");
-            router.replace("/auth/login");
+            setFormError("Failed to send OTP. Please try logging in.");
+            setTimeout(() => {
+              router.replace("/auth/login");
+            }, 2000);
             return;
           }
           router.replace(
@@ -110,7 +116,7 @@ function CompleteProfileForm() {
           );
           return;
         } else {
-          toast.error(registerData.message || "Registration failed");
+          setFormError(registerData.message || "Registration failed");
           return;
         }
       }
@@ -123,12 +129,15 @@ function CompleteProfileForm() {
         return;
       }
       // Fallback: if no user_id, show error
-      toast.error(
+      setFormError(
         "Registration succeeded but user ID missing. Please try logging in."
       );
-      router.replace("/auth/login");
-    } catch {
-      // Errors are handled by the useAuth hook and displayed via toast
+      setTimeout(() => {
+        router.replace("/auth/login");
+      }, 2000);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      setFormError("An unexpected error occurred. Please try again.");
     }
   };
 
@@ -155,11 +164,20 @@ function CompleteProfileForm() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {success && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-green-700 text-sm">{success}</p>
+            {/* Error Display */}
+            {(formError || error) && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-700 text-sm ">{formError || error}</p>
               </div>
             )}
+
+            {/* Success Display */}
+            {success && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-700 text-sm ">{success}</p>
+              </div>
+            )}
+
             <AnimatedInput
               label="Mobile Number"
               name="mobile_number"
@@ -175,11 +193,7 @@ function CompleteProfileForm() {
               value={formData.birthdate}
               onChange={handleInputChange}
               required
-              max={
-                new Date(new Date().setFullYear(new Date().getFullYear() - 18))
-                  .toISOString()
-                  .split("T")[0]
-              }
+              max={new Date().toISOString().split("T")[0]}
             />
 
             <Button

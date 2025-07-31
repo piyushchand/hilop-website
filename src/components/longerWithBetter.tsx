@@ -98,7 +98,7 @@ const LongerWithBetter = ({
             <div className="flex flex-col sm:flex-row gap-4 -mt-[52px]">
               {productId1 && (
                 <Button
-                  label="Get Started"
+                  label="GET STARTED "
                   variant="btn-dark"
                   size="xl"
                   className="w-full sm:w-auto"
@@ -107,7 +107,7 @@ const LongerWithBetter = ({
               )}
               {testId2 && (
                 <Button
-                  label="Take the test"
+                  label="TAKE THE TEST ™"
                   variant="btn-light"
                   size="xl"
                   className="w-full sm:w-auto"
@@ -131,7 +131,7 @@ const LongerWithBetter = ({
               <div className="flex flex-col sm:flex-row gap-4">
                 {testId1 && (
                   <Button
-                    label="Get Started"
+                    label="GET STARTED "
                     variant="btn-dark"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -140,7 +140,7 @@ const LongerWithBetter = ({
                 )}
                 {productId1 && (
                   <Button
-                    label="Add To Cart"
+                    label="ADD TO CART"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -163,7 +163,7 @@ const LongerWithBetter = ({
               <div className="flex flex-col sm:flex-row gap-4">
                 {testId2 && (
                   <Button
-                    label="Get Started"
+                    label="GET STARTED "
                     variant="btn-dark"
                     size="xl"
                     className="w-full sm:w-auto"
@@ -172,7 +172,7 @@ const LongerWithBetter = ({
                 )}
                 {productId2 && (
                   <Button
-                    label="Add To Cart"
+                    label="ADD TO CART"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"

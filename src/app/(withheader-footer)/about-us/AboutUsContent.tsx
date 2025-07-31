@@ -100,7 +100,7 @@ export default function AboutUsContent() {
                 </div>
               ))}
               <Button
-                label="Take The Test"
+                label={"TAKE THE TEST ™"}
                 variant="btn-dark"
                 size="xl"
                 link="/consultation"

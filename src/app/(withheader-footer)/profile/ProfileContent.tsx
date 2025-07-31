@@ -17,8 +17,11 @@ import AddresssModal from "@/components/model/Address";
 
 // Helper function to format mobile number for display
 const formatMobileNumber = (mobileNumber: string) => {
-  if (mobileNumber.startsWith('91') && mobileNumber.length === 12) {
-    return `+${mobileNumber.slice(0, 2)} ${mobileNumber.slice(2, 7)} ${mobileNumber.slice(7)}`;
+  if (mobileNumber.startsWith("91") && mobileNumber.length === 12) {
+    return `+${mobileNumber.slice(0, 2)} ${mobileNumber.slice(
+      2,
+      7
+    )} ${mobileNumber.slice(7)}`;
   }
   return mobileNumber;
 };
@@ -64,7 +67,7 @@ const cardData = [
     title: "Book a Call",
     subtitle: "Book a Call",
     action: "redirect",
-    link: "/book-call",
+    link: "/contact-us",
   },
   {
     id: 7,
@@ -86,7 +89,9 @@ interface ProfileContentProps {
   user?: User; // Make it optional since we'll use AuthContext
 }
 
-export default function ProfileContent({ user: propUser }: ProfileContentProps) {
+export default function ProfileContent({
+  user: propUser,
+}: ProfileContentProps) {
   const router = useRouter();
   const { user, isInitialized, refreshUserData } = useAuth();
 
@@ -95,7 +100,8 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
 
   // State for controlling modal visibility
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [isAccountDetailsModalOpen, setAccountDetailsModalOpen] = useState(false);
+  const [isAccountDetailsModalOpen, setAccountDetailsModalOpen] =
+    useState(false);
   const [isMyPlansModalOpen, setMyPlansModalOpen] = useState(false);
   const [isAddresssModalOpen, setAddresssModalOpen] = useState(false);
 
@@ -106,12 +112,12 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
     try {
       await refreshUserData();
     } catch (error) {
-      console.log('Failed to refresh user data after modal close:', error);
+      console.log("Failed to refresh user data after modal close:", error);
     }
   };
 
   // Function to handle card clicks (redirects or opens modals)
-  const handleClick = (card: typeof cardData[number]) => {
+  const handleClick = (card: (typeof cardData)[number]) => {
     if (card.action === "redirect" && card.link) {
       router.push(card.link);
     } else if (card.action === "modal") {
@@ -120,8 +126,8 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
           if (currentUser && currentUser.name && currentUser.email) {
             setAccountDetailsModalOpen(true);
           } else {
-            console.error('User data not available for account details modal');
-            toast.error('User data not available. Please refresh the page.');
+            console.error("User data not available for account details modal");
+            toast.error("User data not available. Please refresh the page.");
           }
           break;
         case "myPlans":
@@ -144,7 +150,9 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
         <div className="container h-full flex flex-col justify-center items-center">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-4">Loading Profile...</h2>
-            <p className="text-gray-600">Please wait while we load your profile data.</p>
+            <p className="text-gray-600">
+              Please wait while we load your profile data.
+            </p>
           </div>
         </div>
       </div>
@@ -157,10 +165,14 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
       <div className="w-full py-20 bg-cover bg-center bg-greenleaf">
         <div className="container h-full flex flex-col justify-center items-center">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold mb-4">Profile Not Available</h2>
-            <p className="text-gray-600 mb-6">Unable to load your profile data.</p>
+            <h2 className="text-2xl font-semibold mb-4">
+              Profile Not Available
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Unable to load your profile data.
+            </p>
             <ArrowButton
-              onClick={() => router.push('/auth/login')}
+              onClick={() => router.push("/auth/login")}
               label="Go to Login"
               theme="dark"
               size="lg"
@@ -177,9 +189,12 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
         <div className="container h-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="top-content-badge">Profile Page</h1>
-            <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">{currentUser?.name}</h2>
+            <h2 className="text-5xl 2xl:text-6xl mb-4 font-semibold">
+              {currentUser?.name}
+            </h2>
             <p className="text-gray-600">
-              {formatMobileNumber(currentUser?.mobile_number || '')} <span className="px-2">|</span> {currentUser?.email}
+              {formatMobileNumber(currentUser?.mobile_number || "")}{" "}
+              <span className="px-2">|</span> {currentUser?.email}
             </p>
           </div>
           <ArrowButton
@@ -226,16 +241,24 @@ export default function ProfileContent({ user: propUser }: ProfileContentProps) 
         </div>
       </section>
       <MobileApproch />
-      <LogoutModal isOpen={isLogoutModalOpen} onClose={() => setLogoutModalOpen(false)} />
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+      />
       <AccountDetailsModal
         key={`account-details-${isAccountDetailsModalOpen}-${currentUser?.id}`}
         isOpen={isAccountDetailsModalOpen}
         onClose={handleAccountDetailsClose}
         user={currentUser}
       />
-      <MyPlansModal isOpen={isMyPlansModalOpen} onClose={() => setMyPlansModalOpen(false)} />
-      <AddresssModal isOpen={isAddresssModalOpen} onClose={() => setAddresssModalOpen(false)} />
-   
+      <MyPlansModal
+        isOpen={isMyPlansModalOpen}
+        onClose={() => setMyPlansModalOpen(false)}
+      />
+      <AddresssModal
+        isOpen={isAddresssModalOpen}
+        onClose={() => setAddresssModalOpen(false)}
+      />
     </>
   );
 }

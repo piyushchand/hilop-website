@@ -7,7 +7,6 @@ import {
   CardItem,
 } from "./animationComponents/3DCard";
 import Button from "./uiFramework/Button";
-import ArrowButton from "./uiFramework/ArrowButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ProductCardProps {
@@ -85,18 +84,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <CardItem translateZ={10} className="w-full">
             <div className="grid xl:grid-cols-2 gap-2 lg:gap-4">
               <Button
-                label="View Details"
+                label="VIEW DETAILS"
                 variant="btn-light"
-                size="xl"
+                size="lg"
                 className="w-full "
                 link={`/product/${product._id}`}
               />
-              <ArrowButton
-                label="Take the test"
-                theme="primary"
-                className="w-full cursor-pointer"
+
+              <Button
+                label="TAKE THE TEST ™"
+                variant="btn-primary"
                 size="lg"
-                href={
+                className="w-full "
+                link={
                   product.test_id
                     ? `/consultation?testId=${product.test_id}`
                     : "/consultation"

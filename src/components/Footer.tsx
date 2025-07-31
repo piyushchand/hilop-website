@@ -4,36 +4,39 @@ import Image from "next/image";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
-import { useAuth } from "@/contexts/AuthContext";
+// import { useAuth } from "@/contexts/AuthContext";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const [products, setProducts] = useState<Product[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const { user } = useAuth();
+  // const [productsLoading, setProductsLoading] = useState(true);
+  // const { user } = useAuth();
 
   const hilopLinks = [
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
     { href: "/how-it-works", label: "How it works" },
     { href: "/blog", label: "Blog" },
-    { href: "/book-call", label: "Contact Us", authOnly: true },
+    { href: "/contact-us", label: "Contact Us" },
     { href: "/support", label: "Help & Support" },
+    { href: "/shipping-policy", label: "Shipping Policy" },
+    {
+      href: "/cancellations-and-refunds",
+      label: "Cancellations and Refunds",
+    },
   ];
-
-  // Only show Contact Us if user is logged in
-  const filteredLinks = hilopLinks.filter((link) => {
-    if (link.authOnly) {
-      return !!user;
-    }
-    return true;
-  });
+  // const filteredLinks = hilopLinks.filter((link) => {
+  //   if (link.authOnly) {
+  //     return !!user;
+  //   }
+  //   return true;
+  // });
 
   // Fetch products for dynamic footer links
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setProductsLoading(true);
+        // setProductsLoading(true);
         if (!process.env.NEXT_PUBLIC_API_URL) {
           console.warn("API URL is not set in environment variables");
           return;
@@ -55,7 +58,7 @@ const Footer = () => {
       } catch (error) {
         console.error("Error fetching products for footer:", error);
       } finally {
-        setProductsLoading(false);
+        // setProductsLoading(false);
       }
     };
 
@@ -95,17 +98,17 @@ const Footer = () => {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 xl:grid-cols-4 md:gap-x-6 gap-x-4 gap-y-6 order-1 md:order-2">
+          <div className="grid grid-cols-2 xl:grid-cols-3 md:gap-x-6 gap-x-4 gap-y-6 order-1 md:order-2">
             <div>
               <p className="mb-4 text-base uppercase text-zinc-400 font-medium">
                 Hilop
               </p>
-              {filteredLinks.map((link, index) => (
+              {hilopLinks.map((link, index) => (
                 <Link
                   key={index}
                   href={link.href}
                   className={`block text-zinc-400 hover:text-white transition-all duration-300 ${
-                    index !== filteredLinks.length - 1 ? "mb-4" : ""
+                    index !== hilopLinks.length - 1 ? "mb-4" : ""
                   }`}
                 >
                   {link.label}
@@ -117,13 +120,7 @@ const Footer = () => {
               <p className="mb-4 text-base uppercase text-zinc-400 font-medium">
                 Product
               </p>
-              {productsLoading ? (
-                <div className="space-y-4">
-                  <div className="h-4 bg-zinc-200 rounded animate-pulse"></div>
-                  <div className="h-4 bg-zinc-200 rounded animate-pulse"></div>
-                  <div className="h-4 bg-zinc-200 rounded animate-pulse"></div>
-                </div>
-              ) : productLinks.length > 0 ? (
+              {productLinks.length > 0 ? (
                 productLinks.map((link, index) => (
                   <Link
                     key={index}
@@ -136,7 +133,7 @@ const Footer = () => {
                   </Link>
                 ))
               ) : (
-                <p className="text-zinc-500 text-sm">No products available</p>
+                <p className="text-zinc-500 text-sm">loading...</p>
               )}
             </div>
 
@@ -157,7 +154,7 @@ const Footer = () => {
               <div className="flex gap-3 mt-2">
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.instagram.com/think.novus/"
+                  href="https://www.instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -166,7 +163,7 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.facebook.com/thinknovus.official/"
+                  href="https://www.facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -175,7 +172,7 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://x.com/thinknovus"
+                  href="https://x.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Twitter"
@@ -207,11 +204,17 @@ const Footer = () => {
           <div className="flex items-center flex-wrap justify-center md:justify-end gap-2 text-sm text-zinc-400">
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
 
-            <Link href="/terms" className="text-zinc-400 hover:text-white">
+            <Link
+              href="/terms-and-conditions"
+              className="text-zinc-400 hover:text-white"
+            >
               Terms & Conditions
             </Link>
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
-            <Link href="/privacy" className="text-zinc-400 hover:text-white">
+            <Link
+              href="/privacy-policy"
+              className="text-zinc-400 hover:text-white"
+            >
               Privacy Policy
             </Link>
           </div>

@@ -116,7 +116,7 @@ const PrivacyPolicy = () => {
                   <li>Billing and shipping addresses</li>
                   <li> shipping addresses</li>
                   <li>Lorem and shipping addresses</li>
-                  <li>Billing  addresses</li>
+                  <li>Billing addresses</li>
                   <li>
                     Payment information (processed securely through third-party
                     providers)
@@ -336,22 +336,22 @@ const PrivacyPolicy = () => {
                 <div className="bg-green-50 p-6 rounded-xl border border-green-200">
                   <p className="text-gray-700 mb-3 font-medium">
                     <strong className="text-green-700">Email:</strong>{" "}
-                    privacy@hilop.com
+                    info@hilop.com
                   </p>
                   <p className="text-gray-700 mb-3 font-medium">
-                    <strong className="text-green-700">Phone:</strong> +1 (234)
-                    567-8900
+                    <strong className="text-green-700">Phone:</strong>+91
+                    9998852888
                   </p>
-                  <p className="text-gray-700 mb-3 font-medium">
+                  {/* <p className="text-gray-700 mb-3 font-medium">
                     <strong className="text-green-700">Address:</strong> 123
                     Herbal Lane, Nature City, Earth
-                  </p>
-                  <p className="text-gray-700 font-medium">
+                  </p> */}
+                  {/* <p className="text-gray-700 font-medium">
                     <strong className="text-green-700">
                       Data Protection Officer:
                     </strong>{" "}
                     dpo@hilop.com
-                  </p>
+                  </p> */}
                 </div>
               </section>
 

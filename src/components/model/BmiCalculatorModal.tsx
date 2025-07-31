@@ -183,6 +183,7 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                       : 20
                   }
                   progressColor="text-primary"
+                  isShowPercentage={false}
                   trackColor="text-gray-200"
                   animationDuration={800}
                 />
@@ -210,8 +211,8 @@ const BmiCalculatorModal: React.FC<BmiCalculatorModalProps> = ({
                   </span>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 bg-primary/5 rounded-full px-3 md:px-5 py-2 my-3 md:mb-4 shadow transition-all duration-300 whitespace-nowrap text-gray-500">
-                  <span className="text-sm md:text-base font-medium">
+                <div className="flex items-center gap-3 bg-white rounded-full px-3 md:px-5 py-2 my-3 md:mb-4 md:mt-2  transition-all duration-300 lg:whitespace-nowrap text-gray-600">
+                  <span className="text-xs md:text-base  text-center font-medium">
                     Enter your height and weight, then calculate BMI.
                   </span>
                 </div>
