@@ -116,7 +116,7 @@ const PrivacyPolicy = () => {
                   <li>Billing and shipping addresses</li>
                   <li> shipping addresses</li>
                   <li>Lorem and shipping addresses</li>
-                  <li>Billing  addresses</li>
+                  <li>Billing addresses</li>
                   <li>
                     Payment information (processed securely through third-party
                     providers)

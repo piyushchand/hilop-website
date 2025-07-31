@@ -19,6 +19,11 @@ const Footer = () => {
     { href: "/blog", label: "Blog" },
     { href: "/contact-us", label: "Contact Us" },
     { href: "/support", label: "Help & Support" },
+    { href: "/shipping-policy", label: "Shipping Policy" },
+    {
+      href: "/cancellations-and-refunds",
+      label: "Cancellations and Refunds",
+    },
   ];
   // const filteredLinks = hilopLinks.filter((link) => {
   //   if (link.authOnly) {
