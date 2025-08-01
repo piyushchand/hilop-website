@@ -404,6 +404,12 @@ export default function ProductPage() {
             <p className="md:text-xl text-lg font-medium text-dark mb-6">
               Start your transformation today with a personalized plan!
             </p>
+            {/* <h2 className="md:text-xl text-lg font-medium text-dark mb-6">
+              price:{product?.price?.final_price}
+            </h2> */}
+            <h2 className="md:text-2xl text-xl font-medium text-dark mb-6">
+              Price: ₹{product?.price?.final_price?.toLocaleString("en-IN")}
+            </h2>
 
             <div className="hidden md:flex  gap-4">
               <Button
