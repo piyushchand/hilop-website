@@ -86,7 +86,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 label="VIEW DETAILS"
                 variant="btn-light"
-                size="lg"
+                size="md"
                 className="w-full "
                 link={`/product/${product._id}`}
               />
@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 label="TAKE THE TEST ™"
                 variant="btn-primary"
-                size="lg"
+                size="md"
                 className="w-full "
                 link={
                   product.test_id

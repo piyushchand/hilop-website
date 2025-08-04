@@ -1,6 +1,6 @@
 "use client"; // If using Next.js App Router
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Modal from "../animationComponents/animated-model";
 import { Pen, Star, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -88,6 +88,10 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     initialValidationErrors
   );
 
+  // Refs for error elements
+  const errorRefs = useRef<{ [key: string]: HTMLParagraphElement | null }>({});
+  const modalScrollRef = useRef<HTMLDivElement>(null);
+
   // Fetch addresses when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -98,6 +102,13 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       setValidationErrors(initialValidationErrors);
     }
   }, [isOpen]);
+
+  // Scroll to first error when validation errors change
+  useEffect(() => {
+    if (Object.keys(validationErrors).length > 0 && viewMode !== "list") {
+      scrollToFirstError();
+    }
+  }, [validationErrors, viewMode]);
 
   // Fetch addresses from API
   const fetchAddresses = async () => {
@@ -254,6 +265,72 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     setViewMode("editForm");
   };
 
+  // Function to scroll to the first error message
+  const scrollToFirstError = () => {
+    // Wait for the next tick to ensure errors are rendered
+    setTimeout(() => {
+      // Find the first error element using refs
+      const firstErrorKey = Object.keys(validationErrors).find(
+        (key) => validationErrors[key as keyof ValidationErrors]
+      );
+
+      if (firstErrorKey && errorRefs.current[firstErrorKey]) {
+        // Use the modal's scroll container if available
+        if (modalScrollRef.current) {
+          const errorElement = errorRefs.current[firstErrorKey];
+          if (errorElement) {
+            const containerRect =
+              modalScrollRef.current.getBoundingClientRect();
+            const elementRect = errorElement.getBoundingClientRect();
+            const scrollTop = modalScrollRef.current.scrollTop;
+            const elementTop = elementRect.top - containerRect.top + scrollTop;
+
+            modalScrollRef.current.scrollTo({
+              top: elementTop - containerRect.height / 2,
+              behavior: "smooth",
+            });
+          }
+        } else {
+          // Fallback to scrollIntoView
+          errorRefs.current[firstErrorKey]?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+        }
+      } else {
+        // Fallback: try to find error elements by class name within the modal
+        const modalContent = document.querySelector(
+          ".flex-1.flex.flex-col.gap-6.overflow-y-auto"
+        );
+        if (modalContent) {
+          const errorElements = modalContent.querySelectorAll(
+            ".text-red-500.text-xs"
+          );
+          if (errorElements.length > 0) {
+            errorElements[0].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+          }
+        } else {
+          // Final fallback: global search
+          const errorElements = document.querySelectorAll(
+            ".text-red-500.text-xs"
+          );
+          if (errorElements.length > 0) {
+            errorElements[0].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+          }
+        }
+      }
+    }, 300); // Increased timeout to ensure DOM is updated
+  };
+
   const validateForm = (): boolean => {
     const errors: ValidationErrors = {};
 
@@ -297,6 +374,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
     }
 
     setValidationErrors(errors);
+
     return Object.keys(errors).length === 0;
   };
 
@@ -355,6 +433,7 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
 
   const handleSaveAddress = async () => {
     if (!validateForm()) {
+      // Validation failed, scroll to first error is already handled in validateForm
       return; // Don't proceed if validation fails
     }
 
@@ -528,7 +607,10 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
       <h2 className="text-lg md:text-2xl font-semibold p-6 border-b border-gray-200 text-center">
         {getModalTitle()}
       </h2>
-      <div className="flex-1 flex flex-col gap-6 overflow-y-auto p-6">
+      <div
+        ref={modalScrollRef}
+        className="flex-1 flex flex-col gap-6 overflow-y-auto p-6"
+      >
         {isLoading && viewMode === "list" ? (
           <div className="py-10 text-center">
             <p className="text-gray-500">Loading addresses...</p>
@@ -665,7 +747,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.name && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.name = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.name}
                         </p>
                       )}
@@ -681,7 +768,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.address && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.address = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.address}
                         </p>
                       )}
@@ -697,7 +789,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.landmark && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.landmark = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.landmark}
                         </p>
                       )}
@@ -713,7 +810,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.city && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.city = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.city}
                         </p>
                       )}
@@ -730,7 +832,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.state && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.state = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.state}
                         </p>
                       )}
@@ -746,7 +853,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.zipcode && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.zipcode = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.zipcode}
                         </p>
                       )}
@@ -762,7 +874,12 @@ export default function AddresssModal({ isOpen, onClose }: AddressModalProps) {
                         required
                       />
                       {validationErrors.phone_number && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">
+                        <p
+                          ref={(el) => {
+                            errorRefs.current.phone_number = el;
+                          }}
+                          className="text-red-500 text-xs mt-1 ml-1"
+                        >
                           {validationErrors.phone_number}
                         </p>
                       )}

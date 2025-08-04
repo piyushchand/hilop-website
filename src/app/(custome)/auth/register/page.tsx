@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
-import Image from "next/image";
+// import Image from "next/image";
 import AuthLayout from "../AuthLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-hot-toast";
@@ -94,16 +94,16 @@ export default function RegisterPage() {
           "Please enter a valid Indian mobile number starting with 6-9";
       }
     }
-    if (!formData.birthdate) {
-      newErrors.birthdate = "Date of birth is required";
-    } else {
-      const birthDate = new Date(formData.birthdate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (birthDate > today) {
-        newErrors.birthdate = "Date of birth cannot be in the future";
-      }
-    }
+    // if (!formData.birthdate) {
+    //   newErrors.birthdate = "Date of birth is required";
+    // } else {
+    //   const birthDate = new Date(formData.birthdate);
+    //   const today = new Date();
+    //   today.setHours(0, 0, 0, 0);
+    //   if (birthDate > today) {
+    //     newErrors.birthdate = "Date of birth cannot be in the future";
+    //   }
+    // }
     if (!agreedToTerms) {
       newErrors.terms = "Please agree to Terms & Conditions";
     }
@@ -239,7 +239,7 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="flex flex-col gap-px">
+            {/* <div className="flex flex-col gap-px">
               <AnimatedInput
                 label="Date of Birth"
                 name="birthdate"
@@ -252,7 +252,7 @@ export default function RegisterPage() {
               {errors.birthdate && (
                 <div className="text-red-500 text-sm ">{errors.birthdate}</div>
               )}
-            </div>
+            </div> */}
           </div>
 
           <label className="mb-4 flex cursor-pointer items-start">
@@ -294,9 +294,9 @@ export default function RegisterPage() {
           />
         </form>
 
-        <div className="text-center text-sm my-4">Or register with</div>
+        {/* <div className="text-center text-sm my-4">Or register with</div> */}
 
-        <div className="flex gap-4">
+        {/* <div className="flex gap-4">
           <button
             type="button"
             className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
@@ -311,7 +311,7 @@ export default function RegisterPage() {
             Google
           </button>
 
-          {/* <button
+          <button
             type="button"
             className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
             disabled={isLoading}
@@ -323,8 +323,8 @@ export default function RegisterPage() {
               alt="Facebook"
             />
             Facebook
-          </button> */}
-        </div>
+          </button> 
+        </div>*/}
       </div>
     </AuthLayout>
   );

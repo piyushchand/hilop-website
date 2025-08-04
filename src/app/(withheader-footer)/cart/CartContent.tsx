@@ -240,6 +240,7 @@ export default function Cart() {
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState<string | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
+  // const [addError, setAddError] = useState<string | null>(null);
   const [planSuccess, setPlanSuccess] = useState<string | null>(null);
   const [coinsLoading, setCoinsLoading] = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -804,6 +805,7 @@ export default function Cart() {
         return;
       }
       if (!selectedAddress || !selectedAddress._id) {
+        // setAddError("No address selected. Please select a delivery address.");
         toast.error("No address selected. Please select a delivery address.");
         setCheckoutLoading(false);
         scrollToTop();
@@ -956,6 +958,8 @@ export default function Cart() {
     }
 
     if (!selectedAddress || !selectedAddress._id) {
+      // setAddError("No address selected. Please select a delivery address.");
+
       toast.error("No address selected. Please select a delivery address.");
       return;
     }
@@ -1081,7 +1085,7 @@ export default function Cart() {
             {/* Address error message */}
             {addressError && (
               <div className="text-red-600 text-xs md:text-sm mt-1 font-semibold">
-                Add address
+                Please add your street address, city, and ZIP code.
               </div>
             )}
           </div>
@@ -1678,9 +1682,7 @@ export default function Cart() {
           onClick={() => {
             if (!selectedAddress || !selectedAddress._id) {
               setAddressError("Add Address First");
-              toast.error(
-                "No address selected. Please select a delivery address."
-              );
+
               scrollToTop();
               return;
             }
