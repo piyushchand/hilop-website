@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Modal from "../animationComponents/animated-model";
 import Button from "../uiFramework/Button";
 import Image from "next/image";
@@ -45,6 +45,10 @@ export default function AccountDetailsModal({
   const [initialData, setInitialData] = useState<FormData | null>(null);
   const { updateUser, refreshUserData } = useAuth();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Refs for error elements and modal scroll container
+  const errorRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const modalScrollRef = useRef<HTMLDivElement>(null);
 
   // Helper function to format user data for form
   const formatUserDataForForm = (userData: User): FormData => {
@@ -126,6 +130,77 @@ export default function AccountDetailsModal({
       }, 100);
     }
   }, [isOpen, user]);
+
+  // Scroll to first error when validation errors change
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      scrollToFirstError();
+    }
+  }, [errors]);
+
+  // Function to scroll to the first error message
+  const scrollToFirstError = () => {
+    // Wait for the next tick to ensure errors are rendered
+    setTimeout(() => {
+      // Find the first error element using refs
+      const firstErrorKey = Object.keys(errors).find((key) => errors[key]);
+
+      if (firstErrorKey && errorRefs.current[firstErrorKey]) {
+        // Use the modal's scroll container if available
+        if (modalScrollRef.current) {
+          const errorElement = errorRefs.current[firstErrorKey];
+          if (errorElement) {
+            const containerRect =
+              modalScrollRef.current.getBoundingClientRect();
+            const elementRect = errorElement.getBoundingClientRect();
+            const scrollTop = modalScrollRef.current.scrollTop;
+            const elementTop = elementRect.top - containerRect.top + scrollTop;
+
+            modalScrollRef.current.scrollTo({
+              top: elementTop - containerRect.height / 2,
+              behavior: "smooth",
+            });
+          }
+        } else {
+          // Fallback to scrollIntoView
+          errorRefs.current[firstErrorKey]?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+        }
+      } else {
+        // Fallback: try to find error elements by class name within the modal
+        const modalContent = document.querySelector(
+          ".flex-1.flex.flex-col.gap-6.overflow-y-auto"
+        );
+        if (modalContent) {
+          const errorElements = modalContent.querySelectorAll(
+            ".text-red-500.text-sm"
+          );
+          if (errorElements.length > 0) {
+            errorElements[0].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+          }
+        } else {
+          // Final fallback: global search
+          const errorElements = document.querySelectorAll(
+            ".text-red-500.text-sm"
+          );
+          if (errorElements.length > 0) {
+            errorElements[0].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+          }
+        }
+      }
+    }, 300); // Increased timeout to ensure DOM is updated
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -272,23 +347,23 @@ export default function AccountDetailsModal({
     }
 
     // Birthdate validation
-    if (!formData.birthdate) {
-      newErrors.birthdate = "Date of birth is required";
-    } else {
-      const birthDate = new Date(formData.birthdate);
-      // Check if date is valid
-      if (isNaN(birthDate.getTime())) {
-        newErrors.birthdate = "Please enter a valid date of birth";
-      } else {
-        const today = new Date();
-        if (birthDate > today) {
-          newErrors.birthdate = "Date of birth cannot be in the future";
-        }
-        if (today.getFullYear() - birthDate.getFullYear() > 120) {
-          newErrors.birthdate = "Please enter a valid date of birth";
-        }
-      }
-    }
+    // if (!formData.birthdate) {
+    //   newErrors.birthdate = "Date of birth is required";
+    // } else {
+    //   const birthDate = new Date(formData.birthdate);
+    //   // Check if date is valid
+    //   if (isNaN(birthDate.getTime())) {
+    //     newErrors.birthdate = "Please enter a valid date of birth";
+    //   } else {
+    //     const today = new Date();
+    //     if (birthDate > today) {
+    //       newErrors.birthdate = "Date of birth cannot be in the future";
+    //     }
+    //     if (today.getFullYear() - birthDate.getFullYear() > 120) {
+    //       newErrors.birthdate = "Please enter a valid date of birth";
+    //     }
+    //   }
+    // }
 
     // Gender validation
     if (!formData.gender) {
@@ -448,7 +523,10 @@ export default function AccountDetailsModal({
           Edit Account Details
         </h2>
         {/* Scrollable Form Section */}
-        <div className="flex-1 flex flex-col gap-6 overflow-y-auto p-6 min-h-0">
+        <div
+          ref={modalScrollRef}
+          className="flex-1 flex flex-col gap-6 overflow-y-auto p-6 min-h-0"
+        >
           <div className="flex items-center gap-4">
             <Image
               src={profileImageUrl}
@@ -495,7 +573,14 @@ export default function AccountDetailsModal({
               required
             />
             {errors.name && (
-              <div className="text-red-500 text-sm mt-1">{errors.name}</div>
+              <div
+                ref={(el) => {
+                  errorRefs.current.name = el;
+                }}
+                className="text-red-500 text-sm mt-1"
+              >
+                {errors.name}
+              </div>
             )}
           </div>
           <div>
@@ -508,7 +593,14 @@ export default function AccountDetailsModal({
               required
             />
             {errors.email && (
-              <div className="text-red-500 text-sm mt-1">{errors.email}</div>
+              <div
+                ref={(el) => {
+                  errorRefs.current.email = el;
+                }}
+                className="text-red-500 text-sm mt-1"
+              >
+                {errors.email}
+              </div>
             )}
           </div>
           <div>
@@ -528,12 +620,17 @@ export default function AccountDetailsModal({
               />
             </div>
             {errors.mobile_number && (
-              <div className="text-red-500 text-sm mt-1">
+              <div
+                ref={(el) => {
+                  errorRefs.current.mobile_number = el;
+                }}
+                className="text-red-500 text-sm mt-1"
+              >
                 {errors.mobile_number}
               </div>
             )}
           </div>
-          <div>
+          {/* <div>
             <AnimatedInput
               label="Date of Birth"
               name="birthdate"
@@ -546,7 +643,7 @@ export default function AccountDetailsModal({
             {errors.birthdate && (
               <div className="text-red-500 text-sm">{errors.birthdate}</div>
             )}
-          </div>
+          </div> */}
           <div>
             <label
               className="block text-gray-700 font-medium mb-1"
@@ -584,7 +681,14 @@ export default function AccountDetailsModal({
               </span>
             </div>
             {errors.gender && (
-              <div className="text-red-500 text-sm mt-1">{errors.gender}</div>
+              <div
+                ref={(el) => {
+                  errorRefs.current.gender = el;
+                }}
+                className="text-red-500 text-sm mt-1"
+              >
+                {errors.gender}
+              </div>
             )}
           </div>
         </div>
