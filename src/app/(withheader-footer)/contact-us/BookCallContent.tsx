@@ -228,6 +228,8 @@ export default function BookCall() {
   const [bookedSlots, setBookedSlots] = useState<{ [date: string]: string[] }>(
     {}
   );
+  const [bookingError, setBookingError] = useState("");
+  const [contactFormError, setContactFormError] = useState("");
 
   // Filter availableTimeSlots to hide already booked slots for the selected date
   const year = selectedDate?.getFullYear();
@@ -390,10 +392,15 @@ export default function BookCall() {
       console.log("Submit handler - selectedTime:", selectedTime);
       console.log("Submit handler - selectedSlotId:", selectedSlotId);
 
-      if (!selectedDate || !selectedTime || !selectedSlotId) {
-        toast.error("Please select a date and time slot.");
+      if (!selectedDate) {
+        setBookingError("Please select a date.");
         return;
       }
+      if (!selectedTime || !selectedSlotId) {
+        setBookingError("Please select a time slot.");
+        return;
+      }
+      setBookingError(""); // Clear error if all good
       setSubmittingBooking(true);
 
       const day = String(selectedDate.getDate()).padStart(2, "0");
@@ -441,14 +448,15 @@ export default function BookCall() {
         setSelectedDate(null);
         setSelectedTime("");
         setSelectedSlotId("");
+        setBookingError(""); // Clear error on success
       } else {
-        toast.error(
+        setBookingError(
           data.message || "Failed to book appointment. Please try again."
         );
       }
     } catch (error) {
       console.error("Error submitting appointment:", error);
-      toast.error("Failed to submit appointment. Please try again.");
+      setBookingError("Failed to submit appointment. Please try again.");
     } finally {
       setSubmittingBooking(false);
     }
@@ -456,6 +464,15 @@ export default function BookCall() {
 
   const handleContactFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (
+      !contactFormData.name ||
+      !contactFormData.email ||
+      !contactFormData.query
+    ) {
+      setContactFormError("All fields are required.");
+      return;
+    }
+    setContactFormError(""); // Clear error if all good
     toast.success("Query submitted! We will contact you soon.");
     setContactFormData({ name: "", email: "", query: "" });
   };
@@ -514,6 +531,11 @@ export default function BookCall() {
                 <h2 className="text-2xl font-medium md:mb-4 mb-3">
                   Contact Us
                 </h2>
+                {contactFormError && (
+                  <div className="text-red-500 text-sm mb-2">
+                    {contactFormError}
+                  </div>
+                )}
                 <AnimatedInput
                   label="Your Name"
                   name="name"
@@ -538,7 +560,6 @@ export default function BookCall() {
                   required
                   rows={3}
                 />
-
                 <div className="w-full ">
                   <Button
                     label={submittingBooking ? "submiting..." : "Submit"}
@@ -567,6 +588,9 @@ export default function BookCall() {
                 onChange={setSelectedDate}
                 className="w-full min-w-0 max-w-full"
               />
+              {bookingError && (
+                <div className="text-red-500 text-sm mb-2">{bookingError}</div>
+              )}
               <div className="w-full mb-6">
                 <label className="block text-gray-700 mb-2 font-medium">
                   Select Time

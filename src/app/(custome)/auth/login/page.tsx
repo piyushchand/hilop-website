@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import AnimatedInput from "@/components/animationComponents/AnimatedInput";
 import Button from "@/components/uiFramework/Button";
-import Image from "next/image";
 import AuthLayout from "../AuthLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "react-hot-toast";
@@ -17,7 +16,6 @@ export default function LoginPage() {
     isLoading,
     error,
     clearError,
-    signInWithGoogle,
     // signInWithFacebook,
     user,
     success,
@@ -32,9 +30,9 @@ export default function LoginPage() {
     if (error) clearError();
   };
 
-  const handleGoogleLogin = async () => {
-    await signInWithGoogle();
-  };
+  // const handleGoogleLogin = async () => {
+  //   await signInWithGoogle();
+  // };
   // const handleFacebookLogin = async () => {
   //   await signInWithFacebook();
   // };
@@ -156,10 +154,10 @@ export default function LoginPage() {
             />
           </form>
 
-          <div className="text-center text-sm my-4">Or login with</div>
+          {/* <div className="text-center text-sm my-4">Or login with</div> */}
 
-          <div className="flex gap-4">
-            <button
+          {/* <div className="flex gap-4"> */}
+          {/* <button
               type="button"
               className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
@@ -172,9 +170,9 @@ export default function LoginPage() {
                 alt="Google"
               />
               Google
-            </button>
+            </button> */}
 
-            {/* <button
+          {/* <button
               type="button"
               className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
               disabled={isLoading}
@@ -188,7 +186,7 @@ export default function LoginPage() {
               />
               Facebook
             </button> */}
-          </div>
+          {/* </div> */}
         </div>
       </AuthLayout>
     </>

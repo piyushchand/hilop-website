@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
 // import { useAuth } from "@/contexts/AuthContext";
@@ -154,7 +154,7 @@ const Footer = () => {
               <div className="flex gap-3 mt-2">
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.instagram.com"
+                  href="https://www.instagram.com/hilopwellness"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -163,7 +163,7 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://www.facebook.com"
+                  href="https://www.facebook.com/hilopwellness"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -172,12 +172,12 @@ const Footer = () => {
                 </Link>
                 <Link
                   className="social-icon text-zinc-400 hover:text-white"
-                  href="https://x.com"
+                  href="https://www.linkedin.com/company/hilop-pvt-ltd"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Twitter"
                 >
-                  <Twitter />
+                  <Linkedin />
                 </Link>
               </div>
             </div>

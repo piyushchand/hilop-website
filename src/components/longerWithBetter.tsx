@@ -13,28 +13,58 @@ import TestModal from "./model/TestModal";
 
 const testimonials = [
   {
-    name: "Purav Jha",
-    product: "Sildenafil chews",
+    name: "Ritika Sharma, Delhi ",
+    product: "Hilop Natural Fat-Burner",
     image: "/images/weight-loss/product-main.png", // replace with actual image
-    quotePart1: "My manhood wouldn&apos;t work like it used to.",
-    quotePart2:
-      "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
+    quotePart1:
+      " was skeptical at first, but Hilop’s fat-burner worked like magic. I didn’t feel weak or jittery—just more energetic and lighter week after week. Bonus: It’s 100% natural!",
+    // quotePart2:
+    //   "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
   },
   {
-    name: "Ravi Sharma",
-    product: "Tadalafil capsules",
+    name: "Priya Menon, Kochi",
+    product: "Hilop Gut Cleanse & Detox",
     image: "/images/weight-loss/product-main.png",
-    quotePart1: "I was skeptical at first.",
-    quotePart2:
-      "But after a week of usage, I saw incredible results. My energy and confidence are back!",
+    quotePart1:
+      "My digestion has never been better. I used to feel bloated almost daily. After starting Hilop’s gut detox, I feel clean, light, and super active all day!",
+    //   quotePart2:
+    //     "But after a week of usage, I saw incredible results. My energy and confidence are back!",
   },
   {
-    name: "Amit Verma",
-    product: "Herbal vitality booster",
+    name: "Aman Verma, Mumbai ",
+    product: "Hilop Metabolism Booster",
     image: "/images/weight-loss/product-main.png",
-    quotePart1: "Natural and effective!",
-    quotePart2:
-      "I prefer herbal options, and this one actually works. No side effects, only results.",
+    quotePart1:
+      "This metabolism booster gave me the spark I was missing! No crash, no cravings—just a consistent energy flow throughout the day. My workouts improved too!",
+    // quotePart2:
+    //   "I prefer herbal options, and this one actually works. No side effects, only results.",
+  },
+  {
+    name: "Vikram Patel, Ahmedabad ",
+    product: "Hilop Natural Fat-Burner",
+    image: "/images/weight-loss/product-main.png", // replace with actual image
+    quotePart1:
+      " No side effects, no fake promises. Just real results. Within 3 weeks, my clothes fit better and I finally felt in control of my weight. Hilop is the best wellness decision I’ve made. ",
+    // quotePart2:
+    //   "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
+  },
+  {
+    name: "Rajeshwari Iyer, Chennai",
+    product: "Hilop Gut Cleanse & Detox",
+    image: "/images/weight-loss/product-main.png",
+    quotePart1:
+      " didn't realize how much my gut health was affecting my energy and skin. Hilop’s cleanse is a game changer—gentle yet powerful. I feel like a new version of myself",
+    //   quotePart2:
+    //     "But after a week of usage, I saw incredible results. My energy and confidence are back!",
+  },
+  {
+    name: "Neha Singh, Lucknow ",
+    product: "Hilop Metabolism Booster",
+    image: "/images/weight-loss/product-main.png",
+    quotePart1:
+      "It’s not just about weight loss; it’s about feeling alive again. Hilop’s booster gave my body the push it needed. I’ve already recommended it to 3 friends.",
+    // quotePart2:
+    //   "I prefer herbal options, and this one actually works. No side effects, only results.",
   },
 ];
 
@@ -263,11 +293,11 @@ const LongerWithBetter = ({
                     </div>
                     <p className="text-2xl">
                       <span className="text-gray-400">
-                        “{testimonial.quotePart1}
+                        “{testimonial.quotePart1} “
                       </span>{" "}
-                      <span className="text-white font-medium">
+                      {/* <span className="text-white font-medium">
                         {testimonial.quotePart2}”
-                      </span>
+                      </span> */}
                     </p>
                   </SwiperSlide>
                 ))}

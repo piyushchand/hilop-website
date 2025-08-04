@@ -17,6 +17,7 @@ import {
   FacebookAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import { clearAllLanguagePreferences } from "./LanguageContext";
 
 // Types
 export interface AuthState {
@@ -282,6 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         success: null,
       }));
       toast.success("Logged out successfully", { position: "top-right" });
+      clearAllLanguagePreferences();
       router.push("/"); // Redirect to home page after logout
     }
   };
