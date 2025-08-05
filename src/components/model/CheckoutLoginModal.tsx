@@ -519,7 +519,7 @@ export default function CheckoutLoginModal({
                       type="button"
                       onClick={handleResendOTP}
                       disabled={isResending}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50"
+                      className="text-green-600 hover:text-green-800 text-sm font-medium disabled:opacity-50"
                     >
                       {isResending ? "Sending..." : "Resend OTP"}
                     </button>
