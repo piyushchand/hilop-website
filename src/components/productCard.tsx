@@ -8,6 +8,7 @@ import {
 } from "./animationComponents/3DCard";
 import Button from "./uiFramework/Button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 interface ProductCardProps {
   product: Product;
@@ -44,6 +45,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
     if (typeof field === "string") return field;
     return field[language] || field.en || "";
   };
+  const { width } = useWindowSize();
+  const isMobile = width < 1440;
 
   return (
     <>
@@ -86,7 +89,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 label="VIEW DETAILS"
                 variant="btn-light"
-                size="md"
+                size={isMobile ? "md" : "lg"}
                 className="w-full "
                 link={`/product/${product._id}`}
               />
@@ -94,7 +97,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
               <Button
                 label="TAKE THE TEST ™"
                 variant="btn-primary"
-                size="md"
+                size={isMobile ? "md" : "lg"}
                 className="w-full "
                 link={
                   product.test_id
