@@ -15,6 +15,7 @@ import { ChevronDown } from "lucide-react";
 import AddresssModal from "@/components/model/Address";
 import Button from "@/components/uiFramework/Button";
 import PaymentOption from "@/components/model/PaymentOption";
+import CheckoutLoginModal from "@/components/model/CheckoutLoginModal";
 import { setCartCount } from "@/store/cartSlice";
 import { useDispatch } from "react-redux";
 import OrderSuccessful from "@/components/model/OrderSuccessful";
@@ -257,6 +258,7 @@ export default function Cart() {
   }>({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [PaymentOptionModelOpen, setPaymentOptionModelOpen] = useState(false);
+  const [checkoutLoginModalOpen, setCheckoutLoginModalOpen] = useState(false);
   const { language } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
@@ -797,7 +799,7 @@ export default function Cart() {
         if (typeof window !== "undefined") {
           localStorage.setItem("redirectAfterLogin", "/cart");
         }
-        router.push("/auth/login");
+        scrollToTop();
         return;
       }
       if (!cart || cart.items.length === 0) {
@@ -999,6 +1001,7 @@ export default function Cart() {
       setCheckoutLoading(false);
     }
   };
+
   // Hide planSuccess after 4 seconds
   useEffect(() => {
     if (planSuccess) {
@@ -1680,12 +1683,18 @@ export default function Cart() {
           isIcon={true}
           size="lg"
           onClick={() => {
+            // Check if user is not logged in
+            if (!user) {
+              setCheckoutLoginModalOpen(true);
+              return;
+            }
             if (!selectedAddress || !selectedAddress._id) {
               setAddressError("Add Address First");
 
               scrollToTop();
               return;
             }
+
             setPaymentOptionModelOpen(true);
           }}
           disabled={checkoutLoading || !cart || cart.items.length === 0}
@@ -1709,6 +1718,11 @@ export default function Cart() {
         onOnlinePayment={handleOnlinePayment}
         onCashOnDelivery={handleCashOnDelivery}
         loading={checkoutLoading}
+      />
+      <CheckoutLoginModal
+        isOpen={checkoutLoginModalOpen}
+        onClose={() => setCheckoutLoginModalOpen(false)}
+        // onGuestCheckout={handleGuestCheckout}
       />
     </>
   );

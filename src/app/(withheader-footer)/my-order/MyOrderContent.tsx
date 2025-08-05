@@ -426,7 +426,7 @@ export default function MyOrder() {
                               <p className="text-md mb-1 text-gray-600">
                                 Qty: {item.quantity}{" "}
                                 {item.price
-                                  ? `× $${item.price.toFixed(2)}`
+                                  ? `× ₹${item.price.toFixed(2)}`
                                   : ""}
                               </p>
                               <p className="text-sm text-gray-600">
@@ -456,7 +456,7 @@ export default function MyOrder() {
                       <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                         <p className="text-dark">Subtotal</p>
                         <p className="text-gray-600 font-medium">
-                          $
+                          ₹
                           {modalOrder.subtotal
                             ? modalOrder.subtotal.toFixed(2)
                             : "0.00"}
@@ -465,7 +465,7 @@ export default function MyOrder() {
                       <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                         <p className="text-dark">Shipping Fee</p>
                         <p className="text-gray-600 font-medium">
-                          $
+                          ₹
                           {modalOrder.shipping_fee
                             ? modalOrder.shipping_fee.toFixed(2)
                             : "0.00"}
@@ -474,14 +474,14 @@ export default function MyOrder() {
                       <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                         <p className="text-dark">Tax</p>
                         <p className="text-gray-600 font-medium">
-                          ${modalOrder.tax ? modalOrder.tax.toFixed(2) : "0.00"}
+                          ₹{modalOrder.tax ? modalOrder.tax.toFixed(2) : "0.00"}
                         </p>
                       </div>
                       {(modalOrder.hilop_coins_discount || 0) > 0 && (
                         <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                           <p className="text-dark">Hilop Coins Discount</p>
                           <p className="text-green-800 font-medium">
-                            -$
+                            -₹
                             {(modalOrder.hilop_coins_discount || 0).toFixed(2)}
                           </p>
                         </div>
@@ -491,7 +491,7 @@ export default function MyOrder() {
                           Total Amount
                         </p>
                         <Button
-                          label={`$${
+                          label={`₹${
                             modalOrder.total
                               ? modalOrder.total.toFixed(2)
                               : "0.00"
