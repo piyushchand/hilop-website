@@ -164,7 +164,7 @@ function OtpPageContent() {
     otpType === "register" ? "Complete Registration" : "Login Verification";
   const pageDescription = (() => {
     const formattedMobile = mobileNumber
-      ? `+91 ${mobileNumber.slice(0, 2)} ${mobileNumber.slice(
+      ? `+${mobileNumber.slice(0, 2)} ${mobileNumber.slice(
           2,
           7
         )} ${mobileNumber.slice(7)}`
