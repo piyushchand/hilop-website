@@ -16,9 +16,9 @@ interface ProductCardProps {
   totalItems: number;
 }
 const demoImages = [
-  "/images/improving-sexual/improving-sexual-clip.jpg",
-  "/images/instant-boost/instantboost-clip.jpg",
-  "/images/weight-loss/fatloss-clip.jpg",
+  "/images/product/hardveda.png",
+  "/images/product/boldrise.png",
+  "/images/product/slimvibe.png",
 ];
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -57,7 +57,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <CardBody>
           <CardItem
             translateZ={50}
-            className="relative mb-5 rounded-3xl overflow-hidden w-full bg-gray-200 cursor-pointer"
+            className="relative mb-5 overflow-hidden w-full cursor-pointer border-b border-gray-200"
           >
             <a
               href={`/product/${product._id}`}
@@ -70,10 +70,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 alt={getText(product.name)}
                 width={435}
                 height={336}
-                className="rounded-3xl w-full aspect-[4/3] object-cover"
+                className="w-full aspect-[4/3] object-cover"
               />
             </a>
-            <p className="bg-white text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-3 left-3">
+            <p className="bg-gray-200 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-0 left-0">
               {getText(product.for)}
             </p>
           </CardItem>
