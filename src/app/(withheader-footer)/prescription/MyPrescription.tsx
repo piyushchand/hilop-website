@@ -288,9 +288,9 @@ export default function MyPrescription() {
                         <h3 className="text-lg font-medium mb-1">
                           {getText(selectedPrescription.patient.name, language)}
                         </h3>
-                        <p className="text-gray-600">
+                        {/* <p className="text-gray-600">
                           {selectedPrescription.patient.age} years old
-                        </p>
+                        </p> */}
                       </div>
                       <div className="text-left sm:text-right">
                         <h3 className="text-lg font-medium mb-1">

@@ -1,7 +1,7 @@
 // components/animationComponents/OTPInput.tsx
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
 interface OTPInputProps {
   length?: number;
@@ -9,26 +9,31 @@ interface OTPInputProps {
   onChange?: (value: string) => void;
   disabled?: boolean;
   autoFocus?: boolean;
+  className?: string;
 }
 
-export default function OTPInput({ 
-  length = 6, 
-  value = '', 
-  onChange, 
+export default function OTPInput({
+  length = 6,
+  value = "",
+  onChange,
   disabled = false,
-  autoFocus = true 
+  autoFocus = true,
+  className = "",
 }: OTPInputProps) {
-  const [otp, setOtp] = useState<string[]>(new Array(length).fill(''));
+  const [otp, setOtp] = useState<string[]>(new Array(length).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Update internal state when external value changes
   useEffect(() => {
     if (value) {
-      const otpArray = value.split('').slice(0, length);
-      const paddedArray = [...otpArray, ...new Array(length - otpArray.length).fill('')];
+      const otpArray = value.split("").slice(0, length);
+      const paddedArray = [
+        ...otpArray,
+        ...new Array(length - otpArray.length).fill(""),
+      ];
       setOtp(paddedArray);
     } else {
-      setOtp(new Array(length).fill(''));
+      setOtp(new Array(length).fill(""));
     }
   }, [value, length]);
 
@@ -43,7 +48,7 @@ export default function OTPInput({
     if (disabled) return;
 
     const value = element.value;
-    
+
     // Only allow numeric input
     if (value && !/^\d$/.test(value)) {
       return;
@@ -55,7 +60,7 @@ export default function OTPInput({
 
     // Call parent onChange
     if (onChange) {
-      onChange(newOtp.join(''));
+      onChange(newOtp.join(""));
     }
 
     // Move to next input if current field is filled
@@ -64,45 +69,47 @@ export default function OTPInput({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
     if (disabled) return;
 
     // Handle backspace
-    if (e.key === 'Backspace') {
+    if (e.key === "Backspace") {
       e.preventDefault();
       const newOtp = [...otp];
-      
+
       if (otp[index]) {
         // Clear current field
-        newOtp[index] = '';
+        newOtp[index] = "";
       } else if (index > 0) {
         // Move to previous field and clear it
-        newOtp[index - 1] = '';
+        newOtp[index - 1] = "";
         inputRefs.current[index - 1]?.focus();
       }
-      
+
       setOtp(newOtp);
       if (onChange) {
-        onChange(newOtp.join(''));
+        onChange(newOtp.join(""));
       }
     }
-    
+
     // Handle arrow keys
-    else if (e.key === 'ArrowLeft' && index > 0) {
+    else if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
-    }
-    else if (e.key === 'ArrowRight' && index < length - 1) {
+    } else if (e.key === "ArrowRight" && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-    
+
     // Handle delete key
-    else if (e.key === 'Delete') {
+    else if (e.key === "Delete") {
       e.preventDefault();
       const newOtp = [...otp];
-      newOtp[index] = '';
+      newOtp[index] = "";
       setOtp(newOtp);
       if (onChange) {
-        onChange(newOtp.join(''));
+        onChange(newOtp.join(""));
       }
     }
   };
@@ -115,15 +122,18 @@ export default function OTPInput({
     e.preventDefault();
     if (disabled) return;
 
-    const pasteData = e.clipboardData.getData('text');
-    const numericData = pasteData.replace(/\D/g, '').slice(0, length);
-    
+    const pasteData = e.clipboardData.getData("text");
+    const numericData = pasteData.replace(/\D/g, "").slice(0, length);
+
     if (numericData) {
-      const newOtp = numericData.split('').concat(new Array(length).fill('')).slice(0, length);
+      const newOtp = numericData
+        .split("")
+        .concat(new Array(length).fill(""))
+        .slice(0, length);
       setOtp(newOtp);
-      
+
       if (onChange) {
-        onChange(newOtp.join(''));
+        onChange(newOtp.join(""));
       }
 
       // Focus the last filled input or the first empty one
@@ -132,7 +142,8 @@ export default function OTPInput({
           .fill(null)
           .map((_, i) => inputRefs.current[i] || null);
       }
-      const nextEmptyIndex = numericData.length < length ? numericData.length : length - 1;
+      const nextEmptyIndex =
+        numericData.length < length ? numericData.length : length - 1;
       inputRefs.current[nextEmptyIndex]?.focus();
     }
   };
@@ -155,16 +166,18 @@ export default function OTPInput({
           onFocus={handleFocus}
           onPaste={handlePaste}
           disabled={disabled}
-          className={`
+          className={`${className}
             w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg
             transition-all duration-200 outline-none
-            ${digit 
-              ? 'border-green-500 bg-green-50 text-green-800' 
-              : 'border-gray-300 bg-white hover:border-gray-400 focus:border-green-500'
+            ${
+              digit
+                ? "border-green-500 bg-green-50 text-green-800"
+                : "border-gray-300 bg-white hover:border-gray-400 focus:border-green-500"
             }
-            ${disabled 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-              : 'focus:ring-2 focus:ring-green-200'
+            ${
+              disabled
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "focus:ring-2 focus:ring-green-200"
             }
           `}
           aria-label={`OTP digit ${index + 1}`}
