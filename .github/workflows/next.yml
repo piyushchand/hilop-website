@@ -16,6 +16,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            pm2 stop hilop-website
             cd ~/hilop-website
             touch .env
             echo "${{ secrets.PROD_ENV }}" > .env
