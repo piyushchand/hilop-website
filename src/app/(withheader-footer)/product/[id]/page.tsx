@@ -67,7 +67,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       "Those who want to increase their libido and desire without relying on chemicals.",
       "Individuals who are looking to support their overall vitality and well-being.",
     ],
-    benefitImage: "/images/instant-boost/who-can-benefit.jpg",
+    benefitImage: "/images/instant-boost/who-can-benefit.png",
     howItWorksDescription: {
       en: "BoldRise works by naturally increasing blood flow and enhancing your body's natural response to arousal, providing an instant boost in performance and stamina.",
       hi: "बोल्डराइज स्वाभाविक रूप से रक्त प्रवाह को बढ़ाकर और उत्तेजना के लिए आपके शरीर की प्राकृतिक प्रतिक्रिया को बढ़ाकर काम करता है, जो प्रदर्शन और सहनशक्ति में तत्काल वृद्धि प्रदान करता है।",
@@ -89,7 +89,7 @@ const PRODUCT_DYNAMIC_CONTENT: Record<string, ProductDynamicContent> = {
       "Those who want to increase their energy levels and improve overall health.",
       "People who are tired of crash diets or artificial weight loss products and prefer a more holistic approach.",
     ],
-    benefitImage: "/images/weight-loss/product-main.png",
+    benefitImage: "/images/weight-loss/who-can-benefit.png",
     howItWorksDescription: {
       en: "Our Slimvibe formula works by boosting your metabolism, reducing cravings, and promoting natural fat burning. It helps you achieve sustainable weight loss without harsh chemicals.",
       hi: "हमारा स्लिमवाइब फॉर्मूला आपके मेटाबॉलिज्म को बढ़ाकर, क्रेविंग को कम करके और प्राकृतिक वसा जलने को बढ़ावा देकर काम करता है। यह आपको कठोर रसायनों के बिना स्थायी वजन घटाने में मदद करता है।",
@@ -352,29 +352,37 @@ export default function ProductPage() {
         .filter((item) => item.question && item.answer)
     : [];
 
-  const faqItems = Array.isArray(product?.faqs)
-    ? product.faqs
-        .map(
-          (
-            item: string | FaqAccordionItem,
-            index: number
-          ): { id: string; question: string; answer: string } => {
-            if (typeof item === "string") {
-              return {
-                id: `faq-${index}`,
-                question: item,
-                answer: item,
-              };
-            }
-            return {
-              id: `faq-${index}`,
-              question: item.title || item.question || "",
-              answer: item.description || item.answer || "",
-            };
-          }
-        )
-        .filter((item) => item.question && item.answer)
-    : [];
+  const PRODUCT_FAQS: Record<string, { question: string; answer: string }> = {
+    // "BoldRise - Last Long Delay Powder": {
+    //   question: "How does Boldrise Powder Work?",
+    //   answer:
+    //     "Take 1 capsule daily with water after meals. For best results, maintain consistency and pair with a balanced lifestyle.",
+    // },
+    "Hardveda - Natural Performance Booster Capsule": {
+      question: "How does Hardveda help performance?",
+      answer:
+        "Hardveda is formulated with natural herbs that support stamina, vitality, and overall performance. Take 2 capsule daily after meals.",
+    },
+    "Slimvibe - Herbal Weight Loss Capsule": {
+      question: "How does Slimvibe work?",
+      answer:
+        "Slimvibe supports metabolism and helps reduce appetite naturally. Recommended dosage is 2 capsule daily with water after meals.",
+    },
+  };
+
+  const faqItems = [
+    {
+      id: "faq1",
+      question: "How do i order from your company?",
+      answer:
+        "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+    },
+    {
+      id: "faq2",
+      question: PRODUCT_FAQS[product?.name]?.question || "",
+      answer: PRODUCT_FAQS[product?.name]?.answer || "",
+    },
+  ].filter((item) => item.question && item.answer);
 
   return (
     <div className="relative">
@@ -431,7 +439,7 @@ export default function ProductPage() {
               />
             </div>
           </div>
-          <div className="order-1 lg:order-1 relative w-full flex flex-col items-center sm:rounded-4xl rounded-2xl overflow-hidden border border-gray-200 bg-green-100">
+          <div className="order-1 lg:order-1 relative w-full flex flex-col items-center sm:rounded-4xl rounded-2xl overflow-hidden border border-gray-200 bg-green-100 p-4 sm:p-6">
             {shouldShowSwiper ? (
               <>
                 <Swiper
@@ -443,7 +451,7 @@ export default function ProductPage() {
                         : null,
                   }}
                   modules={[Thumbs]}
-                  className="w-full aspect-square"
+                  className="w-full aspect-square mb-4"
                 >
                   {imagesToShow.map((image: string, index: number) => (
                     <SwiperSlide key={index}>
@@ -458,35 +466,9 @@ export default function ProductPage() {
                     </SwiperSlide>
                   ))}
                 </Swiper>
-
-                <Swiper
-                  onSwiper={(swiper) => {
-                    setThumbsSwiper(swiper);
-                  }}
-                  spaceBetween={16}
-                  slidesPerView={3}
-                  watchSlidesProgress
-                  modules={[Thumbs]}
-                  className="w-38 sm:w-64 !absolute sm:bottom-7 bottom-3"
-                >
-                  {imagesToShow.map((image: string, index: number) => (
-                    <SwiperSlide
-                      key={index}
-                      className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
-                    >
-                      <Image
-                        src={getSafeImage(image)}
-                        alt={`${product.name} thumbnail ${index + 1}`}
-                        width={60}
-                        height={60}
-                        className="w-full h-full object-cover aspect-square"
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
               </>
             ) : (
-              <div className="w-full aspect-square">
+              <div className="w-full aspect-square mb-4">
                 <Image
                   src={getSafeImage(imagesToShow[0])}
                   alt={`${product.name} image`}
@@ -497,6 +479,37 @@ export default function ProductPage() {
                 />
               </div>
             )}
+            <Swiper
+              onSwiper={(swiper) => {
+                setThumbsSwiper(swiper);
+              }}
+              spaceBetween={10}
+              slidesPerView={4}
+              watchSlidesProgress
+              modules={[Thumbs]}
+              className="w-full"
+              breakpoints={{
+                320: { slidesPerView: 3 },
+                480: { slidesPerView: 4 },
+                768: { slidesPerView: 5 },
+                1024: { slidesPerView: 6 },
+              }}
+            >
+              {imagesToShow.map((image: string, index: number) => (
+                <SwiperSlide
+                  key={index}
+                  className="cursor-pointer bg-white rounded-md sm:rounded-xl border border-gray-300 overflow-hidden"
+                >
+                  <Image
+                    src={getSafeImage(image)}
+                    alt={`${product.name} thumbnail ${index + 1}`}
+                    width={60}
+                    height={60}
+                    className="w-24 rounded-3x1 sm:w-30 h-full object-cover aspect-square"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </div>
       </section>
@@ -528,78 +541,80 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <section className="mb-16 lg:mb-40 overflow-hidden">
-        <div className="container">
-          <span className="top-content-badge">Key Ingredients</span>
-          <Paragraph
-            paragraph="What's Inside?"
-            textColor="text-dark"
-            className="mb-10"
-            highlightedWord="Inside?"
-          />
-          <Swiper
-            modules={[Navigation, Scrollbar, A11y]}
-            className="!overflow-visible"
-            spaceBetween={24}
-            slidesPerView={1}
-            autoHeight
-            navigation={{
-              nextEl: ".process-next-button",
-              prevEl: ".process-prev-custom",
-            }}
-            scrollbar={{
-              el: ".process-scrollbar-custom",
-              draggable: true,
-              hide: false,
-            }}
-            breakpoints={{
-              640: { slidesPerView: 1, spaceBetween: 24 },
-              768: { slidesPerView: 2, spaceBetween: 24 },
-              1024: { slidesPerView: 3, spaceBetween: 24 },
-            }}
-          >
-            {keyIngredientsToShow.map((item: KeyIngredient, idx: number) => (
-              <SwiperSlide key={idx} className="!h-full">
-                <div className="relative p-6 md:p-10 rounded-2xl bg-white h-full">
-                  <div className="relative text-center">
-                    <Image
-                      src={getSafeImage(item.image)}
-                      alt={item.title}
-                      width={200}
-                      height={200}
-                      className="mx-auto mb-4 rounded-full aspect-square object-cover"
-                    />
-                    <h3 className="font-medium text-lg sm:text-2xl mb-2 lg:mb-4">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-500">{item.description}</p>
+      {product.name !== "Slimvibe - Herbal Weight Loss Capsule" && (
+        <section className="mb-16 lg:mb-40 overflow-hidden">
+          <div className="container">
+            <span className="top-content-badge">Key Ingredients</span>
+            <Paragraph
+              paragraph="What's Inside?"
+              textColor="text-dark"
+              className="mb-10"
+              highlightedWord="Inside?"
+            />
+            <Swiper
+              modules={[Navigation, Scrollbar, A11y]}
+              className="!overflow-visible"
+              spaceBetween={24}
+              slidesPerView={1}
+              autoHeight
+              navigation={{
+                nextEl: ".process-next-button",
+                prevEl: ".process-prev-custom",
+              }}
+              scrollbar={{
+                el: ".process-scrollbar-custom",
+                draggable: true,
+                hide: false,
+              }}
+              breakpoints={{
+                640: { slidesPerView: 1, spaceBetween: 24 },
+                768: { slidesPerView: 2, spaceBetween: 24 },
+                1024: { slidesPerView: 3, spaceBetween: 24 },
+              }}
+            >
+              {keyIngredientsToShow.map((item: KeyIngredient, idx: number) => (
+                <SwiperSlide key={idx} className="!h-full">
+                  <div className="relative p-6 md:p-10 rounded-2xl bg-white h-full">
+                    <div className="relative text-center">
+                      <Image
+                        src={getSafeImage(item.image)}
+                        alt={item.title}
+                        width={200}
+                        height={200}
+                        className="mx-auto mb-4 rounded-full aspect-square object-cover"
+                      />
+                      <h3 className="font-medium text-lg sm:text-2xl mb-2 lg:mb-4">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-500">{item.description}</p>
+                    </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+                </SwiperSlide>
+              ))}
+            </Swiper>
 
-          {(product?.key_ingredients || []).length > 3 && (
-            <div className="mt-8 flex items-center justify-between z-50">
-              <div className="process-scrollbar-custom h-2 w-1/2 rounded-full bg-gray-200">
-                <div className="swiper-scrollbar-drag rounded-full h-full !bg-primary"></div>
+            {(product?.key_ingredients || []).length > 3 && (
+              <div className="mt-8 flex items-center justify-between z-50">
+                <div className="process-scrollbar-custom h-2 w-1/2 rounded-full bg-gray-200">
+                  <div className="swiper-scrollbar-drag rounded-full h-full !bg-primary"></div>
+                </div>
+                <div className="ml-6 flex space-x-3">
+                  <RoundButton
+                    className="process-prev-custom swiper-custome-button rotate-180"
+                    variant="btn-dark"
+                    size="lg"
+                  />
+                  <RoundButton
+                    className="process-next-button swiper-custome-button"
+                    variant="btn-dark"
+                    size="lg"
+                  />
+                </div>
               </div>
-              <div className="ml-6 flex space-x-3">
-                <RoundButton
-                  className="process-prev-custom swiper-custome-button rotate-180"
-                  variant="btn-dark"
-                  size="lg"
-                />
-                <RoundButton
-                  className="process-next-button swiper-custome-button"
-                  variant="btn-dark"
-                  size="lg"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="mb-16 lg:mb-40">
         <div className="container">
@@ -623,7 +638,7 @@ export default function ProductPage() {
 
               <Swiper
                 className="mt-8 !overflow-visible how-it-works-product-slider"
-                slidesPerView={1}
+                slidesPerView={10}
                 spaceBetween={24}
                 autoHeight
                 breakpoints={{
@@ -710,7 +725,7 @@ export default function ProductPage() {
         </div>
       </section>
 
-      <section className=" mb-16 lg:mb-40 lg:py-20 py-10 bg-gray-200">
+      {/* <section className=" mb-16 lg:mb-40 lg:py-20 py-10 bg-gray-200">
         <div className="container grid md:grid-cols-2 gap-10 items-center">
           <div className="lg:order-1 order-2">
             <Paragraph
@@ -734,9 +749,9 @@ export default function ProductPage() {
             className="lg:order-2 order-1"
           />
         </div>
-      </section>
+      </section> */}
 
-      <Testimonials filteredByProductId={productId} />
+      {/* <Testimonials filteredByProductId={productId} /> */}
       <FaqAccordion items={faqItems} className="mx-auto" />
       <Toaster position="bottom-right" />
       <div className="fixed bottom-0 grid grid-cols-2 items-center    z-[999] w-full  justify-center border-t border-t-gray-300  bg-white md:hidden  ">

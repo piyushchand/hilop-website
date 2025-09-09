@@ -4,6 +4,7 @@ import { Blogs } from "@/components/blogs";
 import FaqAccordion from "@/components/FaqAccordion";
 import LongerWithBetter from "@/components/longerWithBetter";
 import LoseWeight from "@/components/loseWeight";
+import Button from "@/components/uiFramework/Button";
 // import { OurProcess } from "@/components/ourProcess";
 import { Testimonials } from "@/components/testimonials";
 import ParallaxText from "@/components/velocityScroll";
@@ -54,28 +55,29 @@ const features = [
 const homepagefaqdata = [
   {
     id: "faq1",
-    question: "How do i order from your company?",
+    question: "What is Hilop?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "Fit Body Better Intimacy Hilop Everyday. Holistic solutions for your weight, energy, and sexual wellness—because true health starts from within.",
   },
   {
     id: "faq2",
-    question: "How do i order from your company?",
+    question: "How does Hilop work?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "By addressing the root causes of your wellness challenges. You see, poor diet, stress, and lifestyle habits may worsen weight, energy, or intimacy issues—but they aren’t the root cause. (It’s like trying to run a marathon with worn-out shoes; the pain is real, but the shoes aren’t the reason you trained!). Hilop works by providing personalized, holistic solutions for weight, energy, and sexual wellness, tailored to your body’s unique needs.",
   },
   {
     id: "faq3",
-    question: "How do i order from your company?",
+    question: "Does it really work?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "We let the results speak for themselves! Explore our customer success stories and see the difference firsthand. Our promise: once you choose Hilop, we’ll support you every step of the way—like a true partner in your wellness journey.",
   },
   {
     id: "faq4",
-    question: "How do i order from your company?",
+    question: "What is Hilop made of?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "A complete, personalized solution for your wellness—crafted by experts and tailored just for you! It contains everything you need to improve your weight, energy, and sexual wellness naturally and effectively. Learn more about our products and kits here.",
   },
+
   {
     id: "faq5",
     question: "How do i order from your company?",
@@ -188,13 +190,13 @@ export default function Home() {
 
   return (
     <>
-      <section className="container overflow-hidden mb-16 lg:mb-40">
+      <section className="container overflow-hidden mb-16 lg:mb-15">
         <div className="grid md:grid-cols-[auto_316px] items-center mt-8 mb-9">
           <div>
             <span className="top-content-badge">Natural Herbal Solutions</span>
             <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl font-medium mb-6">
               <RotatingText
-                texts={["Better Sex", "Weight Loss", "Instant Sex"]}
+                texts={["Have Better Sex", "Lose Weight", "Have Longer Sex"]}
                 mainClassName="text-dark"
                 staggerFrom={"last"}
                 staggerDuration={0.025}
@@ -236,7 +238,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
+        {/* <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
           {productsLoading ? (
             <div className="col-span-full text-center py-8">
               Loading products...
@@ -255,6 +257,18 @@ export default function Home() {
               />
             ))
           )}
+        </div> */}
+
+        <div className="flex justify-center items-center">
+          {testId2 && (
+            <Button
+              label="TAKE THE TEST ™"
+              variant="btn-primary"
+              size="xl"
+              className="w-full sm:w-auto mt-6"
+              link={`/consultation?testId=${testId2}`}
+            />
+          )}
         </div>
       </section>
       <LongerWithBetter
@@ -263,14 +277,14 @@ export default function Home() {
         productId2={product2?._id}
         testId2={testId2 || undefined}
       />
-      <ParallaxText baseVelocity={80}>
+      {/* <ParallaxText baseVelocity={80}>
         ✅ 100% money back guarantee
-      </ParallaxText>
+      </ParallaxText> */}
       <LoseWeight testId={DEFAULT_TEST_ID} productId={weightLossProduct?._id} />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <WhyChoose />
       {/* <OurProcess /> */}
-      <Blogs />
+      {/* <Blogs /> */}
       <FaqAccordion items={homepagefaqdata} className="mx-auto" />
     </>
   );

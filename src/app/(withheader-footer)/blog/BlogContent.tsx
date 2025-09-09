@@ -30,10 +30,10 @@ interface BlogPost {
 
 const sliderData: SliderItem[] = [
   { id: 0, title: "All" },
-  { id: 1, title: "Weight loss" },
-  { id: 2, title: "Better sex" },
+  { id: 1, title: "Loss Weight" },
+  { id: 2, title: "Have Better sex" },
   { id: 3, title: "Intake sex" },
-  { id: 4, title: "Longer sex" },
+  { id: 4, title: "Have Longer sex" },
   { id: 5, title: "Product update" },
   { id: 6, title: "Diet chart" },
   { id: 7, title: "Daily log" },

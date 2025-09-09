@@ -15,7 +15,7 @@ const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
   const [bmiModalOpen, setBmiModalOpen] = useState(false);
   return (
     <>
-      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
+      <section className=" bg-light-vanilla md:py-20 py-12 rounded-4xl mb-16 lg:mb-20">
         <div className="container">
           <div className="max-w-lg mx-auto">
             <Paragraph
@@ -60,11 +60,11 @@ const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6 lg:gap-10">
             <div className="bg-vanilla p-6 lg:p-10 rounded-3xl">
               <Image
-                src="/images/weight-loss/product-main.png"
+                src="/images/weight-loss/OpenBottle.png"
                 width={336}
-                height={336}
+                height={340}
                 alt="weightloss product"
-                className="mb-6 md:h-[336px] h-56 w-full object-contain"
+                className="mb-4 md:h-[350px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
                 Moving in the Right Direction
@@ -79,11 +79,11 @@ const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
             </div>
             <div className="bg-vanilla p-6 lg:p-10 rounded-3xl">
               <Image
-                src="/images/weight-loss/eat-healthy.jpg"
+                src="/images/weight-loss/eat-healthy.png"
                 width={644}
                 height={336}
                 alt="weightloss product"
-                className="mb-6 rounded-3xl md:h-[336px] h-56 w-full object-cover"
+                className="mb-6 rounded-3xl md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
                 Eat Healthy, Get Strong
