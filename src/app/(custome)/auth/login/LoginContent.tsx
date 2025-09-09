@@ -1,0 +1,194 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import AnimatedInput from "@/components/animationComponents/AnimatedInput";
+import Button from "@/components/uiFramework/Button";
+import AuthLayout from "../AuthLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const {
+    login,
+    isLoading,
+    error,
+    clearError,
+    // signInWithFacebook,
+    user,
+    success,
+    setSuccess,
+  } = useAuth();
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [inputError, setInputError] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setMobileNumber(value);
+    if (error) clearError();
+  };
+
+  // const handleGoogleLogin = async () => {
+  //   await signInWithGoogle();
+  // };
+  // const handleFacebookLogin = async () => {
+  //   await signInWithFacebook();
+  // };
+
+  const validatePhoneNumber = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, "");
+    return /^[6-9]\d{9}$/.test(cleanPhone) && cleanPhone.length === 10;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!mobileNumber.trim()) {
+      setInputError("Please enter your mobile number");
+      setTimeout(() => setInputError(""), 4000);
+      return;
+    }
+
+    if (!validatePhoneNumber(mobileNumber)) {
+      setInputError(
+        "Please enter a valid 10-digit Indian mobile number starting with 6-9"
+      );
+      setTimeout(() => setInputError(""), 4000);
+      return;
+    }
+
+    setInputError("");
+    try {
+      await login(`91${mobileNumber}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else if (typeof error === "string") {
+        toast.error(error);
+      } else {
+        toast.error("Login failed");
+      }
+    }
+  };
+
+  // After successful login, check for redirectAfterLogin in localStorage
+  useEffect(() => {
+    if (user && typeof window !== "undefined") {
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.replace(redirectPath);
+      }
+    }
+  }, [user, router]);
+
+  // Hide success message after 4 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setSuccess]);
+
+  return (
+    <>
+      <Toaster position="bottom-right" />
+      <AuthLayout
+        bottomContent={
+          <p className="text-sm mt-4 text-center text-gray-600 font-medium">
+            Don&apos;t have an account yet?{" "}
+            <a
+              href="/auth/register"
+              className="hover:underline text-green-800 font-semibold cursor-pointer"
+            >
+              Sign up for free
+            </a>
+          </p>
+        }
+      >
+        <div className="xl:w-[495px] mx-auto lg:w-full md:w-[495px] min-w-auto">
+          <h2 className="text-3xl font-semibold mb-2">Welcome Back</h2>
+          <p className="font-medium mb-6 text-gray-600">
+            Let&apos;s get you logged in.
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            {success && (
+              <div className="my-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-green-700 text-sm">{success}</p>
+              </div>
+            )}
+
+            {(inputError || error) && (
+              <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-700 text-sm"> {inputError || error}</p>
+              </div>
+            )}
+
+            <div className="relative hilop-mobile-input-wrapper">
+              <span className="absolute left-3 top-4 translate-y-[10%] text-gray-500 text-base select-none pointer-events-none z-10">
+                +91
+              </span>
+              <AnimatedInput
+                label="Mobile number"
+                name="mobile_number"
+                type="tel"
+                value={mobileNumber}
+                onChange={handleInputChange}
+                required
+                placeholder="9876543210"
+              />
+            </div>
+
+            <Button
+              label={isLoading ? "Sending OTP..." : "Get OTP"}
+              variant="btn-dark"
+              size="xl"
+              className="w-full mt-6"
+              disabled={
+                isLoading || !mobileNumber.trim() || mobileNumber.length !== 10
+              }
+              onClick={handleSubmit}
+            />
+          </form>
+
+          {/* <div className="text-center text-sm my-4">Or login with</div> */}
+
+          {/* <div className="flex gap-4"> */}
+          {/* <button
+              type="button"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              disabled={isLoading}
+              onClick={handleGoogleLogin}
+            >
+              <Image
+                src="/images/icon/google.svg"
+                width={22}
+                height={22}
+                alt="Google"
+              />
+              Google
+            </button> */}
+
+          {/* <button
+              type="button"
+              className="text-lg py-3 px-6 w-full cursor-pointer bg-white border hover:text-dark hover:border-green-400 hover:bg-gray-100 transition-all duration-300 border-gray-200 text-gray-600 rounded-full flex items-center justify-center gap-2.5"
+              disabled={isLoading}
+              onClick={handleFacebookLogin}
+            >
+              <Image
+                src="/images/icon/facebook.svg"
+                width={22}
+                height={22}
+                alt="Facebook"
+              />
+              Facebook
+            </button> */}
+          {/* </div> */}
+        </div>
+      </AuthLayout>
+    </>
+  );
+}

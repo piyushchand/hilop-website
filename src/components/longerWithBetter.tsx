@@ -141,10 +141,10 @@ const LongerWithBetter = ({
             <div className="bg-dark-rackley p-6 lg:p-8 rounded-3xl">
               <Image
                 src="/images/weight-loss/Harveda.png"
-                width={340}
-                height={340}
+                width={300}
+                height={300}
                 alt="weightloss product"
-                className="mb-[3.5rem] md:h-[290px] h-50 w-full object-contain mt-6"
+                className="mb-[3.5rem] md:h-[200px] h-35 w-full object-contain mt-[4rem]"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Natural For Improve Testosterone, Stamina & Energy
@@ -176,7 +176,7 @@ const LongerWithBetter = ({
                 width={340}
                 height={340}
                 alt="weightloss product"
-                className="mb-6 md:h-[340px] h-56 w-full object-contain"
+                className="mb-6 md:h-[300px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Last Longer Herbal Sexual Enhancer Powder
@@ -271,8 +271,8 @@ const LongerWithBetter = ({
                       <Image
                         src={testimonial.image}
                         alt={testimonial.name}
-                        width={100}
-                        height={100}
+                        width={70}
+                        height={70}
                         className=""
                       />
                       <div>

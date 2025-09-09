@@ -1,41 +1,53 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: 'About Us',
-  description:
-    'Hilop',
+// ✅ Dynamic metadata
+export async function generateMetadata(): Promise<Metadata> {
+  // Later, you could fetch support-related data from API/DB if needed
+  const pageTitle = "Hilop Support – Customer Help & Assistance";
+  const pageDescription =
+    "Need help with Hilop orders, product, or usage? Get quick support and assistance from our team.";
 
-  openGraph: {
-    title: 'About Us',
-    description:
-      'hilop',
-    images: [
-      {
-        url: '',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    keywords: [
+      "Hilop Support",
+      "Hilop Help",
+      "Customer Care Hilop",
+      "Product Assistance",
     ],
-  },
+    alternates: {
+      canonical: "https://hilop.com/support", 
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: "https://hilop.com/support",
+      siteName: "Hilop",
+      images: [
+        {
+          url: "/image/about-us/mission.webp", // replace with support-specific image if you have one
+          width: 1200,
+          height: 630,
+          alt: "Hilop Support",
+        },
+      ],
+      type: "website",
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+      images: ["/image/about-us/mission.webp"],
+      creator: "@hilop",
+      site: "@hilop",
+    },
+  };
+}
 
-  twitter: {
-    title: 'About Us',
-    description:
-      'Hilop',
-    images: [
-      {
-        url: '/image/about-us/mission.webp',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
-    ],
-  },
-};
+import Support from "./ProfileContent";
 
-import Support from './ProfileContent';
-
-export default function Supportpage() {
+export default function SupportPage() {
   return <Support />;
 }
