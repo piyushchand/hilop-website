@@ -83,7 +83,7 @@ const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
                 width={644}
                 height={336}
                 alt="weightloss product"
-                className="mb-6 rounded-3xl md:h-[336px] h-56 w-full object-contain"
+                className="mb-8 rounded-3xl md:h-[336px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-2 text-white font-medium">
                 Eat Healthy, Get Strong

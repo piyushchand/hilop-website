@@ -23,76 +23,50 @@ export const viewport: Viewport = {
   themeColor: "#7EBF28",
 };
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s | Hilop",
-    default: "Hilop",
-  },
-  description: "Wellness product",
-  applicationName: "Hilop",
-  referrer: "origin-when-cross-origin",
-  keywords: ["HerbaTrim", "VitalVigor", "EverYoung Boost"],
-  authors: [{ name: "Hilop Team" }],
-  creator: "Hilop",
-  publisher: "Hilop",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  alternates: {
-    canonical: "/",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-video-preview": -1,
-      "max-snippet": -1,
-    },
-  },
-  openGraph: {
+// 🔹 Dynamic metadata function
+export async function generateMetadata(): Promise<Metadata> {
+  // Example: later you could fetch data here (API, DB, CMS, etc.)
+  const dynamicTitle =
+    "Hilop – 100% Natural & Science-Backed Weight Loss Formula";
+  const dynamicDescription =
+    "Discover Hilop, India’s 1st science-backed, 100% natural, safe & fast-acting weight loss solution with money-back guarantee.";
+
+  return {
     title: {
       template: "%s | Hilop",
-      default: "Hilop wellness product",
+      default: dynamicTitle,
     },
-    description: "Wellness product",
-    images: [
-      {
-        url: "/image/home-hero.webp",
-        width: 1200,
-        height: 630,
-        alt: "Hilop",
-      },
-    ],
-    siteName: "Hilop",
-    type: "website",
-    url: baseUrl,
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: {
-      template: "%s | Hilop",
-      default: "Hilop wellness product",
+    description: dynamicDescription,
+    applicationName: "Hilop",
+    keywords: ["Hilop", "Natural Weight Loss", "Science Baked Supplement", "Fat Burner India", "Safe Weight Loss", "Money Back Guarantee"],
+    authors: [{ name: "Hilop Team" }],
+    openGraph: {
+      title: dynamicTitle,
+      description: dynamicDescription,
+      url: baseUrl,
+      siteName: "Hilop",
+      images: [
+        {
+          url: `${baseUrl}/image/home-hero.webp`,
+          width: 1200,
+          height: 630,
+          alt: "Hilop",
+        },
+      ],
+      type: "website",
+      locale: "en_US",
     },
-    description: "Wellness product",
-    images: [
-      {
-        url: "/image/home-hero.webp",
-        width: 1200,
-        height: 630,
-        alt: "Hilop",
-      },
-    ],
-    creator: "@hilop",
-    site: "@hilop",
-  },
-  metadataBase: new URL(baseUrl),
-};
+    twitter: {
+      card: "summary_large_image",
+      title: dynamicTitle,
+      description: dynamicDescription,
+      images: [`${baseUrl}/image/home-hero.webp`],
+      creator: "@hilop",
+      site: "@hilop",
+    },
+    metadataBase: new URL(baseUrl),
+  };
+}
 
 export default function RootLayout({
   children,
@@ -143,21 +117,23 @@ export default function RootLayout({
             }),
           }}
         />
+
+        {/* Facebook Pixel */}
         <Script
           id="facebook-pixel"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
            !function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1413400039740880');
-fbq('track', 'PageView');
+           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+           n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+           if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+           n.queue=[];t=b.createElement(e);t.async=!0;
+           t.src=v;s=b.getElementsByTagName(e)[0];
+           s.parentNode.insertBefore(t,s)}(window, document,'script',
+           'https://connect.facebook.net/en_US/fbevents.js');
+           fbq('init', '1413400039740880');
+           fbq('track', 'PageView');
           `,
           }}
         />
@@ -166,6 +142,7 @@ fbq('track', 'PageView');
             height="1"
             width="1"
             src="https://www.facebook.com/tr?id=1413400039740880&ev=PageView&noscript=1"
+            alt=""
           />
         </noscript>
       </head>

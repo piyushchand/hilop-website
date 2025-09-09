@@ -59,7 +59,7 @@ const MobileApproch = () => {
             </p>
           </div>
           <div className="bg-dark rounded-3xl grid xl:grid-cols-2">
-            <div className="md:p-20 p-6">
+            <div className="md:p-19 p-4">
               <h3 className="md:text-2xl text-lg text-white mb-3">
                 Exclusive Features Available in the App
               </h3>
@@ -107,9 +107,9 @@ const MobileApproch = () => {
               </div>
               </div>
             </div>
-            <div className="sm:px-27 px-6 mt-auto mx-auto">
+            <div className="sm:px-50 px-6 mt-auto mx-auto mb-10">
               <Image
-                src="/images/mobile-approch.png"
+                src="/images/mobile-fullscreen.png"
                 alt="why Choose herbal fat loss"
                 width={637}
                 height={709}

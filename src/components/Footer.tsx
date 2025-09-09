@@ -23,6 +23,7 @@ const Footer = () => {
       href: "/cancellations-and-refunds",
       label: "Cancellations and Refunds",
     },
+    
   ];
   // const filteredLinks = hilopLinks.filter((link) => {
   //   if (link.authOnly) {
@@ -72,8 +73,8 @@ const Footer = () => {
     <footer className="relative bg-zinc-950 text-white pt-12 pb-8 overflow-hidden">
       <div className="relative z-10 container mx-auto px-4">
         <div className="grid md:grid-cols-[362px_auto] md:gap-10 gap-6 mb-4">
-          <div className="px-4 pt-4 border border-zinc-900 rounded-lg order-2 md:order-1 bg-white ">
-            <div className="p-4 bg-zinc-200 rounded-lg flex items-center gap-4 mb-4 justify-between">
+          <div className="px-4 pt-4 border border-zinc-900 rounded-lg order-2 md:order-1 bg-white md:h-112">
+            <div className="p-4 bg-zinc-200 rounded-lg flex items-center gap-4 mb-5 md:mb-15 justify-between">
               <h2 className="text-lg md:text-xl">
                 <span className="text-primary">Total care.</span>
                 <br />
@@ -92,8 +93,9 @@ const Footer = () => {
               <Image
                 src="/images/footer/footer-mobile.png"
                 width={164}
-                height={191}
+                height={240}
                 alt="mobile app mockup"
+                className="md:h-54 lg:h-54"
               />
             </div>
           </div>

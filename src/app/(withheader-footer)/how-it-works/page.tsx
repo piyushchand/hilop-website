@@ -1,41 +1,53 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
+// ✅ Dynamic metadata
+export async function generateMetadata(): Promise<Metadata> {
+  // Later you can fetch from API/DB here if needed
+  const pageTitle = "How Hilop Works – Science-Backed Weight Loss Process";
+  const pageDescription =
+    "Understand how Hilop’s 100% natural & safe formula helps you lose weight effectively with zero side effects.";
 
-export const metadata: Metadata = {
-  title: 'About Us',
-  description:
-    'Hilop',
-
-  openGraph: {
-    title: 'About Us',
-    description:
-      'hilop',
-    images: [
-      {
-        url: '',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    keywords: [
+      "How Hilop Works",
+      "Hilop Weight Loss Process",
+      "Fat Burning Supplement India",
+      "Science Baked Formula",
     ],
-  },
+    alternates: {
+      canonical: "https://hilop.com/how-it-works", 
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: "https://hilop.com/how-it-works",
+      siteName: "Hilop",
+      images: [
+        {
+          url: "/image/about-us/mission.webp", // you can change this if you have specific image
+          width: 1200,
+          height: 630,
+          alt: "How Hilop Works",
+        },
+      ],
+      type: "website",
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+      images: ["/image/about-us/mission.webp"],
+      creator: "@hilop",
+      site: "@hilop",
+    },
+  };
+}
 
-  twitter: {
-    title: 'About Us',
-    description:
-      'Hilop',
-    images: [
-      {
-        url: '/image/about-us/mission.webp',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
-    ],
-  },
-};
+import HowItWorkContent from "./HowItWorkContent";
 
-import HowItWorkContent from './HowItWorkContent';
 export default function AboutUsPage() {
   return <HowItWorkContent />;
 }
