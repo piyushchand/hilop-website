@@ -15,7 +15,7 @@ import { BadgeCheck, ShoppingCart } from "lucide-react";
 import Accordion from "@/components/uiFramework/Accordion";
 import RoundButton from "@/components/uiFramework/RoundButton";
 import Paragraph from "@/components/animationComponents/TextVisble";
-import { Testimonials } from "@/components/testimonials";
+// import { Testimonials } from "@/components/testimonials";
 import FaqAccordion from "@/components/FaqAccordion";
 import { Checkmark } from "@/components/checkmark";
 import { toast } from "react-hot-toast";
