@@ -1,7 +1,7 @@
 "use client";
 import Paragraph from "@/components/animationComponents/TextVisble";
 import Button from "@/components/uiFramework/Button";
-import { WhyChoose } from "@/components/whyChoose";
+// import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 import React from "react";
 import {
