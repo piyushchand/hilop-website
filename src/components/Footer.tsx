@@ -16,7 +16,6 @@ const Footer = () => {
     { href: "/", label: "Home" },
     { href: "/about-us", label: "About Us" },
     { href: "/how-it-works", label: "How it works" },
-    { href: "/blog", label: "Blog" },
     { href: "/contact-us", label: "Contact Us" },
     { href: "/support", label: "Help & Support" },
     { href: "/shipping-policy", label: "Shipping Policy" },

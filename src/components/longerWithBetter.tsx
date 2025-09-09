@@ -13,54 +13,54 @@ import TestModal from "./model/TestModal";
 
 const testimonials = [
   {
-    name: "Ritika Sharma, Delhi ",
-    product: "Hilop Natural Fat-Burner",
-    image: "/images/weight-loss/product-main.png", // replace with actual image
+    name: "Rajwinder Raja, Delhi ",
+    product: "Awesome",
+    image: "/images/weight-loss/Transparent Capsule.png", // replace with actual image
     quotePart1:
-      " was skeptical at first, but Hilop’s fat-burner worked like magic. I didn’t feel weak or jittery—just more energetic and lighter week after week. Bonus: It’s 100% natural!",
+      "The product really helped me in boosting mine energy levels, i consumed these product and I can changes in mine body. Very effective, go for it.",
     // quotePart2:
     //   "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
   },
   {
-    name: "Priya Menon, Kochi",
-    product: "Hilop Gut Cleanse & Detox",
-    image: "/images/weight-loss/product-main.png",
+    name: "Daisy, Kochi",
+    product: "Great product",
+    image: "/images/weight-loss/Transparent Capsule.png",
     quotePart1:
-      "My digestion has never been better. I used to feel bloated almost daily. After starting Hilop’s gut detox, I feel clean, light, and super active all day!",
+      "After use I have noticed it boost my stamina and energy levels. It improves blood flow too. It has all natural ingridients. Also it improves your immune system and helps in workout too.",
     //   quotePart2:
     //     "But after a week of usage, I saw incredible results. My energy and confidence are back!",
   },
   {
-    name: "Aman Verma, Mumbai ",
-    product: "Hilop Metabolism Booster",
-    image: "/images/weight-loss/product-main.png",
+    name: "Deewan, Mumbai ",
+    product: "Terrific",
+    image: "/images/weight-loss/Transparent Capsule.png",
     quotePart1:
-      "This metabolism booster gave me the spark I was missing! No crash, no cravings—just a consistent energy flow throughout the day. My workouts improved too!",
+      "Amazing product! Boosted my energy and stamina noticeably. The natural ingredients make it a healthy choice",
     // quotePart2:
     //   "I prefer herbal options, and this one actually works. No side effects, only results.",
   },
   {
-    name: "Vikram Patel, Ahmedabad ",
-    product: "Hilop Natural Fat-Burner",
-    image: "/images/weight-loss/product-main.png", // replace with actual image
+    name: "Subham Choudhury, Ahmedabad ",
+    product: "Perfect product!",
+    image: "/images/weight-loss/Transparent Capsule.png", // replace with actual image
     quotePart1:
-      " No side effects, no fake promises. Just real results. Within 3 weeks, my clothes fit better and I finally felt in control of my weight. Hilop is the best wellness decision I’ve made. ",
+      " Excellent product. Improves strength and stamina. You can feel energetic throughout the day. A good choice for health benefits. ",
     // quotePart2:
     //   "The combo in my treatment makes me get hard and last for hours. It gave me the confidence in the bedroom and my lady enjoys it as well.",
   },
   {
-    name: "Rajeshwari Iyer, Chennai",
-    product: "Hilop Gut Cleanse & Detox",
-    image: "/images/weight-loss/product-main.png",
+    name: "Shobhit Kumar, Chennai",
+    product: "wow!",
+    image: "/images/weight-loss/Transparent Capsule.png",
     quotePart1:
-      " didn't realize how much my gut health was affecting my energy and skin. Hilop’s cleanse is a game changer—gentle yet powerful. I feel like a new version of myself",
+      " Nice product really works I feel the difference good product by Hilop and Very impressed with the quality of this product. L-Arginine has a number of excellent health benefits.",
     //   quotePart2:
     //     "But after a week of usage, I saw incredible results. My energy and confidence are back!",
   },
   {
     name: "Neha Singh, Lucknow ",
-    product: "Hilop Metabolism Booster",
-    image: "/images/weight-loss/product-main.png",
+    product: "Glorious!",
+    image: "/images/weight-loss/Transparent Capsule.png",
     quotePart1:
       "It’s not just about weight loss; it’s about feeling alive again. Hilop’s booster gave my body the push it needed. I’ve already recommended it to 3 friends.",
     // quotePart2:
@@ -101,7 +101,7 @@ const LongerWithBetter = ({
 
   return (
     <>
-      <section className=" bg-rackley md:py-20 py-12 rounded-4xl mb-16 lg:mb-40">
+      <section className=" bg-rackley md:py-20 py-12 rounded-4xl mb-16 lg:mb-20">
         <div className="container">
           <div className="max-w-lg mx-auto">
             <Paragraph
@@ -125,35 +125,26 @@ const LongerWithBetter = ({
               style={{ display: "block" }}
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
-            <div className="flex flex-col sm:flex-row gap-4 -mt-[52px]">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center -mt-[30px]">
               {productId1 && (
                 <Button
                   label="GET STARTED "
                   variant="btn-dark"
                   size="xl"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-55"
                   link={`/product/${productId1}`}
-                />
-              )}
-              {testId2 && (
-                <Button
-                  label="TAKE THE TEST ™"
-                  variant="btn-light"
-                  size="xl"
-                  className="w-full sm:w-auto"
-                  link={`/consultation?testId=${testId2}`}
                 />
               )}
             </div>
           </div>
           <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
-            <div className="bg-dark-rackley p-6 lg:p-10 rounded-3xl">
+            <div className="bg-dark-rackley p-6 lg:p-8 rounded-3xl">
               <Image
-                src="/images/weight-loss/product-main.png"
-                width={336}
-                height={336}
+                src="/images/weight-loss/Harveda.png"
+                width={340}
+                height={340}
                 alt="weightloss product"
-                className="mb-6 md:h-[336px] h-56 w-full object-contain"
+                className="mb-[3.5rem] md:h-[290px] h-50 w-full object-contain mt-6"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Natural For Improve Testosterone, Stamina & Energy
@@ -181,11 +172,11 @@ const LongerWithBetter = ({
             </div>
             <div className="bg-dark-rackley p-6 lg:p-10 rounded-3xl">
               <Image
-                src="/images/weight-loss/product-main.png"
-                width={336}
-                height={336}
+                src="/images/weight-loss/Boldrise.png"
+                width={340}
+                height={340}
                 alt="weightloss product"
-                className="mb-6 md:h-[336px] h-56 w-full object-contain"
+                className="mb-6 md:h-[340px] h-56 w-full object-contain"
               />
               <h3 className="md:text-4xl sm:text-2xl text-xl mb-6 text-white font-medium">
                 Last Longer Herbal Sexual Enhancer Powder
@@ -218,7 +209,7 @@ const LongerWithBetter = ({
               className="bg-dark-rackley p-6 lg:p-10 rounded-3xl relative overflow-hidden"
             >
               <Image
-                src="/images/improving-sexual/personalized-solution.jpg"
+                src="/images/improving-sexual/personalized-solution.png"
                 width={732}
                 height={570}
                 alt="personalized solution"
@@ -276,29 +267,31 @@ const LongerWithBetter = ({
               >
                 {testimonials.map((testimonial, index) => (
                   <SwiperSlide key={index}>
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={200}
-                      height={200}
-                      className="rotate-[20deg]"
-                    />
-                    <div>
-                      <h3 className="text-white font-medium text-xl mb-2">
-                        {testimonial.name}
-                      </h3>
-                      <p className="text-white mb-6 lg:mb-10">
-                        {testimonial.product}
-                      </p>
-                    </div>
-                    <p className="text-2xl">
-                      <span className="text-gray-400">
-                        “{testimonial.quotePart1} “
-                      </span>{" "}
-                      {/* <span className="text-white font-medium">
+                    <div className="flex flex-col items-center text-center space-y-2 sm:items-start sm:text-left max-w-md mx-auto">
+                      <Image
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        width={100}
+                        height={100}
+                        className=""
+                      />
+                      <div>
+                        <h3 className="text-white font-semibold text-base sm:text-lg md:text-xl leading-tight break-words mb-1">
+                          {testimonial.name}
+                        </h3>
+                        <p className="text-white text-sm sm:text-base mb-3 break-words">
+                          {testimonial.product}
+                        </p>
+                      </div>
+                      <p className="text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed">
+                        <span className="text-gray-400">
+                          “{testimonial.quotePart1} “
+                        </span>{" "}
+                        {/* <span className="text-white font-medium">
                         {testimonial.quotePart2}”
                       </span> */}
-                    </p>
+                      </p>
+                    </div>
                   </SwiperSlide>
                 ))}
               </Swiper>

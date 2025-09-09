@@ -4,12 +4,56 @@ import Button from "@/components/uiFramework/Button";
 import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
 import React from "react";
+import {
+  CardBody,
+  CardContainer,
+  CardItem,
+} from "@/components/animationComponents/3DCard";
 
 const stats = [
   { text: "No synthetic chemicals or harmful additives" },
   { text: "Doctor-recommended, pharmacy-grade treatments" },
   { text: "Full transparency in ingredients & processes" },
   { text: "Proven results or your money back!" },
+];
+
+const whyChoosecontent = [
+  {
+    icon: "/images/icon/personalized-approach.svg",
+    title: "Personalized Approach",
+    description:
+      "Our test helps match you with the perfect product for your specific needs and goals.",
+  },
+  {
+    icon: "/images/icon/science-backed-formulas.svg",
+    title: "Science-Backed Formulas",
+    description:
+      "Our herbal solutions combine ancient wisdom with modern scientific research for optimal results.",
+  },
+  {
+    icon: "/images/icon/natural-ingredients.svg",
+    title: "Natural Ingredients",
+    description:
+      "100% pure herbal ingredients, free from chemicals and artificial additives.",
+  },
+  {
+    icon: "/images/icon/fast-acting-results.svg",
+    title: "Fast-Acting Results",
+    description:
+      "Our formulas are designed to provide quick, noticeable benefits while promoting long-term wellness.",
+  },
+  {
+    icon: "/images/icon/customer-focused.svg",
+    title: "Customer Focused",
+    description:
+      "We prioritize your wellness journey with personalized support and guidance.",
+  },
+  {
+    icon: "/images/icon/sustainable-practices.svg",
+    title: "Sustainable Practices",
+    description:
+      "Eco-friendly sourcing and packaging that respects both your body and the planet.",
+  },
 ];
 export default function AboutUsContent() {
   return (
@@ -36,7 +80,7 @@ export default function AboutUsContent() {
             </p>
           </div>
           <Image
-            src="/images/about-us/about-main.jpg"
+            src="/images/about-us/about-main.png"
             alt="About hero image"
             width={620}
             height={632}
@@ -45,7 +89,42 @@ export default function AboutUsContent() {
           />
         </div>
       </section>
-      <WhyChoose />
+      {/* <WhyChoose /> */}
+
+      <section className="mb-16 lg:mb-40 bg-green-100 lg:py-20 py-10">
+        <div className="container">
+          <div className="grid lg:grid-cols-3 sm:grid-cols-2 gap-6">
+            {whyChoosecontent.map((whyChoosecontent, index) => (
+              <CardContainer
+                key={index}
+                containerClassName="h-full"
+                className="h-full bg-white p-6 rounded-2xl"
+              >
+                <CardBody>
+                  <CardItem translateZ={50} className="mb-8">
+                    <Image
+                      src={whyChoosecontent.icon}
+                      width={80}
+                      height={80}
+                      alt={whyChoosecontent.title}
+                    />
+                  </CardItem>
+                  <CardItem translateZ={20} className="mb-4">
+                    <h3 className="mb-4 text-2xl font-medium">
+                      {whyChoosecontent.title}
+                    </h3>
+                  </CardItem>
+                  <CardItem translateZ={10}>
+                    <p className="text-gray-600">
+                      {whyChoosecontent.description}
+                    </p>
+                  </CardItem>
+                </CardBody>
+              </CardContainer>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="container mb-16 lg:mb-40">
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-10 items-center">
           <Image
@@ -108,7 +187,7 @@ export default function AboutUsContent() {
             </div>
           </div>
           <Image
-            src="/images/about-us/our-commitment.jpg"
+            src="/images/about-us/our-commitment.png"
             alt="About hero image"
             width={740}
             height={742}

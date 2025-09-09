@@ -107,7 +107,7 @@ const MobileApproch = () => {
               </div>
               </div>
             </div>
-            <div className="sm:px-20 px-6 mt-auto mx-auto">
+            <div className="sm:px-27 px-6 mt-auto mx-auto">
               <Image
                 src="/images/mobile-approch.png"
                 alt="why Choose herbal fat loss"

@@ -12,28 +12,29 @@ import { useAuth } from "@/contexts/AuthContext";
 const homepagefaqdata = [
   {
     id: "faq1",
-    question: "How do i order from your company?",
+    question: "What is Hilop?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "Fit Body Better Intimacy Hilop Everyday. Holistic solutions for your weight, energy, and sexual wellness—because true health starts from within.",
   },
   {
     id: "faq2",
-    question: "How do i order from your company?",
+    question: "How does Hilop work?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "By addressing the root causes of your wellness challenges. You see, poor diet, stress, and lifestyle habits may worsen weight, energy, or intimacy issues—but they aren’t the root cause. (It’s like trying to run a marathon with worn-out shoes; the pain is real, but the shoes aren’t the reason you trained!). Hilop works by providing personalized, holistic solutions for weight, energy, and sexual wellness, tailored to your body’s unique needs.",
   },
   {
     id: "faq3",
-    question: "How do i order from your company?",
+    question: "Does it really work?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "We let the results speak for themselves! Explore our customer success stories and see the difference firsthand. Our promise: once you choose Hilop, we’ll support you every step of the way—like a true partner in your wellness journey.",
   },
   {
     id: "faq4",
-    question: "How do i order from your company?",
+    question: "What is Hilop made of?",
     answer:
-      "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
+      "A complete, personalized solution for your wellness—crafted by experts and tailored just for you! It contains everything you need to improve your weight, energy, and sexual wellness naturally and effectively. Learn more about our products and kits here.",
   },
+
   {
     id: "faq5",
     question: "How do i order from your company?",
@@ -41,6 +42,7 @@ const homepagefaqdata = [
       "We currently dispendce FDa approded commericiall availanle medication and non-streii compounded medications",
   },
 ];
+
 const hilopRules = [
   {
     title: "Maximum wallet capacity:",
