@@ -38,7 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: dynamicDescription,
     applicationName: "Hilop",
-    keywords: ["Hilop", "Natural Weight Loss", "Science Baked Supplement", "Fat Burner India", "Safe Weight Loss", "Money Back Guarantee"],
+    keywords: [
+      "Hilop",
+      "Natural Weight Loss",
+      "Science Baked Supplement",
+      "Fat Burner India",
+      "Safe Weight Loss",
+      "Money Back Guarantee",
+    ],
     authors: [{ name: "Hilop Team" }],
     openGraph: {
       title: dynamicTitle,
@@ -100,24 +107,38 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Hilop",
-              url: baseUrl,
-              logo: `${baseUrl}/image/hilop-logo-light.svg`,
-              sameAs: [
-                "https://www.instagram.com/hilop/",
-                "https://www.linkedin.com/company/hilop/",
-                "https://www.facebook.com/hilop/",
-                "https://x.com/hilop",
-                "https://github.com/hilop",
-                "https://www.behance.net/hilop",
+              "@graph": [
+                {
+                  "@type": "Corporation",
+                  name: "Hilop",
+                  alternateName: "Hilopwellness",
+                  url: baseUrl,
+                  logo: `${baseUrl}/logo.svg`,
+                  sameAs: [
+                    "https://www.facebook.com/hilopwellness",
+                    "https://www.instagram.com/hilopwellness/",
+                    "https://www.youtube.com/@hilopwellness",
+                    "https://x.com/hilopwellness",
+                    "https://www.pinterest.com/hilopwellness/",
+                    "https://www.linkedin.com/company/hilop-pvt-ltd",
+                    baseUrl,
+                  ],
+                  contactPoint: {
+                    "@type": "ContactPoint",
+                    email: "info@hilop.com",
+                    telephone: "+91-9998852888",
+                    contactType: "Customer Service",
+                    openingHours: "Mo,Tu,We,Th,Fr,Sa 10:00-19:00",
+                  },
+                },
+                {
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: "4.8",
+                    ratingCount: "3687",
+                  },
+                },
               ],
-              contactPoint: {
-                "@type": "ContactPoint",
-                telephone: "+91-1234567890",
-                contactType: "customer service",
-                email: "hello@hilop.com",
-              },
             }),
           }}
         />
