@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
+import AboutUsContent from "./AboutUsContent";
 
-type Props = {
-  params: { locale: string }; // example if you want multi-language
-};
-
-// ✅ Dynamic metadata
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // You could fetch from API/DB here
+// ✅ Dynamic metadata (static route, so no params)
+export async function generateMetadata(): Promise<Metadata> {
   const aboutTitle = "About Hilop – Trusted Wellness & Weight Loss Brand";
   const aboutDescription =
     "Learn about Hilop, our vision, science-backed wellness approach, and commitment to safe, natural weight management in India.";
@@ -22,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "Weight Loss Company"
     ],
     alternates: {
-      canonical: "https://hilop.com/about-us", 
+      canonical: "https://hilop.com/about-us",
     },
     openGraph: {
       title: aboutTitle,
@@ -49,8 +45,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
-
-import AboutUsContent from "./AboutUsContent";
 
 export default function AboutUsPage() {
   return <AboutUsContent />;

@@ -65,6 +65,10 @@ export async function generateMetadata(): Promise<Metadata> {
       site: "@hilop",
     },
     metadataBase: new URL(baseUrl),
+
+    alternates: {
+      canonical: baseUrl,
+    },
   };
 }
 
