@@ -131,13 +131,6 @@ export default function RootLayout({
                     openingHours: "Mo,Tu,We,Th,Fr,Sa 10:00-19:00",
                   },
                 },
-                {
-                  aggregateRating: {
-                    "@type": "AggregateRating",
-                    ratingValue: "4.8",
-                    ratingCount: "3687",
-                  },
-                },
               ],
             }),
           }}
@@ -162,6 +155,7 @@ export default function RootLayout({
           `,
           }}
         />
+
         <noscript>
           <img
             height="1"
@@ -170,12 +164,61 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-ZXJCJF0CZS"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-ZXJCJF0CZS', {
+        page_path: window.location.pathname,
+      });
+    `,
+          }}
+        />
+
+        {/* GTM Head Script */}
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-T39433BL');`}
+        </Script>
+
+        {/* Microsoft Clarity */}
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "t3v04wca79");
+          `}
+        </Script>
       </head>
       <body>
         <ReduxProvider>
           <LanguageProvider>
             <LoadingProvider>
               <AuthProvider>
+                {/* GTM NoScript Fallback */}
+                <noscript>
+                  <iframe
+                    src="https://www.googletagmanager.com/ns.html?id=GTM-T39433BL"
+                    height="0"
+                    width="0"
+                    style={{ display: "none", visibility: "hidden" }}
+                  ></iframe>
+                </noscript>
                 {children}
                 <AuthDebugger />
               </AuthProvider>
