@@ -49,9 +49,12 @@ export async function generateMetadata({
 
     const product = data.data;
 
-    const productName = product?.seo?.name || product?.name || "Unknown Product";
+    const productName =
+      product?.seo?.name || product?.name || "Unknown Product";
     const productDescription =
-      product?.seo?.description || product?.description?.en || "No description available";
+      product?.seo?.description ||
+      product?.description?.en ||
+      "No description available";
     const productImage = product?.images?.[0] || "";
     const productPrice = product?.price?.final_price?.toString() || "0";
 
@@ -76,7 +79,9 @@ export async function generateMetadata({
 function buildProductSchema(product: any, id: string) {
   const productName = product?.seo?.name || product?.name || "Unknown Product";
   const productDescription =
-    product?.seo?.description || product?.description?.en || "No description available";
+    product?.seo?.description ||
+    product?.description?.en ||
+    "No description available";
   const productImage = product?.images?.[0] || "";
 
   return {
@@ -87,11 +92,12 @@ function buildProductSchema(product: any, id: string) {
     image: productImage,
     offers: {
       "@type": "Offer",
-      url: `https://hilop.com/products/${id}`, // Hardcoded base URL
+      url: `https://hilop.com/products/${id}`,
       priceCurrency: "INR",
       price: product?.price?.final_price?.toString() || "0",
       priceValidUntil: "2025-12-31",
-      availability: product?.availability || "https://schema.org/LimitedAvailability",
+      availability:
+        product?.availability || "https://schema.org/LimitedAvailability",
       itemCondition: "https://schema.org/NewCondition",
     },
     brand: {
@@ -105,6 +111,7 @@ function buildProductSchema(product: any, id: string) {
     },
   };
 }
+
 
 export default async function Page({
   params,
@@ -171,7 +178,6 @@ export default async function Page({
 // import ProductPage from "./ProductPage";
 // import { Metadata } from "next";
 // import { notFound } from "next/navigation";
-
 
 // export async function generateMetadata({
 //   params,

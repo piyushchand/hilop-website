@@ -130,6 +130,11 @@ export default function RootLayout({
                     contactType: "Customer Service",
                     openingHours: "Mo,Tu,We,Th,Fr,Sa 10:00-19:00",
                   },
+                  aggregateRating: {
+                    "@type": "AggregateRating",
+                    ratingValue: "4.8",
+                    ratingCount: "3687",
+                  },
                 },
               ],
             }),
