@@ -1,40 +1,47 @@
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: 'About Us',
-  description:
-    'Hilop',
+// ✅ Dynamic metadata
+export async function generateMetadata(): Promise<Metadata> {
+  // Later you can fetch from API/DB here if needed
+  const pageTitle = "Hilop Cart | Review Your Order & Proceed to Checkout";
+  const pageDescription =
+    "View items in your Hilop cart and finalize your order. Secure payment, fast shipping & herbal wellness products ready to boost energy, weight loss, performance & more.";
 
-  openGraph: {
-    title: 'About Us',
-    description:
-      'hilop',
-    images: [
-      {
-        url: '',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
-    ],
-  },
+  return {
+    title: pageTitle,
+    description: pageDescription,
+    alternates: {
+      canonical: "https://hilop.com/cart",
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: "https://hilop.com/cart",
+      siteName: "Hilop",
+      images: [
+        {
+          url: "/image/about-us/mission.webp", 
+          width: 1200,
+          height: 630,
+          alt: "How Hilop Works",
+        },
+      ],
+      type: "website",
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: pageDescription,
+      images: ["/image/about-us/mission.webp"],
+      creator: "@hilop",
+      site: "@hilop",
+    },
+  };
+}
 
-  twitter: {
-    title: 'About Us',
-    description:
-      'Hilop',
-    images: [
-      {
-        url: '/image/about-us/mission.webp',
-        width: 1200,
-        height: 630,
-        alt: 'About Hilop',
-      },
-    ],
-  },
-};
+import Cart from "./CartContent";
 
-import Cart from './CartContent';
-export default function CartPage() {
+export default function AboutUsPage() {
   return <Cart />;
 }

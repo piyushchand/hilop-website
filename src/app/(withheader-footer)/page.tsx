@@ -10,7 +10,7 @@ import Button from "@/components/uiFramework/Button";
 // import ParallaxText from "@/components/velocityScroll";
 import { WhyChoose } from "@/components/whyChoose";
 import Image from "next/image";
-// import ProductCard from "@/components/productCard";
+import ProductCard from "@/components/productCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Product } from "@/types";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -238,7 +238,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        {/* <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid sm:px-0 grid-cols-4 md:grid-cols-3 gap-4 md:gap-6">
           {productsLoading ? (
             <div className="col-span-full text-center py-8">
               Loading products...
@@ -257,9 +257,9 @@ export default function Home() {
               />
             ))
           )}
-        </div> */}
+        </div>
 
-        <div className="flex justify-center items-center">
+        {/* <div className="flex justify-center items-center">
           {testId2 && (
             <Button
               label="TAKE THE TEST ™"
@@ -269,7 +269,7 @@ export default function Home() {
               link={`/consultation?testId=${testId2}`}
             />
           )}
-        </div>
+        </div> */}
       </section>
       <LongerWithBetter
         productId1={product1?._id}
