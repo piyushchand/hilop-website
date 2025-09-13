@@ -73,9 +73,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 className="w-full aspect-[4/3] object-cover"
               />
             </a>
-            <p className="bg-gray-200 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-0 left-0">
+            {/* <p className="bg-gray-200 text-xs lg:text-base font-medium px-2 lg:px-4 py-1 lg:py-1.5 rounded-full block w-fit absolute top-0 left-0">
               {getText(product.for)}
-            </p>
+            </p> */}
           </CardItem>
 
           <CardItem translateZ={20} className="mb-4">

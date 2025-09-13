@@ -22,6 +22,7 @@ export interface Reviews {
 
 export interface Product {
     _id: string;
+    slug: string;
     images: string[];
     name: string;
     label: string;
