@@ -85,16 +85,16 @@ const itemVariants = {
 
 // Add props to the component
 interface LongerWithBetterProps {
-  productId1?: string;
+  productSlug1?: string;
   testId1?: string;
-  productId2?: string;
+  productSlug2?: string;
   testId2?: string;
 }
 
 const LongerWithBetter = ({
-  productId1,
+  productSlug1,
   testId1,
-  productId2,
+  productSlug2,
   testId2,
 }: LongerWithBetterProps) => {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
@@ -126,13 +126,13 @@ const LongerWithBetter = ({
             />
             <div className="absolute bg-gradient-to-b from-transparent to-rackley h-28 w-full bottom-0"></div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center -mt-[30px]">
-              {productId1 && (
+              {productSlug1 && (
                 <Button
                   label="GET STARTED "
                   variant="btn-dark"
                   size="xl"
                   className="w-full sm:w-55"
-                  link={`/product/${productId1}`}
+                  link={`/product/${productSlug1}`}
                 />
               )}
             </div>
@@ -159,13 +159,13 @@ const LongerWithBetter = ({
                     link={`/consultation?testId=${testId1}`}
                   />
                 )}
-                {productId1 && (
+                {productSlug1 && (
                   <Button
                     label="ADD TO CART"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
-                    link={`/product/${productId1}`}
+                    link={`/product/${productSlug1}`}
                   />
                 )}
               </div>
@@ -191,13 +191,13 @@ const LongerWithBetter = ({
                     link={`/consultation?testId=${testId2}`}
                   />
                 )}
-                {productId2 && (
+                {productSlug2 && (
                   <Button
                     label="ADD TO CART"
                     variant="btn-light"
                     size="xl"
                     className="w-full sm:w-auto"
-                    link={`/product/${productId2}`}
+                    link={`/product/${productSlug2}`}
                   />
                 )}
               </div>

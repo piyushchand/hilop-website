@@ -66,7 +66,7 @@ const Footer = () => {
   }, []);
 
   const productLinks = products.map((product) => ({
-    href: `/product/${product._id}`,
+    href: `/product/${product.slug}`,
     label: product.name,
   }));
   return (

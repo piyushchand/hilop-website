@@ -5,11 +5,10 @@ import { notFound } from "next/navigation";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  if (!id) {
-    console.error("Product ID is missing");
+  const { slug } = await params;
+  if (!slug) {
     return {
       title: "Product Not Found",
       description: "The requested product could not be found.",
@@ -17,7 +16,6 @@ export async function generateMetadata({
   }
 
   if (!process.env.NEXT_PUBLIC_API_URL) {
-    console.error("Environment variable NEXT_PUBLIC_API_URL is not set");
     return {
       title: "Configuration Error",
       description: "API configuration is incomplete. Please try again later.",
@@ -26,37 +24,22 @@ export async function generateMetadata({
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}?lang=en`,
-      {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
+      `${process.env.NEXT_PUBLIC_API_URL}/products/slug/${slug}?lang=en`,
+      { cache: "no-store" }
     );
 
-    if (!res.ok) {
-      console.error(`Failed to fetch product: ${res.status} ${res.statusText}`);
-      notFound();
-    }
+    if (!res.ok) notFound();
 
     const data = await res.json();
-    if (!data.success || !data.data) {
-      console.error("Invalid API response:", data);
-      notFound();
-    }
+    if (!data.success || !data.data) notFound();
 
     const product = data.data;
 
-    const productName =
-      product?.seo?.name || product?.name || "Unknown Product";
     const productDescription =
       product?.seo?.description ||
       product?.description?.en ||
       "No description available";
     const productImage = product?.images?.[0] || "";
-    const productPrice = product?.price?.final_price?.toString() || "0";
 
     return {
       title: product?.seo?.title || product?.name || "Product",
@@ -65,9 +48,8 @@ export async function generateMetadata({
         title: product?.seo?.title || product?.name || "Product",
         description: productDescription,
         images: productImage ? [productImage] : [],
-        url: `https://hilop.com/products/${id}`, // Hardcoded base URL
+        url: `https://hilop.com/products/${slug}`,
       },
-      // Removed 'other' to avoid invalid <meta> tag
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
@@ -75,24 +57,20 @@ export async function generateMetadata({
   }
 }
 
-// Helper function to build schema (shared logic)
-function buildProductSchema(product: any, id: string) {
-  const productName = product?.seo?.name || product?.name || "Unknown Product";
-  const productDescription =
-    product?.seo?.description ||
-    product?.description?.en ||
-    "No description available";
-  const productImage = product?.images?.[0] || "";
-
+// Build JSON-LD schema
+function buildProductSchema(product: any, slug: string) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: productName,
-    description: productDescription,
-    image: productImage,
+    name: product?.seo?.name || product?.name || "Unknown Product",
+    description:
+      product?.seo?.description ||
+      product?.description?.en ||
+      "No description available",
+    image: product?.images?.[0] || "",
     offers: {
       "@type": "Offer",
-      url: `https://hilop.com/products/${id}`,
+      url: `https://hilop.com/products/${slug}`,
       priceCurrency: "INR",
       price: product?.price?.final_price?.toString() || "0",
       priceValidUntil: "2025-12-31",
@@ -100,10 +78,7 @@ function buildProductSchema(product: any, id: string) {
         product?.availability || "https://schema.org/LimitedAvailability",
       itemCondition: "https://schema.org/NewCondition",
     },
-    brand: {
-      "@type": "Brand",
-      name: "Hilop",
-    },
+    brand: { "@type": "Brand", name: "Hilop" },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: product?.rating?.toString() || "4.8",
@@ -112,19 +87,15 @@ function buildProductSchema(product: any, id: string) {
   };
 }
 
-
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  if (!id) {
-    notFound();
-  }
+  const { slug } = await params;
+  if (!slug) notFound();
 
   if (!process.env.NEXT_PUBLIC_API_URL) {
-    // Fallback UI for env error
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold">Configuration Error</h1>
@@ -135,32 +106,20 @@ export default async function Page({
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}?lang=en`,
-      {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
+      `${process.env.NEXT_PUBLIC_API_URL}/products/slug/${slug}?lang=en`,
+      { cache: "no-store" }
     );
 
-    if (!res.ok) {
-      notFound();
-    }
+    if (!res.ok) notFound();
 
     const data = await res.json();
-    if (!data.success || !data.data) {
-      notFound();
-    }
+    if (!data.success || !data.data) notFound();
 
     const product = data.data;
-    const productSchema = buildProductSchema(product, id);
-    const schemaString = JSON.stringify(productSchema);
+    const schemaString = JSON.stringify(buildProductSchema(product, slug));
 
     return (
       <>
-        {/* Render JSON-LD as a proper <script> tag */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: schemaString }}

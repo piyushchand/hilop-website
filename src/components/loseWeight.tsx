@@ -8,10 +8,10 @@ import BmiCalculatorModal from "./model/BmiCalculatorModal";
 
 type LoseWeightProps = {
   testId?: string;
-  productId?: string;
+  productSlug?: string;
 };
 
-const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
+const LoseWeight = ({ testId, productSlug }: LoseWeightProps) => {
   const [bmiModalOpen, setBmiModalOpen] = useState(false);
   return (
     <>
@@ -46,7 +46,7 @@ const LoseWeight = ({ testId, productId }: LoseWeightProps) => {
                 variant="btn-dark"
                 size="xl"
                 className="w-full"
-                link={productId ? `/product/${productId}` : "#"}
+                link={productSlug ? `/product/${productSlug}` : "#"}
               />
               <Button
                 label="TAKE THE TEST ™"

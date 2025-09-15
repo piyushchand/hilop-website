@@ -250,7 +250,7 @@ export default function Home() {
           ) : (
             products.map((product, index) => (
               <ProductCard
-                key={product._id}
+                key={product.slug}
                 product={product}
                 index={index}
                 totalItems={products.length}
@@ -272,15 +272,15 @@ export default function Home() {
         </div> */}
       </section>
       <LongerWithBetter
-        productId1={product1?._id}
+        productSlug1={product1?.slug}
         testId1={testId1 || undefined}
-        productId2={product2?._id}
+        productSlug2={product2?.slug}
         testId2={testId2 || undefined}
       />
       {/* <ParallaxText baseVelocity={80}>
         ✅ 100% money back guarantee
       </ParallaxText> */}
-      <LoseWeight testId={DEFAULT_TEST_ID} productId={weightLossProduct?._id} />
+      <LoseWeight testId={DEFAULT_TEST_ID} productSlug={weightLossProduct?.slug} />
       {/* <Testimonials /> */}
       <WhyChoose />
       {/* <OurProcess /> */}
