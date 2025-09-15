@@ -60,7 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="relative mb-5 overflow-hidden w-full cursor-pointer border-b border-gray-200"
           >
             <a
-              href={`/product/${product._id}`}
+              href={`/product/${product.slug}`}
               tabIndex={-1}
               aria-label={`View details for ${getText(product.name)}`}
               className="block"
@@ -91,7 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 variant="btn-light"
                 size={isMobile ? "md" : "lg"}
                 className="w-full "
-                link={`/product/${product._id}`}
+                link={`/product/${product.slug}`}
               />
 
               <Button

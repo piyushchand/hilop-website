@@ -18,9 +18,28 @@ const nextConfig: NextConfig = {
     ],
   },
   eslint: {
-    // ✅ This makes Vercel build succeed even with lint errors
-    ignoreDuringBuilds: true,
-  },
+    ignoreDuringBuilds: true,
+  },
+
+  async redirects() {
+    return [
+      {
+        source: "/product/68246cfc5b9ab999150472e5",
+        destination: "/product/hardveda-natural-performance-booster-capsule",
+        permanent: true,
+      },
+      {
+        source: "/product/68246b005b9ab999150472e2",
+        destination: "/product/boldrise-last-long-delay-powder",
+        permanent: true,
+      },
+      {
+        source: "/product/682314a91b521615a7e89618", 
+        destination: "/product/slimvibe-herbal-weight-loss-capsule", 
+        permanent: true,
+      },  
+    ];
+  },
 };
 
 export default nextConfig;

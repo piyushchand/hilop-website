@@ -206,10 +206,11 @@ export default function ProductPage() {
   const [addToCartLoading, setAddToCartLoading] = useState(false);
   const router = useRouter();
   console.log("product", product);
+
   useEffect(() => {
-    const productId = params?.id as string;
-    if (!productId) {
-      setError("Product ID is missing");
+    const productSlug = params?.slug as string;
+    if (!productSlug) {
+      setError("Product slug is missing");
       return;
     }
 
@@ -219,7 +220,9 @@ export default function ProductPage() {
         setError(null);
         if (!process.env.NEXT_PUBLIC_API_URL)
           throw new Error("API URL is not set in environment variables");
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}?lang=${language}`;
+
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/products/slug/${productSlug}?lang=${language}`;
+        // 👆 You’ll need a backend endpoint like /products/slug/:slug
 
         const response = await fetch(apiUrl, {
           method: "GET",
@@ -253,7 +256,7 @@ export default function ProductPage() {
     };
 
     fetchProduct();
-  }, [params?.id, language, hideLoading, showLoading]);
+  }, [params?.slug, language, hideLoading, showLoading]);
 
   // Buy Now handler
   const handleBuyNow = useCallback(async () => {
@@ -326,7 +329,6 @@ export default function ProductPage() {
     ...ki,
     image: getSafeImage(ki.image),
   }));
-
 
   const dynamicProductContent = getProductContent(product.name);
   const productId =
@@ -536,7 +538,7 @@ export default function ProductPage() {
               label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
-              link={`/product/${productId}`}
+              link={`/product/${product.slug}`}
             />
           </div>
         </div>
@@ -634,7 +636,7 @@ export default function ProductPage() {
                 label="TAKE THE TEST ™"
                 variant="btn-primary"
                 size="xl"
-                link={`/product/${productId}`}
+                link={`/product/${product.slug}`}
               />
 
               <Swiper
@@ -707,7 +709,7 @@ export default function ProductPage() {
               label="TAKE THE TEST ™"
               variant="btn-primary"
               size="xl"
-              link={`/product/${productId}`}
+              link={`/product/${product.slug}`}
             />
             <Button label="ADD TO CART" variant="btn-light" size="xl" />
           </div>
