@@ -24,6 +24,17 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/:path*",           
+        has: [
+          {
+            type: "host",
+            value: "www.hilop.com",      
+          },
+        ],
+        destination: "https://hilop.com/:path*", 
+        permanent: true, 
+      },
+      {
         source: "/product/68246cfc5b9ab999150472e5",
         destination: "/product/hardveda-natural-performance-booster-capsule",
         permanent: true,
