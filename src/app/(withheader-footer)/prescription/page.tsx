@@ -25,7 +25,7 @@ export const metadata: Metadata = {
       'Hilop',
     images: [
       {
-        url: '/image/about-us/mission.webp',
+        url: '',
         width: 1200,
         height: 630,
         alt: 'About Hilop',

@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Hilop",
       images: [
         {
-          url: "/image/about-us/mission.webp", // replace with support-specific image if you have one
+          url: "", // replace with support-specific image if you have one
           width: 1200,
           height: 630,
           alt: "Hilop Support",
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: pageTitle,
       description: pageDescription,
-      images: ["/image/about-us/mission.webp"],
+      images: [""],
       creator: "@hilop",
       site: "@hilop",
     },

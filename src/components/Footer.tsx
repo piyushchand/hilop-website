@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Instagram, Linkedin, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
 // import { useAuth } from "@/contexts/AuthContext";
@@ -179,6 +179,15 @@ const Footer = () => {
                   aria-label="Twitter"
                 >
                   <Linkedin />
+                </Link>
+                <Link
+                  className="social-icon text-zinc-400 hover:text-white"
+                  href="https://x.com/hilopwellness"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                >
+                  <X />
                 </Link>
               </div>
             </div>
