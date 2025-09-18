@@ -49,6 +49,37 @@ const nextConfig: NextConfig = {
         destination: "/product/slimvibe-herbal-weight-loss-capsule", 
         permanent: true,
       },  
+      {
+        source: "/learn/better-sex",
+        destination: "/product/hardveda-natural-performance-booster-capsule",
+        permanent: true,
+      },
+      {
+        source: "/learn/sexual-health",
+        destination: "/product/hardveda-natural-performance-booster-capsule",
+        permanent: true,
+      },
+      {
+        source: "/terms",
+        destination: "/terms-and-conditions",
+        permanent: true,
+      },
+      {
+        source: "/$",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/contact",
+        destination: "/contact-us",
+        permanent: true,
+      },
+      {
+        source: "/privacy",
+        destination: "/privacy-policy",
+        permanent: true,
+      },
+      
     ];
   },
 };
