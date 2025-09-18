@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: pageDescription,
       images: [
         {
-          url: "/image/shipping/shipping-banner.webp",
+          url: "",
           width: 1200,
           height: 630,
           alt: "Hilop Shipping Policy",
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       title: pageTitle,
       description: pageDescription,
-      images: ["/image/shipping/shipping-banner.webp"],
+      images: [""],
     },
   };
 }
