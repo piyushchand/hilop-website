@@ -41,14 +41,25 @@ export async function generateMetadata({
       "No description available";
     const productImage = product?.images?.[0] || "";
 
+    const productTitle = product?.seo?.title || product?.name || "Product";
+
     return {
-      title: product?.seo?.title || product?.name || "Product",
+      title: productTitle,
       description: productDescription,
       openGraph: {
-        title: product?.seo?.title || product?.name || "Product",
+        title: productTitle,
         description: productDescription,
         images: productImage ? [productImage] : [],
-        url: `https://hilop.com/products/${slug}`,
+        url: `https://hilop.com/product/${slug}`,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: productTitle,
+        description: productDescription,
+        images: productImage ? [productImage] : [],
+      },
+      alternates: {
+        canonical: `https://hilop.com/product/${slug}`,
       },
     };
   } catch (error) {
