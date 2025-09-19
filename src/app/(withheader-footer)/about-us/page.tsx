@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Hilop",
       images: [
         {
-          url: "/public/images/our-mission.webp",
+          url: "",
           width: 1200,
           height: 630,
           alt: "About Hilop",
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: aboutTitle,
       description: aboutDescription,
-      images: ["/public/images/our-mission.webp"],
+      images: [""],
       creator: "@hilop",
       site: "@hilop",
     },

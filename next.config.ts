@@ -35,6 +35,17 @@ const nextConfig: NextConfig = {
         permanent: true, 
       },
       {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "api.hilop.com",
+          },
+        ],
+        destination: "https://hilop.com/:path*",
+        permanent: true,
+      },
+      {
         source: "/product/68246cfc5b9ab999150472e5",
         destination: "/product/hardveda-natural-performance-booster-capsule",
         permanent: true,
