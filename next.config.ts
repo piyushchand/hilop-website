@@ -90,7 +90,21 @@ const nextConfig: NextConfig = {
         destination: "/privacy-policy",
         permanent: true,
       },
-      
+      {
+        source: "/products/boldrise-last-long-delay-powder",
+        destination: "/product/boldrise-last-long-delay-powder",
+        permanent: true,
+      },
+      {
+        source: "/products/hardveda-natural-performance-booster-capsule",
+        destination: "/product/hardveda-natural-performance-booster-capsule",
+        permanent: true,
+      },
+      {
+        source: "/products/slimvibe-herbal-weight-loss-capsule",
+        destination: "/product/slimvibe-herbal-weight-loss-capsule",
+        permanent: true,
+      },    
     ];
   },
 };
