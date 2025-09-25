@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      template: "%s | Hilop",
+      template: "%s",
       default: dynamicTitle,
     },
     description: dynamicDescription,
