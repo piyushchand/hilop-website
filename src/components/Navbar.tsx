@@ -349,6 +349,7 @@ const Navbar = () => {
               cartLoading={cartLoading}
               cartCount={cartCount}
               size="lg"
+              
             />
           </div>
 
